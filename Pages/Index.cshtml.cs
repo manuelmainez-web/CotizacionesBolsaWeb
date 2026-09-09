@@ -79,9 +79,9 @@ public class IndexModel : PageModel
                 new("DAX", "^GDAXI", null, "DE"),
                 new("CAC 40", "^FCHI", null, "FR"),
                 new("EURO STOXX 50", "^STOXX50E", null, "EU"),
+                new("DOW JONES", "^DJI", null, "US"),
                 new("NASDAQ", "^IXIC", null, "US"),
                 new("SP 500", "^GSPC", null, "US"),
-                new("DOW JONES", "^DJI", null, "US"),
                 new("NIKKEI 225", "^N225", null, "JP")
             });
         }
