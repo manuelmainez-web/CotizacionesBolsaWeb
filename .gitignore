@@ -1,0 +1,9 @@
+bin/
+obj/
+publish/
+App_Data/
+*.log
+cloudflared-log.txt
+.vs/
+tools/
+test-pid.txt

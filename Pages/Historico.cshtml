@@ -1,0 +1,74 @@
+@page
+@model CotizacionesBolsaWeb.Pages.HistoricoModel
+@{
+    ViewData["Title"] = "Histórico de cotización";
+}
+
+<div class="market-shell">
+    <div class="portfolio-header">
+        <div class="title-block">
+            <h1 class="mb-1">@Model.Name</h1>
+            <p class="portfolio-subtitle">@Model.Symbol · Progresión de la cotización en el tiempo</p>
+        </div>
+        <a class="btn-refresh" href="javascript:history.back()">← Volver</a>
+    </div>
+
+    <div class="market-panel">
+        <div class="panel-head panel-head-row">
+            <span>Cotización histórica</span>
+            <div class="range-buttons">
+                <a class="mini-button @(Model.Range == "1d" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=1d">Día</a>
+                <a class="mini-button @(Model.Range == "5d" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=5d">Semana</a>
+                <a class="mini-button @(Model.Range == "1mo" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=1mo">Mes</a>
+                <a class="mini-button @(Model.Range == "1y" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=1y">Año</a>
+                <a class="mini-button @(Model.Range == "max" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=max">Desde el principio</a>
+            </div>
+        </div>
+        <div class="chart-wrap">
+            @if (Model.HasData)
+            {
+                <canvas id="historyChart"></canvas>
+            }
+            else
+            {
+                <p class="empty-state-cell">No hay datos históricos disponibles para este valor y periodo.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@if (Model.HasData)
+{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script>
+        const labels = @Html.Raw(Model.LabelsJson);
+        const values = @Html.Raw(Model.ValuesJson);
+        const ctx = document.getElementById('historyChart');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '@Model.Symbol',
+                    data: values,
+                    borderColor: '#60a5fa',
+                    backgroundColor: 'rgba(96, 165, 250, 0.15)',
+                    fill: true,
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { ticks: { color: '#a9bacd', maxTicksLimit: 12 }, grid: { color: 'rgba(148,163,184,0.08)' } },
+                    y: { ticks: { color: '#a9bacd' }, grid: { color: 'rgba(148,163,184,0.08)' } }
+                }
+            }
+        });
+    </script>
+}

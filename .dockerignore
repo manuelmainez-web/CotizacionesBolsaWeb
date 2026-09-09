@@ -1,0 +1,7 @@
+bin/
+obj/
+publish/
+App_Data/
+*.log
+cloudflared-log.txt
+.vs/

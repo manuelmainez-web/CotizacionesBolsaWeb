@@ -1,0 +1,623 @@
+﻿@page
+@model CotizacionesBolsaWeb.Pages.IndexModel
+@{
+    ViewData["Title"] = "Cotizaciones bolsa";
+}
+
+<div class="market-shell">
+    <div class="portfolio-header">
+        <div class="title-block">
+            <img class="portfolio-header-image" src="/images/portfolio-header.jpg" alt="Cabecera cartera" />
+            <h1 class="mb-1"><span class="portfolio-label">Mi cartera:</span> Manuel Máinez Arrojo</h1>
+            <p class="portfolio-subtitle">Siga de cerca sus instrumentos financieros y el rendimiento de sus posiciones.</p>
+            <p class="portfolio-note">Para arrancar la página de cotizaciones bastará con escanear el código QR.</p>
+            <p class="portfolio-note">Los cambios realizados en la página no se podrán ver por Internet solo en local, ya que el JSON con los cambios se guarda en la siguiente ruta: C:\CotizacionesBolsaWeb\App_Data</p>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.PublicUrl))
+        {
+            <div class="qr-box">
+                <img class="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=@Uri.EscapeDataString(Model.PublicUrl)" alt="Código QR de acceso" />
+                <span class="qr-label">Escanea para abrir<br />desde el móvil</span>
+            </div>
+        }
+    </div>
+
+    <div class="summary-strip">
+        <div class="summary-box">
+            <span>Importe total invertido</span>
+            <strong>@Model.TotalPurchaseValue.ToString("#,##0.00 €")</strong>
+        </div>
+        <div class="summary-box gain">
+            <span>Rentabilidad total</span>
+            <strong>@Model.TotalGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.TotalGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</strong>
+        </div>
+        <div class="summary-box">
+            <span>Importe total</span>
+            <strong>@((Model.TotalPurchaseValue + Model.TotalGainValue).ToString("#,##0.00 €"))</strong>
+        </div>
+    </div>
+
+    <div class="market-panel">
+        <div class="panel-head panel-head-row">
+            <span>Índices <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-index-dialog">+ Añadir índice</button>
+        </div>
+        <div class="table-wrap">
+            <table class="market-table market-table-compact">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Símbolo</th>
+                        <th class="text-align-right">ÚLTIMO</th>
+                        <th>Cambio %</th>
+                        <th>Actualizado</th>
+                        <th>Mercado<br />(abierto/cerrado)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Indices)
+                    {
+                        <tr>
+                            <td class="name-cell">
+                                <span class="name-with-flag">
+                                    <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                    <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
+                                </span>
+                            </td>
+                            <td>@item.Symbol</td>
+                            <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
+                            <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                            <td class="time-cell">@item.UpdatedText</td>
+                            <td class="market-status-cell market-status-cell-left">
+                                <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
+                            </td>
+                            <td class="delete-cell">
+                                <form method="post" asp-page-handler="DeleteIndex" onsubmit="return confirm('¿Eliminar este índice?');">
+                                    <input type="hidden" name="symbol" value="@item.Symbol" />
+                                    <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <dialog id="add-index-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddIndex">
+            <h3>Añadir índice</h3>
+            <label>
+                Nombre
+                <input type="text" name="name" required maxlength="100" placeholder="Ej. FTSE 100" />
+            </label>
+            <label>
+                Símbolo (Yahoo Finance)
+                <input type="text" name="symbol" required maxlength="20" placeholder="Ej. ^FTSE" />
+            </label>
+            <label>
+                País (código, opcional)
+                <input type="text" name="countryCode" maxlength="2" placeholder="Ej. GB" />
+            </label>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>Acciones <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-stock-dialog">+ Añadir acción</button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.StockError))
+        {
+            <div class="form-error-banner">@Model.StockError</div>
+        }
+        <div class="table-wrap">
+            <table class="market-table market-table-compact">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Símbolo</th>
+                        <th>Bolsa</th>
+                        <th class="text-align-right">Último</th>
+                        <th>Cambio %</th>
+                        <th>Actualizado</th>
+                        <th>Mercado<br />(abierto/cerrado)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Stocks.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8" class="empty-state-cell">No hay acciones añadidas. Usa "+ Añadir acción" para empezar.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.Stocks)
+                        {
+                            <tr>
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
+                                    </span>
+                                </td>
+                                <td>@item.Symbol</td>
+                                <td class="isin-cell">@item.DisplayMarket</td>
+                                <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="time-cell">@item.UpdatedText</td>
+                                <td class="market-status-cell market-status-cell-left">
+                                    <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
+                                </td>
+                                <td class="delete-cell">
+                                    <form method="post" asp-page-handler="DeleteStock" onsubmit="return confirm('¿Eliminar esta acción?');">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <dialog id="add-stock-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddStock">
+            <h3>Añadir acción</h3>
+            <label>
+                Nombre
+                <input type="text" name="name" required maxlength="100" placeholder="Ej. Apple Inc." />
+            </label>
+            <label>
+                Mercado
+                <select name="market">
+                    <option value="IBEX35">IBEX-35</option>
+                    <option value="CAC40">CAC 40</option>
+                    <option value="DAX">DAX</option>
+                    <option value="EUROSTOXX50">EURO STOXX 50</option>
+                    <option value="DOWJONES">DOW JONES</option>
+                    <option value="NASDAQ">NASDAQ</option>
+                    <option value="SP500">S&amp;P 500</option>
+                </select>
+            </label>
+            <p class="dialog-hint">El símbolo se busca automáticamente a partir del nombre, priorizando el mercado seleccionado.</p>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>ETF <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-etf-control-dialog">+ Añadir ETF</button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.EtfControlError))
+        {
+            <div class="form-error-banner">@Model.EtfControlError</div>
+        }
+        <div class="table-wrap">
+            <table class="market-table market-table-compact">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>ISIN</th>
+                        <th class="text-align-right">Último</th>
+                        <th>Cambio %</th>
+                        <th>Actualizado</th>
+                        <th>Mercado<br />(abierto/cerrado)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.EtfsControl.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="empty-state-cell">No hay ETF añadidos. Usa "+ Añadir ETF" para empezar.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.EtfsControl)
+                        {
+                            <tr>
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
+                                    </span>
+                                </td>
+                                <td class="isin-cell">@item.DisplayIsin</td>
+                                <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="time-cell">@item.UpdatedText</td>
+                                <td class="market-status-cell market-status-cell-left">
+                                    <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
+                                </td>
+                                <td class="delete-cell">
+                                    <form method="post" asp-page-handler="DeleteEtfControl" onsubmit="return confirm('¿Eliminar este ETF?');">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <dialog id="add-etf-control-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddEtfControl">
+            <h3>Añadir ETF</h3>
+            <label>
+                Código ISIN
+                <input type="text" name="isin" required maxlength="20" placeholder="Ej. IE00B5BMR087" />
+            </label>
+            <p class="dialog-hint">El nombre, el símbolo y el país se buscan automáticamente a partir del ISIN.</p>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>ETF <span class="panel-head-subtitle">(Cartera)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-etf-dialog">+ Añadir ETF</button>
+        </div>
+        <div class="table-wrap">
+            <table class="market-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>ISIN</th>
+                        <th>Bróker</th>
+                        <th>Última cotización</th>
+                        <th>Cambio %</th>
+                        <th>Títulos / Precio compra</th>
+                        <th>Valoración compra</th>
+                        <th>Valoración actual</th>
+                        <th>% Rentabilidad / Importe</th>
+                        <th>Fecha/Hora Actualización</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Etfs.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="11" class="empty-state-cell">No hay ETF añadidos. Usa "+ Añadir ETF" para empezar.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.Etfs)
+                        {
+                            var holding = Model.EtfHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
+                            var currentPrice = item.Price ?? 0m;
+                            var positionCount = holding?.PositionCount ?? 0m;
+                            var purchaseDisplayValue = holding?.UnitPurchasePrice ?? 0m;
+                            var purchaseValue = positionCount * purchaseDisplayValue;
+                            var currentValue = currentPrice * positionCount;
+                            var gainValue = currentValue - purchaseValue;
+                            var gainPercent = purchaseValue == 0 ? 0m : (gainValue / purchaseValue) * 100m;
+                            var isIngDirect = holding?.Broker == "ING";
+                            var isTradeRepublic = holding?.Broker == "TR";
+
+                            <tr>
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
+                                    </span>
+                                </td>
+                                <td class="isin-cell">@item.DisplayIsin</td>
+                                <td class="broker-cell">
+                                    @if (isIngDirect)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                                    }
+                                    else if (isTradeRepublic)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
+                                    }
+                                </td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="purchase-cell">
+                                    @positionCount.ToString("#,##0.######")<br />
+                                    @purchaseDisplayValue.ToString("#,##0.00 €")
+                                </td>
+                                <td class="price-cell">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="time-cell">@item.UpdatedText</td>
+                                <td class="delete-cell">
+                                    <form method="post" asp-page-handler="DeleteEtf" onsubmit="return confirm('¿Eliminar este ETF?');">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <dialog id="add-etf-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddEtf">
+            <h3>Añadir ETF</h3>
+            <label>
+                Nombre
+                <input type="text" name="name" required maxlength="150" placeholder="Ej. Amundi Ibex 35 Doble Apalancado Diario (2x) (IBEXA)" />
+            </label>
+            <label>
+                Símbolo (Yahoo Finance)
+                <input type="text" name="symbol" required maxlength="20" placeholder="Ej. IBEXAE.XD" />
+            </label>
+            <label>
+                ISIN
+                <input type="text" name="isin" required maxlength="20" placeholder="Ej. LU1681043941" />
+            </label>
+            <label>
+                País (código, opcional)
+                <input type="text" name="countryCode" maxlength="2" placeholder="Ej. ES" />
+            </label>
+            <label>
+                Número de títulos
+                <input type="number" name="positionCount" required min="0.000001" step="0.000001" placeholder="Ej. 437" />
+            </label>
+            <label>
+                Precio de compra (unitario)
+                <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" placeholder="Ej. 25.62" />
+            </label>
+            <label>
+                Bróker
+                <select name="broker" required>
+                    <option value="ING">ING Direct</option>
+                    <option value="TR">Trade Republic</option>
+                </select>
+            </label>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head">
+            <span>Fondos <span class="panel-head-subtitle">(Cartera)</span></span>
+        </div>
+        <div class="table-wrap">
+            <table class="market-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>ISIN</th>
+                        <th>Bróker</th>
+                        <th>Última cotización</th>
+                        <th>Cambio %</th>
+                        <th>Títulos / Precio compra</th>
+                        <th>Valoración compra</th>
+                        <th>Valoración actual</th>
+                        <th>% Rentabilidad / Importe</th>
+                        <th>Fecha/Hora Actualización</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Funds.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="10" class="empty-state-cell">No hay fondos añadidos.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.Funds)
+                        {
+                            var currentPrice = item.Price ?? 0m;
+
+                            var tradeRepublicIsins = new[] { "IE00B4ND5C91", "LU0171306680", "LU0322252886" };
+                            var isTradeRepublic = tradeRepublicIsins.Contains(item.Isin, StringComparer.OrdinalIgnoreCase);
+
+                            var currentValue = item.Symbol switch
+                            {
+                                "0P0000VHO3" or "LU0171306680" or "0P00017AXD.SW" => currentPrice * Model.GoldFundPositionCount,
+                                _ => 0m
+                            };
+
+                            var purchaseValue = item.Symbol switch
+                            {
+                                "0P0000VHO3" or "LU0171306680" or "0P00017AXD.SW" => Model.GoldFundPurchaseValue,
+                                _ => 0m
+                            };
+
+                            var positionCount = item.Symbol switch
+                            {
+                                "0P0000VHO3" or "LU0171306680" or "0P00017AXD.SW" => Model.GoldFundPositionCount,
+                                _ => 0m
+                            };
+
+                            var purchaseDisplayValue = positionCount == 0 ? 0m : purchaseValue / positionCount;
+
+                            var gainValue = currentValue - purchaseValue;
+                            var gainPercent = purchaseValue == 0 ? 0m : (gainValue / purchaseValue) * 100m;
+
+                            <tr>
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
+                                    </span>
+                                </td>
+                                <td class="isin-cell">@item.DisplayIsin</td>
+                                <td class="broker-cell">
+                                    @if (isTradeRepublic)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
+                                    }
+                                </td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="purchase-cell">
+                                    @positionCount.ToString("#,##0.######")<br />
+                                    @purchaseDisplayValue.ToString("#,##0.00 €")
+                                </td>
+                                <td class="price-cell">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="time-cell">@item.UpdatedText</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>Acciones <span class="panel-head-subtitle">(Cartera)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-stock-holding-dialog">+ Añadir acción</button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.StockHoldingError))
+        {
+            <div class="form-error-banner">@Model.StockHoldingError</div>
+        }
+        <div class="table-wrap">
+            <table class="market-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Bróker</th>
+                        <th>Última cotización</th>
+                        <th>Cambio %</th>
+                        <th>Títulos / Precio compra</th>
+                        <th>Valoración compra</th>
+                        <th>Valoración actual</th>
+                        <th>% Rentabilidad / Importe</th>
+                        <th>Fecha/Hora Actualización</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.PortfolioStocks.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="10" class="empty-state-cell">No hay acciones añadidas. Usa "+ Añadir acción" para empezar.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.PortfolioStocks)
+                        {
+                            var holding = Model.StockHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
+                            var currentPrice = item.Price ?? 0m;
+                            var positionCount = holding?.PositionCount ?? 0m;
+                            var purchaseDisplayValue = holding?.UnitPurchasePrice ?? 0m;
+                            var purchaseValue = positionCount * purchaseDisplayValue;
+                            var currentValue = currentPrice * positionCount;
+                            var gainValue = currentValue - purchaseValue;
+                            var gainPercent = purchaseValue == 0 ? 0m : (gainValue / purchaseValue) * 100m;
+                            var isIngDirect = holding?.Broker == "ING";
+                            var isTradeRepublic = holding?.Broker == "TR";
+
+                            <tr>
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
+                                    </span>
+                                </td>
+                                <td class="broker-cell">
+                                    @if (isIngDirect)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                                    }
+                                    else if (isTradeRepublic)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
+                                    }
+                                </td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="purchase-cell">
+                                    @positionCount.ToString("#,##0.######")<br />
+                                    @purchaseDisplayValue.ToString("#,##0.00 €")
+                                </td>
+                                <td class="price-cell">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="time-cell">@item.UpdatedText</td>
+                                <td class="delete-cell">
+                                    <form method="post" asp-page-handler="DeleteStockHolding" onsubmit="return confirm('¿Eliminar esta acción?');">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <dialog id="add-stock-holding-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddStockHolding">
+            <h3>Añadir acción</h3>
+            <label>
+                Nombre
+                <input type="text" name="name" required maxlength="150" placeholder="Ej. Apple Inc." />
+            </label>
+            <label>
+                Número de títulos
+                <input type="number" name="positionCount" required min="0.000001" step="0.000001" placeholder="Ej. 10" />
+            </label>
+            <label>
+                Precio de compra (unitario)
+                <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" placeholder="Ej. 150.00" />
+            </label>
+            <label>
+                Mercado
+                <select name="market">
+                    <option value="IBEX35">IBEX-35</option>
+                    <option value="CAC40">CAC 40</option>
+                    <option value="DAX">DAX</option>
+                    <option value="EUROSTOXX50">EURO STOXX 50</option>
+                    <option value="DOWJONES">DOW JONES</option>
+                    <option value="NASDAQ">NASDAQ</option>
+                    <option value="SP500">S&amp;P 500</option>
+                </select>
+            </label>
+            <label>
+                Bróker
+                <select name="broker" required>
+                    <option value="ING">ING Direct</option>
+                    <option value="TR">Trade Republic</option>
+                </select>
+            </label>
+            <p class="dialog-hint">El símbolo se busca automáticamente a partir del nombre, priorizando el mercado seleccionado.</p>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
+</div>
