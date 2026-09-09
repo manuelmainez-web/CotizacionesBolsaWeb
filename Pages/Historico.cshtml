@@ -35,14 +35,42 @@
             }
         </div>
     </div>
+
+    @if (Model.HasData)
+    {
+        <div class="market-panel mt-4">
+            <div class="panel-head">
+                <span>Análisis técnico</span>
+            </div>
+            <div class="chart-wrap">
+                <canvas id="candlestickChart"></canvas>
+            </div>
+            <div class="chart-wrap chart-wrap-small">
+                <canvas id="volumeChart"></canvas>
+            </div>
+            <div class="chart-wrap chart-wrap-small">
+                <canvas id="rsiChart"></canvas>
+            </div>
+        </div>
+    }
 </div>
 
 @if (Model.HasData)
 {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
     <script>
         const labels = @Html.Raw(Model.LabelsJson);
         const values = @Html.Raw(Model.ValuesJson);
+        const opens = @Html.Raw(Model.OpenJson);
+        const highs = @Html.Raw(Model.HighJson);
+        const lows = @Html.Raw(Model.LowJson);
+        const closes = @Html.Raw(Model.CloseJson);
+        const volumes = @Html.Raw(Model.VolumeJson);
+        const sma20 = @Html.Raw(Model.Sma20Json);
+        const sma50 = @Html.Raw(Model.Sma50Json);
+        const rsi = @Html.Raw(Model.RsiJson);
+
         const ctx = document.getElementById('historyChart');
         new Chart(ctx, {
             type: 'line',
@@ -67,6 +95,108 @@
                 scales: {
                     x: { ticks: { color: '#a9bacd', maxTicksLimit: 12 }, grid: { color: 'rgba(148,163,184,0.08)' } },
                     y: { ticks: { color: '#a9bacd' }, grid: { color: 'rgba(148,163,184,0.08)' } }
+                }
+            }
+        });
+
+        function etiquetaEnIndice(value) {
+            return labels[value] !== undefined ? labels[value] : '';
+        }
+
+        const ejeXComun = {
+            type: 'linear',
+            ticks: { color: '#a9bacd', maxTicksLimit: 12, callback: etiquetaEnIndice },
+            grid: { color: 'rgba(148,163,184,0.08)' }
+        };
+
+        // Velas japonesas + medias móviles (SMA 20 / SMA 50)
+        const candleData = closes.map(function (c, i) {
+            return { x: i, o: opens[i], h: highs[i], l: lows[i], c: c };
+        });
+
+        new Chart(document.getElementById('candlestickChart'), {
+            type: 'candlestick',
+            data: {
+                datasets: [
+                    {
+                        label: 'Precio',
+                        data: candleData,
+                        color: { up: '#22c55e', down: '#ef4444', unchanged: '#a9bacd' }
+                    },
+                    {
+                        type: 'line',
+                        label: 'SMA 20',
+                        data: sma20.map(function (v, i) { return { x: i, y: v }; }),
+                        borderColor: '#facc15',
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        spanGaps: true
+                    },
+                    {
+                        type: 'line',
+                        label: 'SMA 50',
+                        data: sma50.map(function (v, i) { return { x: i, y: v }; }),
+                        borderColor: '#a78bfa',
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        spanGaps: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { color: '#a9bacd', filter: function (item) { return item.text !== 'Precio'; } }
+                    }
+                },
+                scales: {
+                    x: ejeXComun,
+                    y: { ticks: { color: '#a9bacd' }, grid: { color: 'rgba(148,163,184,0.08)' } }
+                }
+            }
+        });
+
+        // Volumen negociado
+        new Chart(document.getElementById('volumeChart'), {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    label: 'Volumen',
+                    data: volumes.map(function (v, i) { return { x: i, y: v }; }),
+                    backgroundColor: 'rgba(96, 165, 250, 0.5)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: ejeXComun,
+                    y: { ticks: { color: '#a9bacd' }, grid: { color: 'rgba(148,163,184,0.08)' } }
+                }
+            }
+        });
+
+        // RSI (14 periodos)
+        new Chart(document.getElementById('rsiChart'), {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'RSI (14)',
+                    data: rsi.map(function (v, i) { return { x: i, y: v }; }),
+                    borderColor: '#38bdf8',
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    spanGaps: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: ejeXComun,
+                    y: { min: 0, max: 100, ticks: { color: '#a9bacd', stepSize: 25 }, grid: { color: 'rgba(148,163,184,0.08)' } }
                 }
             }
         });

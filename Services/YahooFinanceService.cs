@@ -54,7 +54,7 @@ public sealed class YahooFinanceService
         return results;
     }
 
-    public async Task<List<(DateTimeOffset Date, decimal Close)>> GetHistoryAsync(string symbol, string range, string interval, CancellationToken cancellationToken = default)
+    public async Task<List<(DateTimeOffset Date, decimal Open, decimal High, decimal Low, decimal Close, long Volume)>> GetHistoryAsync(string symbol, string range, string interval, CancellationToken cancellationToken = default)
     {
         var resolvedSymbol = ResolveSymbol(symbol);
         var url = $"https://query1.finance.yahoo.com/v8/finance/chart/{Uri.EscapeDataString(resolvedSymbol)}?range={range}&interval={interval}";
@@ -68,7 +68,7 @@ public sealed class YahooFinanceService
             using var response = await _httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return new List<(DateTimeOffset, decimal)>();
+                return new();
             }
 
             var payload = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -79,28 +79,41 @@ public sealed class YahooFinanceService
                 resultArray.ValueKind != JsonValueKind.Array ||
                 resultArray.GetArrayLength() == 0)
             {
-                return new List<(DateTimeOffset, decimal)>();
+                return new();
             }
 
             var first = resultArray[0];
             if (!first.TryGetProperty("timestamp", out var timestamps) || timestamps.ValueKind != JsonValueKind.Array)
             {
-                return new List<(DateTimeOffset, decimal)>();
+                return new();
             }
 
             if (!first.TryGetProperty("indicators", out var indicators) ||
                 !indicators.TryGetProperty("quote", out var quoteArray) ||
                 quoteArray.ValueKind != JsonValueKind.Array ||
-                quoteArray.GetArrayLength() == 0 ||
-                !quoteArray[0].TryGetProperty("close", out var closes) ||
-                closes.ValueKind != JsonValueKind.Array)
+                quoteArray.GetArrayLength() == 0)
             {
-                return new List<(DateTimeOffset, decimal)>();
+                return new();
             }
 
-            var points = new List<(DateTimeOffset, decimal)>();
+            var quote0 = quoteArray[0];
+            if (!quote0.TryGetProperty("close", out var closes) || closes.ValueKind != JsonValueKind.Array)
+            {
+                return new();
+            }
+
+            quote0.TryGetProperty("open", out var opens);
+            quote0.TryGetProperty("high", out var highs);
+            quote0.TryGetProperty("low", out var lows);
+            quote0.TryGetProperty("volume", out var volumes);
+
+            var points = new List<(DateTimeOffset, decimal, decimal, decimal, decimal, long)>();
             var timestampArray = timestamps.EnumerateArray().ToList();
             var closeArray = closes.EnumerateArray().ToList();
+            var openArray = opens.ValueKind == JsonValueKind.Array ? opens.EnumerateArray().ToList() : null;
+            var highArray = highs.ValueKind == JsonValueKind.Array ? highs.EnumerateArray().ToList() : null;
+            var lowArray = lows.ValueKind == JsonValueKind.Array ? lows.EnumerateArray().ToList() : null;
+            var volumeArray = volumes.ValueKind == JsonValueKind.Array ? volumes.EnumerateArray().ToList() : null;
 
             for (var i = 0; i < timestampArray.Count && i < closeArray.Count; i++)
             {
@@ -111,14 +124,19 @@ public sealed class YahooFinanceService
 
                 var date = DateTimeOffset.FromUnixTimeSeconds(timestampArray[i].GetInt64());
                 var close = Convert.ToDecimal(closeArray[i].GetDouble());
-                points.Add((date, close));
+                var open = (openArray != null && i < openArray.Count && openArray[i].ValueKind == JsonValueKind.Number) ? Convert.ToDecimal(openArray[i].GetDouble()) : close;
+                var high = (highArray != null && i < highArray.Count && highArray[i].ValueKind == JsonValueKind.Number) ? Convert.ToDecimal(highArray[i].GetDouble()) : close;
+                var low = (lowArray != null && i < lowArray.Count && lowArray[i].ValueKind == JsonValueKind.Number) ? Convert.ToDecimal(lowArray[i].GetDouble()) : close;
+                var volume = (volumeArray != null && i < volumeArray.Count && volumeArray[i].ValueKind == JsonValueKind.Number) ? volumeArray[i].GetInt64() : 0L;
+
+                points.Add((date, open, high, low, close, volume));
             }
 
             return points;
         }
         catch
         {
-            return new List<(DateTimeOffset, decimal)>();
+            return new();
         }
     }
 
