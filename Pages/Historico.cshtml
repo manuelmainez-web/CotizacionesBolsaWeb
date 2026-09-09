@@ -45,12 +45,6 @@
             <div class="chart-wrap">
                 <canvas id="candlestickChart"></canvas>
             </div>
-            <div class="chart-wrap chart-wrap-small">
-                <canvas id="volumeChart"></canvas>
-            </div>
-            <div class="chart-wrap chart-wrap-small">
-                <canvas id="rsiChart"></canvas>
-            </div>
         </div>
     }
 </div>
@@ -154,49 +148,6 @@
                 scales: {
                     x: ejeXComun,
                     y: { ticks: { color: '#a9bacd' }, grid: { color: 'rgba(148,163,184,0.08)' } }
-                }
-            }
-        });
-
-        // Volumen negociado
-        new Chart(document.getElementById('volumeChart'), {
-            type: 'bar',
-            data: {
-                datasets: [{
-                    label: 'Volumen',
-                    data: volumes.map(function (v, i) { return { x: i, y: v }; }),
-                    backgroundColor: 'rgba(96, 165, 250, 0.5)'
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: ejeXComun,
-                    y: { ticks: { color: '#a9bacd' }, grid: { color: 'rgba(148,163,184,0.08)' } }
-                }
-            }
-        });
-
-        // RSI (14 periodos)
-        new Chart(document.getElementById('rsiChart'), {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: 'RSI (14)',
-                    data: rsi.map(function (v, i) { return { x: i, y: v }; }),
-                    borderColor: '#38bdf8',
-                    borderWidth: 1.5,
-                    pointRadius: 0,
-                    spanGaps: true
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: ejeXComun,
-                    y: { min: 0, max: 100, ticks: { color: '#a9bacd', stepSize: 25 }, grid: { color: 'rgba(148,163,184,0.08)' } }
                 }
             }
         });
