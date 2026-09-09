@@ -178,6 +178,10 @@ body.wco-active .topbar-datetime {
   margin-top: 6px;
 }
 
+.portfolio-name-text {
+  font-size: calc(1em - 2pt);
+}
+
 .portfolio-avatar {
   width: 44px;
   height: 44px;
