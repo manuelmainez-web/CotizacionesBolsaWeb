@@ -22,7 +22,11 @@
         }
     </div>
 
-    <div class="summary-strip" id="summary-strip">
+    <div class="summary-strip-label">
+        Resumen total
+        <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip" title="Mostrar/ocultar">Mostrar</button>
+    </div>
+    <div class="summary-strip is-collapsed" id="summary-strip">
         <div class="summary-box">
             <span>Importe total invertido</span>
             <strong>@Model.TotalPurchaseValue.ToString("#,##0.00 €")</strong>
