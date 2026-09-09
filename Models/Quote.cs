@@ -11,10 +11,14 @@ public sealed class Quote
     public string Market { get; set; } = string.Empty;
     public decimal? Price { get; set; }
     public decimal? PercentChange { get; set; }
+    public decimal? Open { get; set; }
+    public decimal? PreviousClose { get; set; }
     public DateTimeOffset? LastUpdated { get; set; }
 
     public string DisplayPrice => Price.HasValue ? Price.Value.ToString("#,##0.00") : "N/A";
     public string DisplayPercent => PercentChange.HasValue ? $"{PercentChange.Value:0.00}%" : "N/A";
+    public string DisplayOpen => Open.HasValue ? Open.Value.ToString("#,##0.00") : "N/A";
+    public string DisplayPreviousClose => PreviousClose.HasValue ? PreviousClose.Value.ToString("#,##0.00") : "N/A";
     public string DisplayIsin => string.IsNullOrWhiteSpace(Isin) ? "—" : Isin;
     public string DisplayMarket => string.IsNullOrWhiteSpace(Market) ? "—" : Market;
     public string UpdatedText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("dd/MM/yyyy HH:mm") : "N/A";

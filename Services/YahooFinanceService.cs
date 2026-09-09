@@ -250,6 +250,8 @@ public sealed class YahooFinanceService
             var price = GetDecimal(meta, "regularMarketPrice");
             var changePercent = GetDecimal(meta, "regularMarketChangePercent");
             var updated = GetDate(meta, "regularMarketTime");
+            var previousClose = GetDecimal(meta, "chartPreviousClose");
+            var open = GetFirstOpen(first);
 
             return new Quote
             {
@@ -259,6 +261,8 @@ public sealed class YahooFinanceService
                 CountryCode = config.CountryCode ?? string.Empty,
                 Price = price,
                 PercentChange = changePercent,
+                Open = open,
+                PreviousClose = previousClose,
                 LastUpdated = updated
             };
         }
@@ -347,6 +351,29 @@ public sealed class YahooFinanceService
         PercentChange = null,
         LastUpdated = null
     };
+
+    private static decimal? GetFirstOpen(JsonElement chartResult)
+    {
+        if (!chartResult.TryGetProperty("indicators", out var indicators) ||
+            !indicators.TryGetProperty("quote", out var quoteArray) ||
+            quoteArray.ValueKind != JsonValueKind.Array ||
+            quoteArray.GetArrayLength() == 0 ||
+            !quoteArray[0].TryGetProperty("open", out var opens) ||
+            opens.ValueKind != JsonValueKind.Array)
+        {
+            return null;
+        }
+
+        foreach (var value in opens.EnumerateArray())
+        {
+            if (value.ValueKind == JsonValueKind.Number)
+            {
+                return Convert.ToDecimal(value.GetDouble());
+            }
+        }
+
+        return null;
+    }
 
     private static decimal? GetDecimal(JsonElement element, string propertyName)
     {
