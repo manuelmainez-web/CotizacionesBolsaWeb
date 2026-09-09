@@ -227,6 +227,10 @@ body.wco-active .topbar-datetime {
   max-width: 640px;
 }
 
+.portfolio-note-tight {
+  margin-top: 2px;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
