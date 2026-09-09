@@ -483,8 +483,8 @@
                                     @positionCount.ToString("#,##0.######")<br />
                                     @purchaseDisplayValue.ToString("#,##0.00 €")
                                 </td>
-                                <td class="price-cell">@purchaseValue.ToString("#,##0.00 €")</td>
-                                <td class="price-cell">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedText</td>
                             </tr>
@@ -565,8 +565,8 @@
                                     @positionCount.ToString("#,##0.######")<br />
                                     @purchaseDisplayValue.ToString("#,##0.00 €")
                                 </td>
-                                <td class="price-cell">@purchaseValue.ToString("#,##0.00 €")</td>
-                                <td class="price-cell">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedText</td>
                                 <td class="delete-cell">
