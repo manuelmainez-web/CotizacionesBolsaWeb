@@ -340,6 +340,10 @@ body.wco-active .topbar-datetime {
   height: 3rem;
 }
 
+.blank-line-1 {
+  height: 1.5rem;
+}
+
 .summary-strip.is-collapsed {
   display: none;
 }
