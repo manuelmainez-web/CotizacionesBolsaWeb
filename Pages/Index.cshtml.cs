@@ -77,10 +77,10 @@ public class IndexModel : PageModel
             {
                 new("IBEX 35", "^IBEX", null, "ES"),
                 new("DAX", "^GDAXI", null, "DE"),
+                new("CAC 40", "^FCHI", null, "FR"),
                 new("EURO STOXX 50", "^STOXX50E", null, "EU"),
                 new("NASDAQ", "^IXIC", null, "US"),
                 new("SP 500", "^GSPC", null, "US"),
-                new("CAC 40", "^FCHI", null, "FR"),
                 new("DOW JONES", "^DJI", null, "US"),
                 new("NIKKEI 225", "^N225", null, "JP")
             });
