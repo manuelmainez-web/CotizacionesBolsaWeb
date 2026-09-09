@@ -171,6 +171,16 @@ body.wco-active .topbar-datetime {
   font-weight: 700;
 }
 
+.portfolio-avatar {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid rgba(148, 163, 184, 0.35);
+  vertical-align: middle;
+  margin: 0 6px;
+}
+
 .portfolio-subtitle {
   margin: 10px 0 0;
   color: #b4c2d1;
