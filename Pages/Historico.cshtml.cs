@@ -1,3 +1,4 @@
+using CotizacionesBolsaWeb.Models;
 using CotizacionesBolsaWeb.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Globalization;
@@ -46,7 +47,7 @@ public class HistoricoModel : PageModel
         }
 
         HasData = true;
-        var labels = points.Select(p => p.Date.LocalDateTime.ToString(dateFormat, CultureInfo.InvariantCulture)).ToList();
+        var labels = points.Select(p => TimeZoneInfo.ConvertTime(p.Date, Quote.SpainTimeZone).ToString(dateFormat, CultureInfo.InvariantCulture)).ToList();
         var values = points.Select(p => p.Close).ToList();
 
         LabelsJson = JsonSerializer.Serialize(labels);
