@@ -371,6 +371,13 @@ body.wco-active .topbar-datetime {
   margin-left: 5ch !important;
 }
 
+.broker-label-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 170px;
+}
+
 .btn-toggle-summary:hover {
   background: linear-gradient(180deg, #29415d 0%, #1b2d3e 100%);
 }
