@@ -497,6 +497,7 @@ body {
   font-weight: 700;
   color: #f8fafc;
   white-space: nowrap;
+  text-align: right;
 }
 
 .price-cell-quote {
@@ -551,6 +552,12 @@ body {
   font-weight: 600;
   white-space: nowrap;
   line-height: 1.4;
+  text-align: right;
+}
+
+.market-table td.text-success,
+.market-table td.text-danger {
+  text-align: right;
 }
 
 .cell-label {
