@@ -8,24 +8,19 @@ namespace CotizacionesBolsaWeb.Pages;
 
 public class IndexModel : PageModel
 {
+    private const string IndicesKey = "custom-indices";
+    private const string StocksKey = "custom-stocks";
+    private const string EtfsKey = "custom-etfs";
+    private const string FundsKey = "custom-funds";
+    private const string StockHoldingsKey = "custom-stock-holdings";
+    private const string EtfControlKey = "custom-etf-control";
+
     private readonly YahooFinanceService _service = new();
-    private readonly string _customIndicesPath;
-    private readonly string _customStocksPath;
-    private readonly string _customEtfsPath;
-    private readonly string _customFundsPath;
-    private readonly string _customStockHoldingsPath;
-    private readonly string _customEtfControlPath;
+    private readonly DataStore _dataStore;
 
     public IndexModel(IWebHostEnvironment environment, IConfiguration configuration)
     {
-        var dataFolder = Path.Combine(environment.ContentRootPath, "App_Data");
-        Directory.CreateDirectory(dataFolder);
-        _customIndicesPath = Path.Combine(dataFolder, "custom-indices.json");
-        _customStocksPath = Path.Combine(dataFolder, "custom-stocks.json");
-        _customEtfsPath = Path.Combine(dataFolder, "custom-etfs.json");
-        _customFundsPath = Path.Combine(dataFolder, "custom-funds.json");
-        _customStockHoldingsPath = Path.Combine(dataFolder, "custom-stock-holdings.json");
-        _customEtfControlPath = Path.Combine(dataFolder, "custom-etf-control.json");
+        _dataStore = new DataStore(environment, configuration);
         PublicUrl = configuration["Portfolio:PublicUrl"] ?? string.Empty;
     }
 
@@ -71,9 +66,9 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync()
     {
-        if (!System.IO.File.Exists(_customIndicesPath))
+        if (!await _dataStore.ExistsAsync(IndicesKey))
         {
-            SaveEntries(_customIndicesPath, new List<QuoteConfig>
+            await _dataStore.SaveEntriesAsync(IndicesKey, new List<QuoteConfig>
             {
                 new("IBEX 35", "^IBEX", null, "ES"),
                 new("DAX", "^GDAXI", null, "DE"),
@@ -86,12 +81,12 @@ public class IndexModel : PageModel
             });
         }
 
-        var indexConfigs = LoadEntries<QuoteConfig>(_customIndicesPath);
-        var stockConfigs = LoadEntries<QuoteConfig>(_customStocksPath);
+        var indexConfigs = await _dataStore.LoadEntriesAsync<QuoteConfig>(IndicesKey);
+        var stockConfigs = await _dataStore.LoadEntriesAsync<QuoteConfig>(StocksKey);
 
-        if (!System.IO.File.Exists(_customEtfsPath))
+        if (!await _dataStore.ExistsAsync(EtfsKey))
         {
-            SaveEntries(_customEtfsPath, new List<EtfHolding>
+            await _dataStore.SaveEntriesAsync(EtfsKey, new List<EtfHolding>
             {
                 new("Amundi Ibex 35 Doble Apalancado Diario (2x) (IBEXA)", "IBEXAE.XD", "LU1681043941", "ES", 437m, 11194.98m / 437m, "ING"),
                 new("db x-trackers LevDAX Daily UCITS 1C", "DBPE.DU", "LU0322252738", "DE", 119m, 18979.98m / 119m, "ING"),
@@ -102,30 +97,30 @@ public class IndexModel : PageModel
             });
         }
 
-        EtfHoldings = LoadEntries<EtfHolding>(_customEtfsPath);
+        EtfHoldings = await _dataStore.LoadEntriesAsync<EtfHolding>(EtfsKey);
         var etfConfigs = EtfHoldings
             .Select(h => new QuoteConfig(h.Name, h.Symbol, h.Isin, h.CountryCode))
             .ToList();
 
-        if (!System.IO.File.Exists(_customFundsPath))
+        if (!await _dataStore.ExistsAsync(FundsKey))
         {
-            SaveEntries(_customFundsPath, new List<FundHolding>
+            await _dataStore.SaveEntriesAsync(FundsKey, new List<FundHolding>
             {
                 new("BlackRock Global Funds - World Gold Fund E2 EUR ACC", "0P0000VHO3", "LU0171306680", "LU", 199.911759m, 67.60m, "TR")
             });
         }
 
-        FundHoldings = LoadEntries<FundHolding>(_customFundsPath);
+        FundHoldings = await _dataStore.LoadEntriesAsync<FundHolding>(FundsKey);
         var fundConfigs = FundHoldings
             .Select(h => new QuoteConfig(h.Name, h.Symbol, h.Isin, h.CountryCode))
             .ToList();
 
-        StockHoldings = LoadEntries<StockHolding>(_customStockHoldingsPath);
+        StockHoldings = await _dataStore.LoadEntriesAsync<StockHolding>(StockHoldingsKey);
         var stockHoldingConfigs = StockHoldings
             .Select(h => new QuoteConfig(h.Name, h.Symbol, h.Isin, h.CountryCode))
             .ToList();
 
-        var etfControlConfigs = LoadEntries<QuoteConfig>(_customEtfControlPath);
+        var etfControlConfigs = await _dataStore.LoadEntriesAsync<QuoteConfig>(EtfControlKey);
 
         Indices = await _service.GetQuotesAsync(indexConfigs);
         Stocks = stockConfigs.Count > 0 ? await _service.GetQuotesAsync(stockConfigs) : new List<Quote>();
@@ -171,9 +166,9 @@ public class IndexModel : PageModel
         }
     }
 
-    public IActionResult OnPostAddIndex(string name, string symbol, string? countryCode)
+    public async Task<IActionResult> OnPostAddIndexAsync(string name, string symbol, string? countryCode)
     {
-        AddCustomEntry(_customIndicesPath, name, symbol, countryCode);
+        await AddCustomEntryAsync(IndicesKey, name, symbol, countryCode);
         return RedirectToPage();
     }
 
@@ -183,14 +178,14 @@ public class IndexModel : PageModel
         var match = await _service.SearchSymbolAsync(name, preferredExchanges);
         if (match.HasValue)
         {
-            var entries = LoadEntries<QuoteConfig>(_customStocksPath);
+            var entries = await _dataStore.LoadEntriesAsync<QuoteConfig>(StocksKey);
             entries.Add(new QuoteConfig(
                 match.Value.Name,
                 match.Value.Symbol,
                 null,
                 match.Value.CountryCode,
                 match.Value.Market));
-            SaveEntries(_customStocksPath, entries);
+            await _dataStore.SaveEntriesAsync(StocksKey, entries);
         }
         else
         {
@@ -215,21 +210,21 @@ public class IndexModel : PageModel
         var match = await _service.SearchSymbolAsync(isin);
         if (match.HasValue)
         {
-            var entries = LoadEntries<QuoteConfig>(_customEtfControlPath);
+            var entries = await _dataStore.LoadEntriesAsync<QuoteConfig>(EtfControlKey);
             entries.Add(new QuoteConfig(match.Value.Name, match.Value.Symbol, isin.Trim().ToUpperInvariant(), match.Value.CountryCode));
-            SaveEntries(_customEtfControlPath, entries);
+            await _dataStore.SaveEntriesAsync(EtfControlKey, entries);
         }
         else
         {
-            EtfControlError = $"No se ha encontrado ning\u00fan ETF con el ISIN \"{isin}\". Comprueba que sea correcto.";
+            EtfControlError = $"No se ha encontrado ningún ETF con el ISIN \"{isin}\". Comprueba que sea correcto.";
         }
 
         return RedirectToPage();
     }
 
-    public IActionResult OnPostDeleteEtfControl(string symbol)
+    public async Task<IActionResult> OnPostDeleteEtfControlAsync(string symbol)
     {
-        RemoveCustomEntry(_customEtfControlPath, symbol);
+        await RemoveCustomEntryAsync(EtfControlKey, symbol);
         return RedirectToPage();
     }
 
@@ -244,7 +239,7 @@ public class IndexModel : PageModel
         var match = await _service.SearchSymbolAsync(isin);
         if (match.HasValue)
         {
-            var holdings = LoadEntries<FundHolding>(_customFundsPath);
+            var holdings = await _dataStore.LoadEntriesAsync<FundHolding>(FundsKey);
             holdings.Add(new FundHolding(
                 match.Value.Name,
                 match.Value.Symbol,
@@ -254,7 +249,7 @@ public class IndexModel : PageModel
                 unitPurchasePrice,
                 string.Empty));
 
-            SaveEntries(_customFundsPath, holdings);
+            await _dataStore.SaveEntriesAsync(FundsKey, holdings);
         }
         else
         {
@@ -264,40 +259,40 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
-    public IActionResult OnPostDeleteFund(string symbol)
+    public async Task<IActionResult> OnPostDeleteFundAsync(string symbol)
     {
         if (!string.IsNullOrWhiteSpace(symbol))
         {
-            var holdings = LoadEntries<FundHolding>(_customFundsPath);
+            var holdings = await _dataStore.LoadEntriesAsync<FundHolding>(FundsKey);
             var toRemove = holdings.FirstOrDefault(h => string.Equals(h.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
             if (toRemove != null)
             {
                 holdings.Remove(toRemove);
-                SaveEntries(_customFundsPath, holdings);
+                await _dataStore.SaveEntriesAsync(FundsKey, holdings);
             }
         }
 
         return RedirectToPage();
     }
 
-    public IActionResult OnPostDeleteIndex(string symbol)
+    public async Task<IActionResult> OnPostDeleteIndexAsync(string symbol)
     {
-        RemoveCustomEntry(_customIndicesPath, symbol);
+        await RemoveCustomEntryAsync(IndicesKey, symbol);
         return RedirectToPage();
     }
 
-    public IActionResult OnPostDeleteStock(string symbol)
+    public async Task<IActionResult> OnPostDeleteStockAsync(string symbol)
     {
-        RemoveCustomEntry(_customStocksPath, symbol);
+        await RemoveCustomEntryAsync(StocksKey, symbol);
         return RedirectToPage();
     }
 
-    public IActionResult OnPostAddEtf(string name, string symbol, string isin, string? countryCode, decimal positionCount, decimal unitPurchasePrice, string broker)
+    public async Task<IActionResult> OnPostAddEtfAsync(string name, string symbol, string isin, string? countryCode, decimal positionCount, decimal unitPurchasePrice, string broker)
     {
         if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(symbol) &&
             !string.IsNullOrWhiteSpace(isin) && positionCount > 0 && unitPurchasePrice > 0)
         {
-            var holdings = LoadEntries<EtfHolding>(_customEtfsPath);
+            var holdings = await _dataStore.LoadEntriesAsync<EtfHolding>(EtfsKey);
             holdings.Add(new EtfHolding(
                 name.Trim(),
                 symbol.Trim(),
@@ -307,22 +302,22 @@ public class IndexModel : PageModel
                 unitPurchasePrice,
                 string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING"));
 
-            SaveEntries(_customEtfsPath, holdings);
+            await _dataStore.SaveEntriesAsync(EtfsKey, holdings);
         }
 
         return RedirectToPage();
     }
 
-    public IActionResult OnPostDeleteEtf(string symbol)
+    public async Task<IActionResult> OnPostDeleteEtfAsync(string symbol)
     {
         if (!string.IsNullOrWhiteSpace(symbol))
         {
-            var holdings = LoadEntries<EtfHolding>(_customEtfsPath);
+            var holdings = await _dataStore.LoadEntriesAsync<EtfHolding>(EtfsKey);
             var toRemove = holdings.FirstOrDefault(h => string.Equals(h.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
             if (toRemove != null)
             {
                 holdings.Remove(toRemove);
-                SaveEntries(_customEtfsPath, holdings);
+                await _dataStore.SaveEntriesAsync(EtfsKey, holdings);
             }
         }
 
@@ -337,7 +332,7 @@ public class IndexModel : PageModel
             var match = await _service.SearchSymbolAsync(name, preferredExchanges);
             if (match.HasValue)
             {
-                var holdings = LoadEntries<StockHolding>(_customStockHoldingsPath);
+                var holdings = await _dataStore.LoadEntriesAsync<StockHolding>(StockHoldingsKey);
                 holdings.Add(new StockHolding(
                     match.Value.Name,
                     match.Value.Symbol,
@@ -347,7 +342,7 @@ public class IndexModel : PageModel
                     unitPurchasePrice,
                     string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING"));
 
-                SaveEntries(_customStockHoldingsPath, holdings);
+                await _dataStore.SaveEntriesAsync(StockHoldingsKey, holdings);
             }
             else
             {
@@ -362,76 +357,52 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
-    public IActionResult OnPostDeleteStockHolding(string symbol)
+    public async Task<IActionResult> OnPostDeleteStockHoldingAsync(string symbol)
     {
         if (!string.IsNullOrWhiteSpace(symbol))
         {
-            var holdings = LoadEntries<StockHolding>(_customStockHoldingsPath);
+            var holdings = await _dataStore.LoadEntriesAsync<StockHolding>(StockHoldingsKey);
             var toRemove = holdings.FirstOrDefault(h => string.Equals(h.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
             if (toRemove != null)
             {
                 holdings.Remove(toRemove);
-                SaveEntries(_customStockHoldingsPath, holdings);
+                await _dataStore.SaveEntriesAsync(StockHoldingsKey, holdings);
             }
         }
 
         return RedirectToPage();
     }
 
-    private static void AddCustomEntry(string path, string name, string symbol, string? countryCode)
+    private async Task AddCustomEntryAsync(string key, string name, string symbol, string? countryCode)
     {
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(symbol))
         {
             return;
         }
 
-        var entries = LoadEntries<QuoteConfig>(path);
+        var entries = await _dataStore.LoadEntriesAsync<QuoteConfig>(key);
         entries.Add(new QuoteConfig(
             name.Trim(),
             symbol.Trim(),
             null,
             string.IsNullOrWhiteSpace(countryCode) ? null : countryCode.Trim().ToUpperInvariant()));
 
-        SaveEntries(path, entries);
+        await _dataStore.SaveEntriesAsync(key, entries);
     }
 
-    private static void RemoveCustomEntry(string path, string symbol)
+    private async Task RemoveCustomEntryAsync(string key, string symbol)
     {
         if (string.IsNullOrWhiteSpace(symbol))
         {
             return;
         }
 
-        var entries = LoadEntries<QuoteConfig>(path);
+        var entries = await _dataStore.LoadEntriesAsync<QuoteConfig>(key);
         var toRemove = entries.FirstOrDefault(e => string.Equals(e.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
         if (toRemove != null)
         {
             entries.Remove(toRemove);
-            SaveEntries(path, entries);
+            await _dataStore.SaveEntriesAsync(key, entries);
         }
-    }
-
-    private static List<T> LoadEntries<T>(string path)
-    {
-        if (!System.IO.File.Exists(path))
-        {
-            return new List<T>();
-        }
-
-        try
-        {
-            var json = System.IO.File.ReadAllText(path);
-            return JsonSerializer.Deserialize<List<T>>(json) ?? new List<T>();
-        }
-        catch (JsonException)
-        {
-            return new List<T>();
-        }
-    }
-
-    private static void SaveEntries<T>(string path, List<T> entries)
-    {
-        var json = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true });
-        System.IO.File.WriteAllText(path, json);
     }
 }
