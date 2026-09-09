@@ -363,6 +363,10 @@ body.wco-active .topbar-datetime {
   transition: background 0.2s ease;
 }
 
+.summary-strip-label .btn-toggle-summary:first-child {
+  margin-left: 0;
+}
+
 .btn-toggle-summary:hover {
   background: linear-gradient(180deg, #29415d 0%, #1b2d3e 100%);
 }
