@@ -44,6 +44,7 @@ public class IndexModel : PageModel
     public List<Quote> Funds { get; private set; } = new();
     public List<Quote> PortfolioStocks { get; private set; } = new();
     public List<Quote> EtfsControl { get; private set; } = new();
+    public List<Quote> Metals { get; private set; } = new();
     public List<EtfHolding> EtfHoldings { get; private set; } = new();
     public List<FundHolding> FundHoldings { get; private set; } = new();
     public List<StockHolding> StockHoldings { get; private set; } = new();
@@ -148,6 +149,13 @@ public class IndexModel : PageModel
         Funds = fundConfigs.Count > 0 ? await _service.GetQuotesAsync(fundConfigs) : new List<Quote>();
         PortfolioStocks = stockHoldingConfigs.Count > 0 ? await _service.GetQuotesAsync(stockHoldingConfigs) : new List<Quote>();
         EtfsControl = etfControlConfigs.Count > 0 ? await _service.GetQuotesAsync(etfControlConfigs) : new List<Quote>();
+
+        var metalsConfigs = new List<QuoteConfig>
+        {
+            new("Oro", "GC=F", null, "US"),
+            new("Plata", "SI=F", null, "US")
+        };
+        Metals = await _service.GetQuotesAsync(metalsConfigs);
 
         foreach (var quote in Indices)
         {

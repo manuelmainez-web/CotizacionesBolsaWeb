@@ -269,7 +269,9 @@ public sealed class YahooFinanceService
             var changePercent = GetDecimal(meta, "regularMarketChangePercent");
             var updated = GetDate(meta, "regularMarketTime");
             var previousClose = GetDecimal(meta, "chartPreviousClose");
-            var open = GetFirstOpen(first);
+            var open = GetFirstArrayValue(first, "open");
+            var high = GetFirstArrayValue(first, "high");
+            var low = GetFirstArrayValue(first, "low");
 
             return new Quote
             {
@@ -281,6 +283,8 @@ public sealed class YahooFinanceService
                 PercentChange = changePercent,
                 Open = open,
                 PreviousClose = previousClose,
+                High = high,
+                Low = low,
                 LastUpdated = updated
             };
         }
@@ -370,19 +374,19 @@ public sealed class YahooFinanceService
         LastUpdated = null
     };
 
-    private static decimal? GetFirstOpen(JsonElement chartResult)
+    private static decimal? GetFirstArrayValue(JsonElement chartResult, string fieldName)
     {
         if (!chartResult.TryGetProperty("indicators", out var indicators) ||
             !indicators.TryGetProperty("quote", out var quoteArray) ||
             quoteArray.ValueKind != JsonValueKind.Array ||
             quoteArray.GetArrayLength() == 0 ||
-            !quoteArray[0].TryGetProperty("open", out var opens) ||
-            opens.ValueKind != JsonValueKind.Array)
+            !quoteArray[0].TryGetProperty(fieldName, out var values) ||
+            values.ValueKind != JsonValueKind.Array)
         {
             return null;
         }
 
-        foreach (var value in opens.EnumerateArray())
+        foreach (var value in values.EnumerateArray())
         {
             if (value.ValueKind == JsonValueKind.Number)
             {

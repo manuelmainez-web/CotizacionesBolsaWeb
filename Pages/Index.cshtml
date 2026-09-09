@@ -329,6 +329,46 @@
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
+            <span>Metales preciosos <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+        </div>
+        <div class="table-wrap">
+            <table class="market-table market-table-compact">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th class="text-align-right">Último</th>
+                        <th class="text-align-right">Máximo</th>
+                        <th class="text-align-right">Mínimo</th>
+                        <th class="text-align-right">Var.</th>
+                        <th class="text-align-right">% Var.</th>
+                        <th>Fecha/Hora</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-metals">
+                    @foreach (var item in Model.Metals)
+                    {
+                        <tr>
+                            <td class="name-cell">
+                                <span class="name-with-flag">
+                                    <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                    <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
+                                </span>
+                            </td>
+                            <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
+                            <td class="price-cell price-cell-quote">@item.DisplayHigh</td>
+                            <td class="price-cell price-cell-quote">@item.DisplayLow</td>
+                            <td class="@item.TrendCssClass">@item.DisplayChange</td>
+                            <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                            <td class="time-cell">@item.UpdatedText</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
             <span>ETF <span class="panel-head-subtitle">(Cartera)</span></span>
             <button type="button" class="mini-button" data-dialog-target="add-etf-dialog">+ Añadir ETF</button>
         </div>
@@ -709,6 +749,7 @@
                 'tbody-indices',
                 'tbody-stocks',
                 'tbody-etfs-control',
+                'tbody-metals',
                 'tbody-etfs',
                 'tbody-funds',
                 'tbody-portfolio-stocks'
