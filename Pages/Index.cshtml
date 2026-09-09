@@ -22,7 +22,7 @@
         }
     </div>
 
-    <div class="summary-strip">
+    <div class="summary-strip" id="summary-strip">
         <div class="summary-box">
             <span>Importe total invertido</span>
             <strong>@Model.TotalPurchaseValue.ToString("#,##0.00 €")</strong>
@@ -55,7 +55,7 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody-indices">
                     @foreach (var item in Model.Indices)
                     {
                         <tr>
@@ -130,7 +130,7 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody-stocks">
                     @if (Model.Stocks.Count == 0)
                     {
                         <tr>
@@ -219,7 +219,7 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody-etfs-control">
                     @if (Model.EtfsControl.Count == 0)
                     {
                         <tr>
@@ -295,7 +295,7 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody-etfs">
                     @if (Model.Etfs.Count == 0)
                     {
                         <tr>
@@ -420,7 +420,7 @@
                         <th>Fecha/Hora Actualización</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody-funds">
                     @if (Model.Funds.Count == 0)
                     {
                         <tr>
@@ -516,7 +516,7 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody-portfolio-stocks">
                     @if (Model.PortfolioStocks.Count == 0)
                     {
                         <tr>
@@ -625,13 +625,43 @@
 @section Scripts {
     <script>
         (function () {
-            var refreshIntervalMs = 60000;
-            setInterval(function () {
+            var refreshIntervalMs = 15000;
+            var idsAActualizar = [
+                'summary-strip',
+                'tbody-indices',
+                'tbody-stocks',
+                'tbody-etfs-control',
+                'tbody-etfs',
+                'tbody-funds',
+                'tbody-portfolio-stocks'
+            ];
+
+            function actualizarDatos() {
                 var hayDialogoAbierto = document.querySelector('dialog[open]') !== null;
-                if (!hayDialogoAbierto) {
-                    window.location.reload();
+                if (hayDialogoAbierto) {
+                    return;
                 }
-            }, refreshIntervalMs);
+
+                fetch(window.location.href, { cache: 'no-store' })
+                    .then(function (respuesta) { return respuesta.text(); })
+                    .then(function (html) {
+                        var parser = new DOMParser();
+                        var docNuevo = parser.parseFromString(html, 'text/html');
+
+                        idsAActualizar.forEach(function (id) {
+                            var actual = document.getElementById(id);
+                            var nuevo = docNuevo.getElementById(id);
+                            if (actual && nuevo) {
+                                actual.innerHTML = nuevo.innerHTML;
+                            }
+                        });
+                    })
+                    .catch(function () {
+                        // Si falla la petición (red, servidor dormido, etc.) simplemente se reintenta en el siguiente ciclo.
+                    });
+            }
+
+            setInterval(actualizarDatos, refreshIntervalMs);
         })();
     </script>
 }
