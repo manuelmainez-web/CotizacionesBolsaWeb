@@ -54,20 +54,6 @@ document.querySelectorAll('[data-dialog-target]').forEach(function (button) {
     }
 
     boton.addEventListener('click', function () {
-        if (boton.classList.contains('is-refreshing')) {
-            return;
-        }
-
-        boton.classList.add('is-refreshing');
-
-        var terminar = function () {
-            boton.classList.remove('is-refreshing');
-        };
-
-        if (typeof window.refreshPageData === 'function') {
-            Promise.resolve(window.refreshPageData()).finally(terminar);
-        } else {
-            window.location.reload();
-        }
+        window.location.reload();
     });
 })();
