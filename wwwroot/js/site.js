@@ -12,6 +12,19 @@ document.querySelectorAll('[data-dialog-target]').forEach(function (button) {
     });
 });
 
+// Botones de mostrar/ocultar las cajas de resumen por bróker
+document.querySelectorAll('[data-toggle-target]').forEach(function (button) {
+    button.addEventListener('click', function () {
+        var target = document.getElementById(button.getAttribute('data-toggle-target'));
+        if (!target) {
+            return;
+        }
+
+        var estaOculto = target.classList.toggle('is-collapsed');
+        button.textContent = estaOculto ? 'Mostrar' : 'Ocultar';
+    });
+});
+
 // Reloj con fecha y hora actual en la cabecera
 (function () {
     var el = document.getElementById('current-datetime');

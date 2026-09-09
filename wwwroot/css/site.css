@@ -296,6 +296,29 @@ body.wco-active .topbar-datetime {
   margin-bottom: 8px;
 }
 
+.summary-strip.is-collapsed {
+  display: none;
+}
+
+.btn-toggle-summary {
+  margin-left: auto;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);
+  color: #eff9ff;
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-toggle-summary:hover {
+  background: linear-gradient(180deg, #29415d 0%, #1b2d3e 100%);
+}
+
 .summary-box {
   background: linear-gradient(180deg, rgba(17, 24, 39, 0.96) 0%, rgba(15, 23, 42, 0.9) 100%);
   border: 1px solid rgba(148, 163, 184, 0.14);
