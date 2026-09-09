@@ -179,7 +179,7 @@ body.wco-active .topbar-datetime {
 }
 
 .portfolio-name-text {
-  font-size: calc(1em - 4pt);
+  font-size: calc(1em - 8pt);
 }
 
 .portfolio-avatar {
