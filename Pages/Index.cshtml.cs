@@ -12,6 +12,7 @@ public class IndexModel : PageModel
     private readonly string _customIndicesPath;
     private readonly string _customStocksPath;
     private readonly string _customEtfsPath;
+    private readonly string _customFundsPath;
     private readonly string _customStockHoldingsPath;
     private readonly string _customEtfControlPath;
 
@@ -22,6 +23,7 @@ public class IndexModel : PageModel
         _customIndicesPath = Path.Combine(dataFolder, "custom-indices.json");
         _customStocksPath = Path.Combine(dataFolder, "custom-stocks.json");
         _customEtfsPath = Path.Combine(dataFolder, "custom-etfs.json");
+        _customFundsPath = Path.Combine(dataFolder, "custom-funds.json");
         _customStockHoldingsPath = Path.Combine(dataFolder, "custom-stock-holdings.json");
         _customEtfControlPath = Path.Combine(dataFolder, "custom-etf-control.json");
         PublicUrl = configuration["Portfolio:PublicUrl"] ?? string.Empty;
@@ -38,9 +40,8 @@ public class IndexModel : PageModel
     [TempData]
     public string? StockError { get; set; }
 
-    public decimal GoldFundUnitPurchasePrice => 67.60m;
-    public decimal GoldFundPositionCount => 199.911759m;
-    public decimal GoldFundPurchaseValue => GoldFundPositionCount * GoldFundUnitPurchasePrice;
+    [TempData]
+    public string? FundError { get; set; }
 
     public List<Quote> Indices { get; private set; } = new();
     public List<Quote> Stocks { get; private set; } = new();
@@ -49,24 +50,23 @@ public class IndexModel : PageModel
     public List<Quote> PortfolioStocks { get; private set; } = new();
     public List<Quote> EtfsControl { get; private set; } = new();
     public List<EtfHolding> EtfHoldings { get; private set; } = new();
+    public List<FundHolding> FundHoldings { get; private set; } = new();
     public List<StockHolding> StockHoldings { get; private set; } = new();
-
-    public Quote? GoldFundEtf => Funds.FirstOrDefault(x => x.Symbol == "0P0000VHO3" || x.Symbol == "LU0171306680" || x.Symbol == "0P00017AXD.SW");
-
-    public decimal CurrentGoldFundMarketValue => (GoldFundEtf?.Price ?? 0m) * GoldFundPositionCount;
-    public decimal GoldFundGainValue => CurrentGoldFundMarketValue - GoldFundPurchaseValue;
-    public decimal GoldFundGainPercent => GoldFundPurchaseValue == 0 ? 0m : (GoldFundGainValue / GoldFundPurchaseValue) * 100m;
 
     public decimal EtfsPurchaseValue => EtfHoldings.Sum(h => h.PositionCount * h.UnitPurchasePrice);
     public decimal EtfsCurrentValue => EtfHoldings.Sum(h => (Etfs.FirstOrDefault(q => q.Symbol == h.Symbol)?.Price ?? 0m) * h.PositionCount);
     public decimal EtfsGainValue => EtfsCurrentValue - EtfsPurchaseValue;
 
+    public decimal FundsPurchaseValue => FundHoldings.Sum(h => h.PositionCount * h.UnitPurchasePrice);
+    public decimal FundsCurrentValue => FundHoldings.Sum(h => (Funds.FirstOrDefault(q => q.Symbol == h.Symbol)?.Price ?? 0m) * h.PositionCount);
+    public decimal FundsGainValue => FundsCurrentValue - FundsPurchaseValue;
+
     public decimal StockHoldingsPurchaseValue => StockHoldings.Sum(h => h.PositionCount * h.UnitPurchasePrice);
     public decimal StockHoldingsCurrentValue => StockHoldings.Sum(h => (PortfolioStocks.FirstOrDefault(q => q.Symbol == h.Symbol)?.Price ?? 0m) * h.PositionCount);
     public decimal StockHoldingsGainValue => StockHoldingsCurrentValue - StockHoldingsPurchaseValue;
 
-    public decimal TotalPurchaseValue => EtfsPurchaseValue + GoldFundPurchaseValue + StockHoldingsPurchaseValue;
-    public decimal TotalGainValue => EtfsGainValue + GoldFundGainValue + StockHoldingsGainValue;
+    public decimal TotalPurchaseValue => EtfsPurchaseValue + FundsPurchaseValue + StockHoldingsPurchaseValue;
+    public decimal TotalGainValue => EtfsGainValue + FundsGainValue + StockHoldingsGainValue;
     public decimal TotalGainPercent => TotalPurchaseValue == 0 ? 0m : (TotalGainValue / TotalPurchaseValue) * 100m;
 
     public async Task OnGetAsync()
@@ -107,10 +107,18 @@ public class IndexModel : PageModel
             .Select(h => new QuoteConfig(h.Name, h.Symbol, h.Isin, h.CountryCode))
             .ToList();
 
-        var fundConfigs = new List<QuoteConfig>
+        if (!System.IO.File.Exists(_customFundsPath))
         {
-            new("BlackRock Global Funds - World Gold Fund E2 EUR ACC", "0P0000VHO3", "LU0171306680", "LU")
-        };
+            SaveEntries(_customFundsPath, new List<FundHolding>
+            {
+                new("BlackRock Global Funds - World Gold Fund E2 EUR ACC", "0P0000VHO3", "LU0171306680", "LU", 199.911759m, 67.60m, "TR")
+            });
+        }
+
+        FundHoldings = LoadEntries<FundHolding>(_customFundsPath);
+        var fundConfigs = FundHoldings
+            .Select(h => new QuoteConfig(h.Name, h.Symbol, h.Isin, h.CountryCode))
+            .ToList();
 
         StockHoldings = LoadEntries<StockHolding>(_customStockHoldingsPath);
         var stockHoldingConfigs = StockHoldings
@@ -122,7 +130,7 @@ public class IndexModel : PageModel
         Indices = await _service.GetQuotesAsync(indexConfigs);
         Stocks = stockConfigs.Count > 0 ? await _service.GetQuotesAsync(stockConfigs) : new List<Quote>();
         Etfs = await _service.GetQuotesAsync(etfConfigs);
-        Funds = await _service.GetQuotesAsync(fundConfigs);
+        Funds = fundConfigs.Count > 0 ? await _service.GetQuotesAsync(fundConfigs) : new List<Quote>();
         PortfolioStocks = stockHoldingConfigs.Count > 0 ? await _service.GetQuotesAsync(stockHoldingConfigs) : new List<Quote>();
         EtfsControl = etfControlConfigs.Count > 0 ? await _service.GetQuotesAsync(etfControlConfigs) : new List<Quote>();
 
@@ -222,6 +230,53 @@ public class IndexModel : PageModel
     public IActionResult OnPostDeleteEtfControl(string symbol)
     {
         RemoveCustomEntry(_customEtfControlPath, symbol);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAddFundAsync(string isin, decimal positionCount, decimal unitPurchasePrice)
+    {
+        if (string.IsNullOrWhiteSpace(isin) || positionCount <= 0 || unitPurchasePrice <= 0)
+        {
+            FundError = "Revisa los datos: el ISIN, el número de títulos y el precio de compra son obligatorios.";
+            return RedirectToPage();
+        }
+
+        var match = await _service.SearchSymbolAsync(isin);
+        if (match.HasValue)
+        {
+            var holdings = LoadEntries<FundHolding>(_customFundsPath);
+            holdings.Add(new FundHolding(
+                match.Value.Name,
+                match.Value.Symbol,
+                isin.Trim().ToUpperInvariant(),
+                match.Value.CountryCode,
+                positionCount,
+                unitPurchasePrice,
+                string.Empty));
+
+            SaveEntries(_customFundsPath, holdings);
+        }
+        else
+        {
+            FundError = $"No se ha encontrado ningún fondo con el ISIN \"{isin}\". Comprueba que sea correcto.";
+        }
+
+        return RedirectToPage();
+    }
+
+    public IActionResult OnPostDeleteFund(string symbol)
+    {
+        if (!string.IsNullOrWhiteSpace(symbol))
+        {
+            var holdings = LoadEntries<FundHolding>(_customFundsPath);
+            var toRemove = holdings.FirstOrDefault(h => string.Equals(h.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
+            if (toRemove != null)
+            {
+                holdings.Remove(toRemove);
+                SaveEntries(_customFundsPath, holdings);
+            }
+        }
+
         return RedirectToPage();
     }
 

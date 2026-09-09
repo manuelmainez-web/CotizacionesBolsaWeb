@@ -405,9 +405,14 @@
     </dialog>
 
     <div class="market-panel mt-4">
-        <div class="panel-head">
+        <div class="panel-head panel-head-row">
             <span>Fondos <span class="panel-head-subtitle">(Cartera)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-fund-dialog">+ Añadir Fondo</button>
         </div>
+        @if (!string.IsNullOrWhiteSpace(Model.FundError))
+        {
+            <div class="form-error-banner">@Model.FundError</div>
+        }
         <div class="table-wrap">
             <table class="market-table">
                 <thead>
@@ -422,46 +427,30 @@
                         <th class="text-align-right">Valoración actual</th>
                         <th class="text-align-right">% Rentabilidad / Importe</th>
                         <th>Fecha/Hora Actualización</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody id="tbody-funds">
                     @if (Model.Funds.Count == 0)
                     {
                         <tr>
-                            <td colspan="10" class="empty-state-cell">No hay fondos añadidos.</td>
+                            <td colspan="11" class="empty-state-cell">No hay fondos añadidos. Usa "+ Añadir Fondo" para empezar.</td>
                         </tr>
                     }
                     else
                     {
                         @foreach (var item in Model.Funds)
                         {
+                            var holding = Model.FundHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
                             var currentPrice = item.Price ?? 0m;
-
-                            var tradeRepublicIsins = new[] { "IE00B4ND5C91", "LU0171306680", "LU0322252886" };
-                            var isTradeRepublic = tradeRepublicIsins.Contains(item.Isin, StringComparer.OrdinalIgnoreCase);
-
-                            var currentValue = item.Symbol switch
-                            {
-                                "0P0000VHO3" or "LU0171306680" or "0P00017AXD.SW" => currentPrice * Model.GoldFundPositionCount,
-                                _ => 0m
-                            };
-
-                            var purchaseValue = item.Symbol switch
-                            {
-                                "0P0000VHO3" or "LU0171306680" or "0P00017AXD.SW" => Model.GoldFundPurchaseValue,
-                                _ => 0m
-                            };
-
-                            var positionCount = item.Symbol switch
-                            {
-                                "0P0000VHO3" or "LU0171306680" or "0P00017AXD.SW" => Model.GoldFundPositionCount,
-                                _ => 0m
-                            };
-
-                            var purchaseDisplayValue = positionCount == 0 ? 0m : purchaseValue / positionCount;
-
+                            var positionCount = holding?.PositionCount ?? 0m;
+                            var purchaseDisplayValue = holding?.UnitPurchasePrice ?? 0m;
+                            var purchaseValue = positionCount * purchaseDisplayValue;
+                            var currentValue = currentPrice * positionCount;
                             var gainValue = currentValue - purchaseValue;
                             var gainPercent = purchaseValue == 0 ? 0m : (gainValue / purchaseValue) * 100m;
+                            var isTradeRepublic = holding?.Broker == "TR";
+                            var isIngDirect = holding?.Broker == "ING";
 
                             <tr>
                                 <td class="name-cell">
@@ -476,6 +465,10 @@
                                     {
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
+                                    else if (isIngDirect)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                                    }
                                 </td>
                                 <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
                                 <td class="@item.TrendCssClass">@item.DisplayPercent</td>
@@ -487,6 +480,12 @@
                                 <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedText</td>
+                                <td class="delete-cell">
+                                    <form method="post" asp-page-handler="DeleteFund" onsubmit="return confirm('¿Eliminar este fondo?');">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
                             </tr>
                         }
                     }
@@ -494,6 +493,29 @@
             </table>
         </div>
     </div>
+
+    <dialog id="add-fund-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddFund">
+            <h3>Añadir Fondo</h3>
+            <label>
+                Código ISIN
+                <input type="text" name="isin" required maxlength="20" placeholder="Ej. LU0171306680" />
+            </label>
+            <label>
+                Número de títulos
+                <input type="number" name="positionCount" required min="0.000001" step="0.000001" placeholder="Ej. 100" />
+            </label>
+            <label>
+                Precio de compra (unitario)
+                <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" placeholder="Ej. 67.60" />
+            </label>
+            <p class="dialog-hint">El nombre, el símbolo y el país se buscan automáticamente a partir del ISIN.</p>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
