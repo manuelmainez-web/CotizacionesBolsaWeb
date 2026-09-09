@@ -205,6 +205,19 @@ body.wco-active .topbar-datetime {
   margin-top: 12px;
 }
 
+.quick-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quick-link-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
 .portfolio-note {
   margin: 8px 0 0;
   color: #8a97a6;
