@@ -262,6 +262,8 @@
                     <tr>
                         <th>Nombre</th>
                         <th>ISIN</th>
+                        <th class="text-align-right">Apertura</th>
+                        <th class="text-align-right">CIERRE<br />(Anterior)</th>
                         <th class="text-align-right">Último</th>
                         <th class="text-align-right">Cambio %</th>
                         <th>Actualizado</th>
@@ -273,7 +275,7 @@
                     @if (Model.EtfsControl.Count == 0)
                     {
                         <tr>
-                            <td colspan="7" class="empty-state-cell">No hay ETF añadidos. Usa "+ Añadir ETF" para empezar.</td>
+                            <td colspan="9" class="empty-state-cell">No hay ETF añadidos. Usa "+ Añadir ETF" para empezar.</td>
                         </tr>
                     }
                     else
@@ -288,6 +290,8 @@
                                     </span>
                                 </td>
                                 <td class="isin-cell">@item.DisplayIsin</td>
+                                <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen</td>
+                                <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose</td>
                                 <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
                                 <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                                 <td class="time-cell">@item.UpdatedText</td>
