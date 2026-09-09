@@ -665,10 +665,10 @@
             function actualizarDatos() {
                 var hayDialogoAbierto = document.querySelector('dialog[open]') !== null;
                 if (hayDialogoAbierto) {
-                    return;
+                    return Promise.resolve();
                 }
 
-                fetch(window.location.href, { cache: 'no-store' })
+                return fetch(window.location.href, { cache: 'no-store' })
                     .then(function (respuesta) { return respuesta.text(); })
                     .then(function (html) {
                         var parser = new DOMParser();
@@ -688,6 +688,7 @@
             }
 
             setInterval(actualizarDatos, refreshIntervalMs);
+            window.refreshPageData = actualizarDatos;
         })();
     </script>
 }

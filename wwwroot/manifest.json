@@ -3,6 +3,7 @@
   "short_name": "Mi Cartera",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#0b1320",
   "theme_color": "#0b1320",
   "icons": [

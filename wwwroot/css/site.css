@@ -15,6 +15,84 @@ body {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
 }
 
+.topbar-datetime {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  color: #8ec5ff;
+  white-space: nowrap;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Cuando la PWA está instalada en modo Window Controls Overlay, el reloj y el
+   botón de actualizar se sacan del flujo normal y se colocan pegados a los
+   controles de ventana (minimizar/maximizar/cerrar) dibujados por el sistema. */
+body.wco-active .topbar-right {
+  position: fixed;
+  top: 0;
+  right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw) + 10px);
+  height: env(titlebar-area-height, 40px);
+  gap: 10px;
+  z-index: 1000;
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+body.wco-active .topbar-right > * {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+body.wco-active .btn-refresh-page {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+body.wco-active .topbar-datetime {
+  font-size: 0.8rem;
+}
+
+.btn-refresh-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);
+  color: #eff9ff;
+  border-radius: 10px;
+  padding: 0.5rem 0.9rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-refresh-page:hover {
+  background: linear-gradient(180deg, #29415d 0%, #1b2d3e 100%);
+}
+
+.btn-refresh-page-icon {
+  display: inline-block;
+  transition: transform 0.4s ease;
+}
+
+.btn-refresh-page.is-refreshing .btn-refresh-page-icon {
+  animation: btn-refresh-spin 0.8s linear infinite;
+}
+
+@keyframes btn-refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .eyebrow {
   display: block;
   margin-bottom: 0.35rem;
