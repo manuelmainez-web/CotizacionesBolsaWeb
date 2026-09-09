@@ -37,6 +37,42 @@
         </div>
     </div>
 
+    <div class="summary-strip-label">
+        <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" /> ING Direct
+    </div>
+    <div class="summary-strip" id="summary-strip-ing">
+        <div class="summary-box">
+            <span>Importe total invertido</span>
+            <strong>@Model.IngPurchaseValue.ToString("#,##0.00 €")</strong>
+        </div>
+        <div class="summary-box gain">
+            <span>Rentabilidad total</span>
+            <strong>@Model.IngGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.IngGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</strong>
+        </div>
+        <div class="summary-box">
+            <span>Importe total</span>
+            <strong>@((Model.IngPurchaseValue + Model.IngGainValue).ToString("#,##0.00 €"))</strong>
+        </div>
+    </div>
+
+    <div class="summary-strip-label">
+        <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" /> Trade Republic
+    </div>
+    <div class="summary-strip" id="summary-strip-tr">
+        <div class="summary-box">
+            <span>Importe total invertido</span>
+            <strong>@Model.TrPurchaseValue.ToString("#,##0.00 €")</strong>
+        </div>
+        <div class="summary-box gain">
+            <span>Rentabilidad total</span>
+            <strong>@Model.TrGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.TrGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</strong>
+        </div>
+        <div class="summary-box">
+            <span>Importe total</span>
+            <strong>@((Model.TrPurchaseValue + Model.TrGainValue).ToString("#,##0.00 €"))</strong>
+        </div>
+    </div>
+
     <div class="market-panel">
         <div class="panel-head panel-head-row">
             <span>Índices <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
@@ -654,6 +690,8 @@
             var refreshIntervalMs = 15000;
             var idsAActualizar = [
                 'summary-strip',
+                'summary-strip-ing',
+                'summary-strip-tr',
                 'tbody-indices',
                 'tbody-stocks',
                 'tbody-etfs-control',

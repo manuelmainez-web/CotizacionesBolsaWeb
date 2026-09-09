@@ -64,6 +64,26 @@ public class IndexModel : PageModel
     public decimal TotalGainValue => EtfsGainValue + FundsGainValue + StockHoldingsGainValue;
     public decimal TotalGainPercent => TotalPurchaseValue == 0 ? 0m : (TotalGainValue / TotalPurchaseValue) * 100m;
 
+    private decimal PurchaseValueByBroker(string broker) =>
+        EtfHoldings.Where(h => h.Broker == broker).Sum(h => h.PositionCount * h.UnitPurchasePrice) +
+        FundHoldings.Where(h => h.Broker == broker).Sum(h => h.PositionCount * h.UnitPurchasePrice) +
+        StockHoldings.Where(h => h.Broker == broker).Sum(h => h.PositionCount * h.UnitPurchasePrice);
+
+    private decimal CurrentValueByBroker(string broker) =>
+        EtfHoldings.Where(h => h.Broker == broker).Sum(h => (Etfs.FirstOrDefault(q => q.Symbol == h.Symbol)?.Price ?? 0m) * h.PositionCount) +
+        FundHoldings.Where(h => h.Broker == broker).Sum(h => (Funds.FirstOrDefault(q => q.Symbol == h.Symbol)?.Price ?? 0m) * h.PositionCount) +
+        StockHoldings.Where(h => h.Broker == broker).Sum(h => (PortfolioStocks.FirstOrDefault(q => q.Symbol == h.Symbol)?.Price ?? 0m) * h.PositionCount);
+
+    public decimal IngPurchaseValue => PurchaseValueByBroker("ING");
+    public decimal IngCurrentValue => CurrentValueByBroker("ING");
+    public decimal IngGainValue => IngCurrentValue - IngPurchaseValue;
+    public decimal IngGainPercent => IngPurchaseValue == 0 ? 0m : (IngGainValue / IngPurchaseValue) * 100m;
+
+    public decimal TrPurchaseValue => PurchaseValueByBroker("TR");
+    public decimal TrCurrentValue => CurrentValueByBroker("TR");
+    public decimal TrGainValue => TrCurrentValue - TrPurchaseValue;
+    public decimal TrGainPercent => TrPurchaseValue == 0 ? 0m : (TrGainValue / TrPurchaseValue) * 100m;
+
     public async Task OnGetAsync()
     {
         if (!await _dataStore.ExistsAsync(IndicesKey))
