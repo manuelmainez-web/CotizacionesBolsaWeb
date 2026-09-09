@@ -22,6 +22,11 @@ document.querySelectorAll('[data-toggle-target]').forEach(function (button) {
 
         var estaOculto = target.classList.toggle('is-collapsed');
         button.textContent = estaOculto ? 'Mostrar' : 'Ocultar';
+
+        var etiqueta = button.closest('.summary-strip-label');
+        if (etiqueta) {
+            etiqueta.classList.toggle('is-expanded', !estaOculto);
+        }
     });
 });
 

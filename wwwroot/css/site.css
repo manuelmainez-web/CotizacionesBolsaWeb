@@ -335,6 +335,11 @@ body.wco-active .topbar-datetime {
   margin-bottom: 8px;
 }
 
+.summary-strip-label.is-expanded {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .blank-lines-2 {
   height: 3rem;
 }
