@@ -329,7 +329,7 @@
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
-            <span>Metales preciosos <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+            <span>Materias primas <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
         </div>
         <div class="table-wrap">
             <table class="market-table market-table-compact">
@@ -344,8 +344,8 @@
                         <th>Fecha/Hora</th>
                     </tr>
                 </thead>
-                <tbody id="tbody-metals">
-                    @foreach (var item in Model.Metals)
+                <tbody id="tbody-commodities">
+                    @foreach (var item in Model.Commodities)
                     {
                         <tr>
                             <td class="name-cell">
@@ -749,7 +749,7 @@
                 'tbody-indices',
                 'tbody-stocks',
                 'tbody-etfs-control',
-                'tbody-metals',
+                'tbody-commodities',
                 'tbody-etfs',
                 'tbody-funds',
                 'tbody-portfolio-stocks'
