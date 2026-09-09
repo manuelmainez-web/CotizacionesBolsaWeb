@@ -376,6 +376,7 @@ body.wco-active .topbar-datetime {
   align-items: center;
   gap: 6px;
   min-width: 170px;
+  margin-left: 2ch;
 }
 
 .btn-toggle-summary:hover {
