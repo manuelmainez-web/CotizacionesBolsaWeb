@@ -621,3 +621,17 @@
         </form>
     </dialog>
 </div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var refreshIntervalMs = 60000;
+            setInterval(function () {
+                var hayDialogoAbierto = document.querySelector('dialog[open]') !== null;
+                if (!hayDialogoAbierto) {
+                    window.location.reload();
+                }
+            }, refreshIntervalMs);
+        })();
+    </script>
+}
