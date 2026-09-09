@@ -98,7 +98,7 @@ public class IndexModel : PageModel
                 new("Amundi EURO STOXX 50 Daily (2x) Leveraged UCITS Ac", "LVE.PA", "FR0014005S97", "FR", 394m, 16745.71m / 394m, "ING"),
                 new("Xtrackers IE Physical Gold ETC (XGDU)", "XGDU.MI", "IE00B4ND5C91", "IT", 166.200468m, 53.60m, "TR"),
                 new("Amundi NASDAQ-100 II UCITS ETF", "UST.PA", "LU1829221024", "FR", 322m, 5101.62m / 322m, "ING"),
-                new("db x-trackers S&P 500 2x Leveraged Daily UCITS 1C (DBPG)", "DBPG.DU", "LU0322252886", "DE", 16.319971m, 245.21m, "TR")
+                new("db x-trackers S&P 500 2x Leveraged Daily UCITS 1C", "DBPG.DU", "LU0322252886", "DE", 16.319971m, 245.21m, "TR")
             });
         }
 

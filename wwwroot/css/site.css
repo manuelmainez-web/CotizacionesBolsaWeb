@@ -470,6 +470,10 @@ body {
   font-weight: 400;
 }
 
+.name-cell-regular {
+  font-weight: 400;
+}
+
 .name-with-flag {
   display: inline-flex;
   align-items: center;
