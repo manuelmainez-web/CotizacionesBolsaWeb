@@ -219,7 +219,7 @@ public class IndexModel : PageModel
         }
     }
 
-    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, decimal rentabilidad12Meses, string broker, decimal rentabilidadUltimoMes, decimal rentabilidadDesdeInicio, decimal capitalInvertido)
+    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, decimal rentabilidad12Meses, string broker, decimal rentabilidadUltimoMes, decimal capitalInvertido)
     {
         if (string.IsNullOrWhiteSpace(name) || participaciones <= 0 || valorLiquidativo <= 0)
         {
@@ -235,7 +235,6 @@ public class IndexModel : PageModel
             rentabilidad12Meses,
             string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING",
             rentabilidadUltimoMes,
-            rentabilidadDesdeInicio,
             capitalInvertido));
         await _dataStore.SaveEntriesAsync(PensionPlansKey, holdings);
 
