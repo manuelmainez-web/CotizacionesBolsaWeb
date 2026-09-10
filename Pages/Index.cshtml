@@ -656,7 +656,7 @@
                         <th class="text-align-right">Capital invertido</th>
                         <th class="text-align-right">Rentabilidad último mes</th>
                         <th class="text-align-right">Rentabilidad 12 meses</th>
-                        <th class="text-align-right">Rentabilidad desde inicio (31/10/2013)</th>
+                        <th class="text-align-right">Rentabilidad desde inicio</th>
                         <th class="text-align-right">Saldo total</th>
                         <th></th>
                     </tr>
@@ -673,6 +673,7 @@
                         @foreach (var item in Model.PensionPlans)
                         {
                             var saldoTotal = item.Participaciones * item.ValorLiquidativo;
+                            var gananciaDesdeInicio = saldoTotal - item.CapitalInvertido;
                             var rentabilidadDesdeInicio = item.CapitalInvertido > 0 ? (saldoTotal - item.CapitalInvertido) / item.CapitalInvertido * 100m : 0m;
                             var isIngDirect = item.Broker == "ING";
                             var isTradeRepublic = item.Broker == "TR";
@@ -695,7 +696,7 @@
                                 <td class="price-cell price-cell-quote">@item.CapitalInvertido.ToString("#,##0.00 €")</td>
                                 <td class="@((item.RentabilidadUltimoMes >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadUltimoMes.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadUltimoMes >= 0 ? "▲" : "▼")</td>
                                 <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
-                                <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")</td>
+                                <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")<br />@gananciaDesdeInicio.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
                                 <td class="delete-cell">
                                     <form method="post" asp-page-handler="DeletePensionPlan" onsubmit="return confirm('¿Eliminar este plan de pensiones?');">
