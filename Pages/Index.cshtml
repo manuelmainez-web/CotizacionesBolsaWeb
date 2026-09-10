@@ -751,7 +751,12 @@
                             var isOccident = item.Broker == "OCCIDENT";
 
                             <tr>
-                                <td class="name-cell">@item.Name</td>
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                        @item.Name
+                                    </span>
+                                </td>
                                 <td class="isin-cell" style="white-space: nowrap;">@item.CodigoDgsfp</td>
                                 <td class="broker-cell text-align-center">
                                     @if (isIngDirect)
