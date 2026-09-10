@@ -407,9 +407,9 @@
                         <th style="min-width: 260px;">Nombre</th>
                         <th>ISIN</th>
                         <th>Bróker</th>
+                        <th class="text-align-right">Títulos / Precio</th>
                         <th class="text-align-right notranslate" translate="no">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right">Cambio %</th>
-                        <th class="text-align-right">Títulos / Precio</th>
                         <th class="text-align-right">Valoración compra</th>
                         <th class="text-align-right">Valoración actual</th>
                         <th class="text-align-right">% Rentabilidad / Importe</th>
@@ -457,12 +457,12 @@
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
                                 </td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                                 <td class="purchase-cell">
                                     @positionCount.ToString("#,##0.######")<br />
                                     @purchaseDisplayValue.ToString("#,##0.00 €")
                                 </td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                                 <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
@@ -574,9 +574,9 @@
                         <th style="min-width: 260px;">Nombre</th>
                         <th>ISIN</th>
                         <th>Bróker</th>
+                        <th class="text-align-right">Títulos / Precio</th>
                         <th class="text-align-right notranslate" translate="no">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right">Cambio %</th>
-                        <th class="text-align-right">Títulos / Precio</th>
                         <th class="text-align-right">Valoración compra</th>
                         <th class="text-align-right">Valoración actual</th>
                         <th class="text-align-right">% Rentabilidad / Importe</th>
@@ -624,12 +624,12 @@
                                         <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
                                     }
                                 </td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                                 <td class="purchase-cell">
                                     @positionCount.ToString("#,##0.######")<br />
                                     @purchaseDisplayValue.ToString("#,##0.00 €")
                                 </td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                                 <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
