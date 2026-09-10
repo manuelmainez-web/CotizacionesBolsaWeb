@@ -86,7 +86,7 @@
                 <tbody id="tbody-indices">
                     @foreach (var item in Model.Indices)
                     {
-                        <tr class="@(item.Symbol == "^STOXX50E" ? "row-divider-bottom" : "")">
+                        <tr class="@(item.Symbol == "^STOXX50E" || item.Symbol == "^GSPC" ? "row-divider-bottom" : "")">
                             <td class="name-cell">
                                 <span class="name-with-flag">
                                     <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
