@@ -637,6 +637,82 @@
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
+            <span>Planes de pensiones <span class="panel-head-subtitle">(Cartera)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-pensionplan-dialog">+ Añadir Plan</button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.PensionPlanError))
+        {
+            <div class="form-error-banner">@Model.PensionPlanError</div>
+        }
+        <div class="table-wrap">
+            <table class="market-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Fecha actual</th>
+                        <th class="text-align-right">Participaciones</th>
+                        <th class="text-align-right">Valor liquidativo</th>
+                        <th class="text-align-right">Saldo total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-pensionplans">
+                    @if (Model.PensionPlans.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.PensionPlans)
+                        {
+                            var saldoTotal = item.Participaciones * item.ValorLiquidativo;
+
+                            <tr>
+                                <td class="name-cell">@item.Name</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")</td>
+                                <td class="price-cell price-cell-quote">@item.Participaciones.ToString("#,##0.######")</td>
+                                <td class="price-cell price-cell-quote">@item.ValorLiquidativo.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
+                                <td class="delete-cell">
+                                    <form method="post" asp-page-handler="DeletePensionPlan" onsubmit="return confirm('¿Eliminar este plan de pensiones?');">
+                                        <input type="hidden" name="name" value="@item.Name" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <dialog id="add-pensionplan-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddPensionPlan">
+            <h3>Añadir Plan de pensiones</h3>
+            <label>
+                Nombre
+                <input type="text" name="name" required maxlength="100" placeholder="Ej. Plan de pensiones ING" />
+            </label>
+            <label>
+                Participaciones
+                <input type="number" name="participaciones" required min="0.000001" step="0.000001" placeholder="Ej. 100" />
+            </label>
+            <label>
+                Valor liquidativo
+                <input type="number" name="valorLiquidativo" required min="0.01" step="0.01" placeholder="Ej. 12.50" />
+            </label>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
             <span>Acciones <span class="panel-head-subtitle">(Cartera)</span></span>
             <button type="button" class="mini-button" data-dialog-target="add-stock-holding-dialog">+ Añadir acción</button>
         </div>
@@ -780,6 +856,7 @@
                 'tbody-commodities',
                 'tbody-etfs',
                 'tbody-funds',
+                'tbody-pensionplans',
                 'tbody-portfolio-stocks'
             ];
 

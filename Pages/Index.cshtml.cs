@@ -14,6 +14,7 @@ public class IndexModel : PageModel
     private const string FundsKey = "custom-funds";
     private const string StockHoldingsKey = "custom-stock-holdings";
     private const string EtfControlKey = "custom-etf-control";
+    private const string PensionPlansKey = "custom-pensionplans";
 
     private readonly YahooFinanceService _service = new();
     private readonly DataStore _dataStore;
@@ -38,6 +39,9 @@ public class IndexModel : PageModel
     [TempData]
     public string? FundError { get; set; }
 
+    [TempData]
+    public string? PensionPlanError { get; set; }
+
     public List<Quote> Indices { get; private set; } = new();
     public List<Quote> Stocks { get; private set; } = new();
     public List<Quote> Etfs { get; private set; } = new();
@@ -48,6 +52,7 @@ public class IndexModel : PageModel
     public List<EtfHolding> EtfHoldings { get; private set; } = new();
     public List<FundHolding> FundHoldings { get; private set; } = new();
     public List<StockHolding> StockHoldings { get; private set; } = new();
+    public List<PensionPlanHolding> PensionPlans { get; private set; } = new();
 
     public decimal EtfsPurchaseValue => EtfHoldings.Sum(h => h.PositionCount * h.UnitPurchasePrice);
     public decimal EtfsCurrentValue => EtfHoldings.Sum(h => (Etfs.FirstOrDefault(q => q.Symbol == h.Symbol)?.Price ?? 0m) * h.PositionCount);
@@ -194,6 +199,39 @@ public class IndexModel : PageModel
             var config = etfControlConfigs.FirstOrDefault(x => x.Symbol == quote.Symbol);
             quote.Isin = config?.Isin ?? quote.Isin;
         }
+
+        PensionPlans = await _dataStore.LoadEntriesAsync<PensionPlanHolding>(PensionPlansKey);
+    }
+
+    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo)
+    {
+        if (string.IsNullOrWhiteSpace(name) || participaciones <= 0 || valorLiquidativo <= 0)
+        {
+            PensionPlanError = "Revisa los datos: el nombre, las participaciones y el valor liquidativo son obligatorios.";
+            return RedirectToPage();
+        }
+
+        var holdings = await _dataStore.LoadEntriesAsync<PensionPlanHolding>(PensionPlansKey);
+        holdings.Add(new PensionPlanHolding(name.Trim(), participaciones, valorLiquidativo));
+        await _dataStore.SaveEntriesAsync(PensionPlansKey, holdings);
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostDeletePensionPlanAsync(string name)
+    {
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            var holdings = await _dataStore.LoadEntriesAsync<PensionPlanHolding>(PensionPlansKey);
+            var toRemove = holdings.FirstOrDefault(h => string.Equals(h.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (toRemove != null)
+            {
+                holdings.Remove(toRemove);
+                await _dataStore.SaveEntriesAsync(PensionPlansKey, holdings);
+            }
+        }
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostAddIndexAsync(string name, string symbol, string? countryCode)
