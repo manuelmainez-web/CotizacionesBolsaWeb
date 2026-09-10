@@ -722,6 +722,7 @@
                     <tr>
                         <th>Nombre</th>
                         <th>BROKER</th>
+                        <th>Código DGSFP</th>
                         <th>Fecha actual</th>
                         <th class="text-align-right">Participaciones</th>
                         <th class="text-align-right">Valor liquidativo</th>
@@ -737,7 +738,7 @@
                     @if (Model.PensionPlans.Count == 0)
                     {
                         <tr>
-                            <td colspan="11" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
+                            <td colspan="12" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
                         </tr>
                     }
                     else
@@ -767,6 +768,7 @@
                                         <img class="broker-logo" src="/images/brokers/occident.png" alt="Occident" title="Occident" />
                                     }
                                 </td>
+                                <td class="isin-cell">@item.CodigoDgsfp</td>
                                 <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")</td>
                                 <td class="price-cell price-cell-quote">@item.Participaciones.ToString("#,##0.######")</td>
                                 <td class="price-cell price-cell-quote">@item.ValorLiquidativo.ToString("#,##0.00 €")</td>
@@ -814,6 +816,10 @@
                     <input type="number" name="participaciones" required min="0.000001" step="0.000001" value="@item.Participaciones" />
                 </label>
                 <label>
+                    Código DGSFP
+                    <input type="text" name="codigoDgsfp" maxlength="50" value="@item.CodigoDgsfp" />
+                </label>
+                <label>
                     Valor liquidativo
                     <input type="number" name="valorLiquidativo" required min="0.01" step="0.01" value="@item.ValorLiquidativo" />
                 </label>
@@ -855,6 +861,10 @@
             <label>
                 Participaciones
                 <input type="number" name="participaciones" required min="0.000001" step="0.000001" placeholder="Ej. 100" />
+            </label>
+            <label>
+                Código DGSFP
+                <input type="text" name="codigoDgsfp" maxlength="50" placeholder="Ej. N3901 / F1399" />
             </label>
             <label>
                 Valor liquidativo
