@@ -220,7 +220,15 @@ public class IndexModel : PageModel
 
         if (!PensionPlans.Any(p => p.Name == "Gco. Plan De Pensiones De Empleo"))
         {
-            PensionPlans.Add(new PensionPlanHolding("Gco. Plan De Pensiones De Empleo", 1576.35894m, 1.00m, 0m, "OCCIDENT", 0m, 0m));
+            PensionPlans.Add(new PensionPlanHolding("Gco. Plan De Pensiones De Empleo", 1576.35894m, 1.00m, 0m, "OCCIDENT", 0m, 0m, "N2408 / N2408"));
+            await _dataStore.SaveEntriesAsync(PensionPlansKey, PensionPlans);
+        }
+
+        var gcoPlan = PensionPlans.FirstOrDefault(p => p.Name == "Gco. Plan De Pensiones De Empleo");
+        if (gcoPlan != null && string.IsNullOrEmpty(gcoPlan.CodigoDgsfp))
+        {
+            var index = PensionPlans.IndexOf(gcoPlan);
+            PensionPlans[index] = gcoPlan with { CodigoDgsfp = "N2408 / N2408" };
             await _dataStore.SaveEntriesAsync(PensionPlansKey, PensionPlans);
         }
     }
