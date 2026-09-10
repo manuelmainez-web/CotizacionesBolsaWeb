@@ -204,14 +204,22 @@ public class IndexModel : PageModel
         {
             await _dataStore.SaveEntriesAsync(PensionPlansKey, new List<PensionPlanHolding>
             {
-                new("PLAN 2030", 1972.843234m, 19.689456m, 7.18m, "ING")
+                new("PLAN 2030", 1972.843234m, 19.689456m, 7.18m, "ING", -0.72m, 0m)
             });
         }
 
         PensionPlans = await _dataStore.LoadEntriesAsync<PensionPlanHolding>(PensionPlansKey);
+
+        var plan2030 = PensionPlans.FirstOrDefault(p => p.Name == "PLAN 2030");
+        if (plan2030 != null && plan2030.RentabilidadUltimoMes == 0m)
+        {
+            var index = PensionPlans.IndexOf(plan2030);
+            PensionPlans[index] = plan2030 with { RentabilidadUltimoMes = -0.72m };
+            await _dataStore.SaveEntriesAsync(PensionPlansKey, PensionPlans);
+        }
     }
 
-    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, decimal rentabilidad12Meses, string broker)
+    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, decimal rentabilidad12Meses, string broker, decimal rentabilidadUltimoMes, decimal rentabilidadDesdeInicio)
     {
         if (string.IsNullOrWhiteSpace(name) || participaciones <= 0 || valorLiquidativo <= 0)
         {
@@ -225,7 +233,9 @@ public class IndexModel : PageModel
             participaciones,
             valorLiquidativo,
             rentabilidad12Meses,
-            string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING"));
+            string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING",
+            rentabilidadUltimoMes,
+            rentabilidadDesdeInicio));
         await _dataStore.SaveEntriesAsync(PensionPlansKey, holdings);
 
         return RedirectToPage();

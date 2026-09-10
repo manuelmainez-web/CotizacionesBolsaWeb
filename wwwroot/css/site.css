@@ -708,6 +708,11 @@ body.wco-active .topbar-datetime {
   text-align: right;
 }
 
+.text-align-center,
+.market-table th.text-align-center {
+  text-align: center;
+}
+
 .isin-cell {
   color: #c9d5df;
   font-size: 0.8rem;
