@@ -468,6 +468,7 @@
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedText</td>
                                 <td class="delete-cell">
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-etf-@item.Symbol" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteEtf" onsubmit="return confirm('¿Eliminar este ETF?');">
                                         <input type="hidden" name="symbol" value="@item.Symbol" />
                                         <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
@@ -480,6 +481,41 @@
             </table>
         </div>
     </div>
+
+    @foreach (var item in Model.Etfs)
+    {
+        var etfHolding = Model.EtfHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
+        var etfPositionCount = etfHolding?.PositionCount ?? 0m;
+        var etfPurchaseDisplayValue = etfHolding?.UnitPurchasePrice ?? 0m;
+        var etfIsIngDirect = etfHolding?.Broker == "ING";
+        var etfIsTradeRepublic = etfHolding?.Broker == "TR";
+
+        <dialog id="edit-etf-@item.Symbol" class="add-entry-dialog">
+            <form method="post" asp-page-handler="EditEtf">
+                <h3>Editar @item.Name</h3>
+                <input type="hidden" name="symbol" value="@item.Symbol" />
+                <label>
+                    Bróker
+                    <select name="broker" required>
+                        <option value="ING" selected="@(etfIsIngDirect)">ING Direct</option>
+                        <option value="TR" selected="@(etfIsTradeRepublic)">Trade Republic</option>
+                    </select>
+                </label>
+                <label>
+                    Número de títulos
+                    <input type="number" name="positionCount" required min="0.000001" step="0.000001" value="@etfPositionCount" />
+                </label>
+                <label>
+                    Precio de compra (unitario)
+                    <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" value="@etfPurchaseDisplayValue" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </form>
+        </dialog>
+    }
 
     <dialog id="add-etf-dialog" class="add-entry-dialog">
         <form method="post" asp-page-handler="AddEtf">
@@ -599,6 +635,7 @@
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedText</td>
                                 <td class="delete-cell">
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-fund-@item.Symbol" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteFund" onsubmit="return confirm('¿Eliminar este fondo?');">
                                         <input type="hidden" name="symbol" value="@item.Symbol" />
                                         <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
@@ -611,6 +648,41 @@
             </table>
         </div>
     </div>
+
+    @foreach (var item in Model.Funds)
+    {
+        var fundHolding = Model.FundHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
+        var fundPositionCount = fundHolding?.PositionCount ?? 0m;
+        var fundPurchaseDisplayValue = fundHolding?.UnitPurchasePrice ?? 0m;
+        var fundIsTradeRepublic = fundHolding?.Broker == "TR";
+        var fundIsIngDirect = fundHolding?.Broker == "ING";
+
+        <dialog id="edit-fund-@item.Symbol" class="add-entry-dialog">
+            <form method="post" asp-page-handler="EditFund">
+                <h3>Editar @item.Name</h3>
+                <input type="hidden" name="symbol" value="@item.Symbol" />
+                <label>
+                    Bróker
+                    <select name="broker" required>
+                        <option value="ING" selected="@(fundIsIngDirect)">ING Direct</option>
+                        <option value="TR" selected="@(fundIsTradeRepublic)">Trade Republic</option>
+                    </select>
+                </label>
+                <label>
+                    Número de títulos
+                    <input type="number" name="positionCount" required min="0.000001" step="0.000001" value="@fundPositionCount" />
+                </label>
+                <label>
+                    Precio de compra (unitario)
+                    <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" value="@fundPurchaseDisplayValue" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </form>
+        </dialog>
+    }
 
     <dialog id="add-fund-dialog" class="add-entry-dialog">
         <form method="post" asp-page-handler="AddFund">
@@ -677,6 +749,7 @@
                             var rentabilidadDesdeInicio = item.CapitalInvertido > 0 ? (saldoTotal - item.CapitalInvertido) / item.CapitalInvertido * 100m : 0m;
                             var isIngDirect = item.Broker == "ING";
                             var isTradeRepublic = item.Broker == "TR";
+                            var isOccident = item.Broker == "OCCIDENT";
 
                             <tr>
                                 <td class="name-cell">@item.Name</td>
@@ -689,6 +762,10 @@
                                     {
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
+                                    else if (isOccident)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/occident.png" alt="Occident" title="Occident" />
+                                    }
                                 </td>
                                 <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")</td>
                                 <td class="price-cell price-cell-quote">@item.Participaciones.ToString("#,##0.######")</td>
@@ -699,6 +776,7 @@
                                 <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")<br />@gananciaDesdeInicio.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
                                 <td class="delete-cell">
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-pensionplan-@Model.PensionPlans.IndexOf(item)" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeletePensionPlan" onsubmit="return confirm('¿Eliminar este plan de pensiones?');">
                                         <input type="hidden" name="name" value="@item.Name" />
                                         <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
@@ -712,6 +790,53 @@
         </div>
     </div>
 
+    @foreach (var item in Model.PensionPlans)
+    {
+        var planIndex = Model.PensionPlans.IndexOf(item);
+        var planIsIngDirect = item.Broker == "ING";
+        var planIsTradeRepublic = item.Broker == "TR";
+        var planIsOccident = item.Broker == "OCCIDENT";
+
+        <dialog id="edit-pensionplan-@planIndex" class="add-entry-dialog">
+            <form method="post" asp-page-handler="EditPensionPlan">
+                <h3>Editar @item.Name</h3>
+                <input type="hidden" name="name" value="@item.Name" />
+                <label>
+                    Bróker
+                    <select name="broker" required>
+                        <option value="ING" selected="@(planIsIngDirect)">ING Direct</option>
+                        <option value="TR" selected="@(planIsTradeRepublic)">Trade Republic</option>
+                        <option value="OCCIDENT" selected="@(planIsOccident)">Occident</option>
+                    </select>
+                </label>
+                <label>
+                    Participaciones
+                    <input type="number" name="participaciones" required min="0.000001" step="0.000001" value="@item.Participaciones" />
+                </label>
+                <label>
+                    Valor liquidativo
+                    <input type="number" name="valorLiquidativo" required min="0.01" step="0.01" value="@item.ValorLiquidativo" />
+                </label>
+                <label>
+                    Capital invertido
+                    <input type="number" name="capitalInvertido" step="0.01" value="@item.CapitalInvertido" />
+                </label>
+                <label>
+                    Rentabilidad 12 meses (%)
+                    <input type="number" name="rentabilidad12Meses" required step="0.01" value="@item.Rentabilidad12Meses" />
+                </label>
+                <label>
+                    Rentabilidad último mes (%)
+                    <input type="number" name="rentabilidadUltimoMes" step="0.01" value="@item.RentabilidadUltimoMes" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </form>
+        </dialog>
+    }
+
     <dialog id="add-pensionplan-dialog" class="add-entry-dialog">
         <form method="post" asp-page-handler="AddPensionPlan">
             <h3>Añadir Plan de pensiones</h3>
@@ -724,6 +849,7 @@
                 <select name="broker" required>
                     <option value="ING">ING Direct</option>
                     <option value="TR">Trade Republic</option>
+                    <option value="OCCIDENT">Occident</option>
                 </select>
             </label>
             <label>
@@ -828,6 +954,7 @@
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedText</td>
                                 <td class="delete-cell">
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-stockholding-@item.Symbol" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteStockHolding" onsubmit="return confirm('¿Eliminar esta acción?');">
                                         <input type="hidden" name="symbol" value="@item.Symbol" />
                                         <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
@@ -840,6 +967,41 @@
             </table>
         </div>
     </div>
+
+    @foreach (var item in Model.PortfolioStocks)
+    {
+        var stockHolding = Model.StockHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
+        var stockPositionCount = stockHolding?.PositionCount ?? 0m;
+        var stockPurchaseDisplayValue = stockHolding?.UnitPurchasePrice ?? 0m;
+        var stockIsIngDirect = stockHolding?.Broker == "ING";
+        var stockIsTradeRepublic = stockHolding?.Broker == "TR";
+
+        <dialog id="edit-stockholding-@item.Symbol" class="add-entry-dialog">
+            <form method="post" asp-page-handler="EditStockHolding">
+                <h3>Editar @item.Name</h3>
+                <input type="hidden" name="symbol" value="@item.Symbol" />
+                <label>
+                    Bróker
+                    <select name="broker" required>
+                        <option value="ING" selected="@(stockIsIngDirect)">ING Direct</option>
+                        <option value="TR" selected="@(stockIsTradeRepublic)">Trade Republic</option>
+                    </select>
+                </label>
+                <label>
+                    Número de títulos
+                    <input type="number" name="positionCount" required min="0.000001" step="0.000001" value="@stockPositionCount" />
+                </label>
+                <label>
+                    Precio de compra (unitario)
+                    <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" value="@stockPurchaseDisplayValue" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </form>
+        </dialog>
+    }
 
     <dialog id="add-stock-holding-dialog" class="add-entry-dialog">
         <form method="post" asp-page-handler="AddStockHolding">

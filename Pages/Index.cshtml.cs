@@ -217,7 +217,20 @@ public class IndexModel : PageModel
             PensionPlans[index] = plan2030 with { RentabilidadUltimoMes = -0.72m, CapitalInvertido = 27484.40m };
             await _dataStore.SaveEntriesAsync(PensionPlansKey, PensionPlans);
         }
+
+        if (!PensionPlans.Any(p => p.Name == "Gco. Plan De Pensiones De Empleo"))
+        {
+            PensionPlans.Add(new PensionPlanHolding("Gco. Plan De Pensiones De Empleo", 1576.35894m, 1.00m, 0m, "OCCIDENT", 0m, 0m));
+            await _dataStore.SaveEntriesAsync(PensionPlansKey, PensionPlans);
+        }
     }
+
+    private static string ResolvePensionBroker(string? broker) => broker?.Trim().ToUpperInvariant() switch
+    {
+        "TR" => "TR",
+        "OCCIDENT" => "OCCIDENT",
+        _ => "ING"
+    };
 
     public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, decimal rentabilidad12Meses, string broker, decimal rentabilidadUltimoMes, decimal capitalInvertido)
     {
@@ -233,7 +246,7 @@ public class IndexModel : PageModel
             participaciones,
             valorLiquidativo,
             rentabilidad12Meses,
-            string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING",
+            ResolvePensionBroker(broker),
             rentabilidadUltimoMes,
             capitalInvertido));
         await _dataStore.SaveEntriesAsync(PensionPlansKey, holdings);
@@ -252,6 +265,28 @@ public class IndexModel : PageModel
                 holdings.Remove(toRemove);
                 await _dataStore.SaveEntriesAsync(PensionPlansKey, holdings);
             }
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEditPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, decimal rentabilidad12Meses, string broker, decimal rentabilidadUltimoMes, decimal capitalInvertido)
+    {
+        var holdings = await _dataStore.LoadEntriesAsync<PensionPlanHolding>(PensionPlansKey);
+        var existing = holdings.FirstOrDefault(h => string.Equals(h.Name, name, StringComparison.OrdinalIgnoreCase));
+        if (existing != null)
+        {
+            var index = holdings.IndexOf(existing);
+            holdings[index] = existing with
+            {
+                Participaciones = participaciones,
+                ValorLiquidativo = valorLiquidativo,
+                Rentabilidad12Meses = rentabilidad12Meses,
+                Broker = ResolvePensionBroker(broker),
+                RentabilidadUltimoMes = rentabilidadUltimoMes,
+                CapitalInvertido = capitalInvertido
+            };
+            await _dataStore.SaveEntriesAsync(PensionPlansKey, holdings);
         }
 
         return RedirectToPage();
@@ -366,6 +401,25 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostEditFundAsync(string symbol, decimal positionCount, decimal unitPurchasePrice, string broker)
+    {
+        var holdings = await _dataStore.LoadEntriesAsync<FundHolding>(FundsKey);
+        var existing = holdings.FirstOrDefault(h => string.Equals(h.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
+        if (existing != null && positionCount > 0 && unitPurchasePrice > 0)
+        {
+            var index = holdings.IndexOf(existing);
+            holdings[index] = existing with
+            {
+                PositionCount = positionCount,
+                UnitPurchasePrice = unitPurchasePrice,
+                Broker = string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING"
+            };
+            await _dataStore.SaveEntriesAsync(FundsKey, holdings);
+        }
+
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnPostDeleteIndexAsync(string symbol)
     {
         await RemoveCustomEntryAsync(IndicesKey, symbol);
@@ -415,6 +469,25 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostEditEtfAsync(string symbol, decimal positionCount, decimal unitPurchasePrice, string broker)
+    {
+        var holdings = await _dataStore.LoadEntriesAsync<EtfHolding>(EtfsKey);
+        var existing = holdings.FirstOrDefault(h => string.Equals(h.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
+        if (existing != null && positionCount > 0 && unitPurchasePrice > 0)
+        {
+            var index = holdings.IndexOf(existing);
+            holdings[index] = existing with
+            {
+                PositionCount = positionCount,
+                UnitPurchasePrice = unitPurchasePrice,
+                Broker = string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING"
+            };
+            await _dataStore.SaveEntriesAsync(EtfsKey, holdings);
+        }
+
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnPostAddStockHoldingAsync(string name, string? market, decimal positionCount, decimal unitPurchasePrice, string broker)
     {
         if (!string.IsNullOrWhiteSpace(name) && positionCount > 0 && unitPurchasePrice > 0)
@@ -459,6 +532,25 @@ public class IndexModel : PageModel
                 holdings.Remove(toRemove);
                 await _dataStore.SaveEntriesAsync(StockHoldingsKey, holdings);
             }
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEditStockHoldingAsync(string symbol, decimal positionCount, decimal unitPurchasePrice, string broker)
+    {
+        var holdings = await _dataStore.LoadEntriesAsync<StockHolding>(StockHoldingsKey);
+        var existing = holdings.FirstOrDefault(h => string.Equals(h.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
+        if (existing != null && positionCount > 0 && unitPurchasePrice > 0)
+        {
+            var index = holdings.IndexOf(existing);
+            holdings[index] = existing with
+            {
+                PositionCount = positionCount,
+                UnitPurchasePrice = unitPurchasePrice,
+                Broker = string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING"
+            };
+            await _dataStore.SaveEntriesAsync(StockHoldingsKey, holdings);
         }
 
         return RedirectToPage();

@@ -578,6 +578,7 @@ body.wco-active .topbar-datetime {
 
 .delete-cell {
   text-align: center;
+  white-space: nowrap;
 }
 
 .delete-cell form {
@@ -602,6 +603,28 @@ body.wco-active .topbar-datetime {
 
 .icon-button-delete:hover {
   background: rgba(255, 93, 115, 0.28);
+  color: #fff;
+}
+
+.icon-button-edit {
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  background: rgba(96, 165, 250, 0.12);
+  color: #93c5fd;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  line-height: 1;
+  font-size: 0.62rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  margin-right: 4px;
+}
+
+.icon-button-edit:hover {
+  background: rgba(96, 165, 250, 0.28);
   color: #fff;
 }
 
