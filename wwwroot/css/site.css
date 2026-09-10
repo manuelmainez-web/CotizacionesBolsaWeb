@@ -635,6 +635,10 @@ body.wco-active .topbar-datetime {
   line-height: 1.15;
 }
 
+.row-divider-bottom td {
+  border-bottom: 1px solid #ffffff;
+}
+
 .market-table-compact td {
   padding: 1px 12px;
   line-height: 1;
