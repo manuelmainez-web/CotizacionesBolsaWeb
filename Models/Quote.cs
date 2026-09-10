@@ -18,7 +18,7 @@ public sealed class Quote
     public DateTimeOffset? LastUpdated { get; set; }
 
     public string DisplayPrice => Price.HasValue ? Price.Value.ToString("#,##0.00") : "N/A";
-    public string DisplayPercent => PercentChange.HasValue ? $"{(PercentChange.Value >= 0 ? "▲" : "▼")} {PercentChange.Value:0.00}%" : "N/A";
+    public string DisplayPercent => PercentChange.HasValue ? $"{PercentChange.Value:0.00}% {(PercentChange.Value >= 0 ? "▲" : "▼")}" : "N/A";
     public string DisplayOpen => Open.HasValue ? Open.Value.ToString("#,##0.00") : "N/A";
     public string DisplayPreviousClose => PreviousClose.HasValue ? PreviousClose.Value.ToString("#,##0.00") : "N/A";
     public string DisplayHigh => High.HasValue ? High.Value.ToString("#,##0.00") : "N/A";
