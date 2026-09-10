@@ -426,7 +426,7 @@
                     }
                     else
                     {
-                        @foreach (var item in Model.Etfs)
+                        @foreach (var item in Model.Etfs.OrderBy(e => Model.EtfHoldings.FirstOrDefault(h => h.Symbol == e.Symbol)?.Broker == "ING" ? 0 : 1))
                         {
                             var holding = Model.EtfHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
                             var currentPrice = item.Price ?? 0m;
