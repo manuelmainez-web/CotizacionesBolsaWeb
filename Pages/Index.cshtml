@@ -465,7 +465,7 @@
                                 </td>
                                 <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
-                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedText</td>
                                 <td class="delete-cell">
                                     <form method="post" asp-page-handler="DeleteEtf" onsubmit="return confirm('¿Eliminar este ETF?');">
@@ -690,9 +690,9 @@
                                 <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")</td>
                                 <td class="price-cell price-cell-quote">@item.Participaciones.ToString("#,##0.######")</td>
                                 <td class="price-cell price-cell-quote">@item.ValorLiquidativo.ToString("#,##0.00 €")</td>
-                                <td class="@((item.RentabilidadUltimoMes >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadUltimoMes.ToString("+#,##0.00;-#,##0.00;0.00")%</td>
-                                <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")%</td>
-                                <td class="@((item.RentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")%</td>
+                                <td class="@((item.RentabilidadUltimoMes >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadUltimoMes.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadUltimoMes >= 0 ? "▲" : "▼")</td>
+                                <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
+                                <td class="@((item.RentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadDesdeInicio >= 0 ? "▲" : "▼")</td>
                                 <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
                                 <td class="delete-cell">
                                     <form method="post" asp-page-handler="DeletePensionPlan" onsubmit="return confirm('¿Eliminar este plan de pensiones?');">
