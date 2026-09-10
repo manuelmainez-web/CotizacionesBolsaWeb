@@ -200,10 +200,18 @@ public class IndexModel : PageModel
             quote.Isin = config?.Isin ?? quote.Isin;
         }
 
+        if (!await _dataStore.ExistsAsync(PensionPlansKey))
+        {
+            await _dataStore.SaveEntriesAsync(PensionPlansKey, new List<PensionPlanHolding>
+            {
+                new("PLAN 2030", 1972.843234m, 19.689456m, 7.18m, "ING")
+            });
+        }
+
         PensionPlans = await _dataStore.LoadEntriesAsync<PensionPlanHolding>(PensionPlansKey);
     }
 
-    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo)
+    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, decimal rentabilidad12Meses, string broker)
     {
         if (string.IsNullOrWhiteSpace(name) || participaciones <= 0 || valorLiquidativo <= 0)
         {
@@ -212,7 +220,12 @@ public class IndexModel : PageModel
         }
 
         var holdings = await _dataStore.LoadEntriesAsync<PensionPlanHolding>(PensionPlansKey);
-        holdings.Add(new PensionPlanHolding(name.Trim(), participaciones, valorLiquidativo));
+        holdings.Add(new PensionPlanHolding(
+            name.Trim(),
+            participaciones,
+            valorLiquidativo,
+            rentabilidad12Meses,
+            string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING"));
         await _dataStore.SaveEntriesAsync(PensionPlansKey, holdings);
 
         return RedirectToPage();

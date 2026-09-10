@@ -649,9 +649,11 @@
                 <thead>
                     <tr>
                         <th>Nombre</th>
+                        <th>Bróker</th>
                         <th>Fecha actual</th>
                         <th class="text-align-right">Participaciones</th>
                         <th class="text-align-right">Valor liquidativo</th>
+                        <th class="text-align-right">Rentabilidad 12 meses</th>
                         <th class="text-align-right">Saldo total</th>
                         <th></th>
                     </tr>
@@ -660,7 +662,7 @@
                     @if (Model.PensionPlans.Count == 0)
                     {
                         <tr>
-                            <td colspan="6" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
+                            <td colspan="8" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
                         </tr>
                     }
                     else
@@ -668,12 +670,25 @@
                         @foreach (var item in Model.PensionPlans)
                         {
                             var saldoTotal = item.Participaciones * item.ValorLiquidativo;
+                            var isIngDirect = item.Broker == "ING";
+                            var isTradeRepublic = item.Broker == "TR";
 
                             <tr>
                                 <td class="name-cell">@item.Name</td>
+                                <td class="broker-cell">
+                                    @if (isIngDirect)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                                    }
+                                    else if (isTradeRepublic)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
+                                    }
+                                </td>
                                 <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")</td>
                                 <td class="price-cell price-cell-quote">@item.Participaciones.ToString("#,##0.######")</td>
                                 <td class="price-cell price-cell-quote">@item.ValorLiquidativo.ToString("#,##0.00 €")</td>
+                                <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")%</td>
                                 <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
                                 <td class="delete-cell">
                                     <form method="post" asp-page-handler="DeletePensionPlan" onsubmit="return confirm('¿Eliminar este plan de pensiones?');">
@@ -697,12 +712,23 @@
                 <input type="text" name="name" required maxlength="100" placeholder="Ej. Plan de pensiones ING" />
             </label>
             <label>
+                Bróker
+                <select name="broker" required>
+                    <option value="ING">ING Direct</option>
+                    <option value="TR">Trade Republic</option>
+                </select>
+            </label>
+            <label>
                 Participaciones
                 <input type="number" name="participaciones" required min="0.000001" step="0.000001" placeholder="Ej. 100" />
             </label>
             <label>
                 Valor liquidativo
                 <input type="number" name="valorLiquidativo" required min="0.01" step="0.01" placeholder="Ej. 12.50" />
+            </label>
+            <label>
+                Rentabilidad 12 meses (%)
+                <input type="number" name="rentabilidad12Meses" required step="0.01" placeholder="Ej. 7.18" />
             </label>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
