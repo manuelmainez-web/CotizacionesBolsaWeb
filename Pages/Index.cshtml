@@ -439,7 +439,7 @@
                             var isIngDirect = holding?.Broker == "ING";
                             var isTradeRepublic = holding?.Broker == "TR";
 
-                            <tr>
+                            <tr class="@(item.Symbol == "UST.PA" ? "row-divider-bottom" : "")">
                                 <td class="name-cell name-cell-regular">
                                     <span class="name-with-flag">
                                         <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
