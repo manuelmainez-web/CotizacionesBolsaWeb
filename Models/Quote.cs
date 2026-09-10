@@ -25,6 +25,7 @@ public sealed class Quote
     public string DisplayLow => Low.HasValue ? Low.Value.ToString("#,##0.00") : "N/A";
     public decimal? Change => Price.HasValue && PreviousClose.HasValue ? Price.Value - PreviousClose.Value : null;
     public string DisplayChange => Change.HasValue ? Change.Value.ToString("+#,##0.00;-#,##0.00;0.00") : "N/A";
+    public string DisplaySymbol => Symbol.TrimStart('^');
     public string DisplayIsin => string.IsNullOrWhiteSpace(Isin) ? "—" : Isin;
     public string DisplayMarket => string.IsNullOrWhiteSpace(Market) ? "—" : Market;
     public string UpdatedText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("dd/MM/yyyy HH:mm") : "N/A";
