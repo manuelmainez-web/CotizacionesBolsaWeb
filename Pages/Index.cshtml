@@ -653,6 +653,7 @@
                         <th>Fecha actual</th>
                         <th class="text-align-right">Participaciones</th>
                         <th class="text-align-right">Valor liquidativo</th>
+                        <th class="text-align-right">Capital invertido</th>
                         <th class="text-align-right">Rentabilidad último mes</th>
                         <th class="text-align-right">Rentabilidad 12 meses</th>
                         <th class="text-align-right">Rentabilidad desde inicio (31/10/2013)</th>
@@ -664,7 +665,7 @@
                     @if (Model.PensionPlans.Count == 0)
                     {
                         <tr>
-                            <td colspan="10" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
+                            <td colspan="11" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
                         </tr>
                     }
                     else
@@ -690,6 +691,7 @@
                                 <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")</td>
                                 <td class="price-cell price-cell-quote">@item.Participaciones.ToString("#,##0.######")</td>
                                 <td class="price-cell price-cell-quote">@item.ValorLiquidativo.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@item.CapitalInvertido.ToString("#,##0.00 €")</td>
                                 <td class="@((item.RentabilidadUltimoMes >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadUltimoMes.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadUltimoMes >= 0 ? "▲" : "▼")</td>
                                 <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
                                 <td class="@((item.RentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadDesdeInicio >= 0 ? "▲" : "▼")</td>
@@ -729,6 +731,10 @@
             <label>
                 Valor liquidativo
                 <input type="number" name="valorLiquidativo" required min="0.01" step="0.01" placeholder="Ej. 12.50" />
+            </label>
+            <label>
+                Capital invertido
+                <input type="number" name="capitalInvertido" step="0.01" placeholder="Ej. 27484.40" />
             </label>
             <label>
                 Rentabilidad 12 meses (%)
