@@ -298,7 +298,8 @@ public sealed class YahooFinanceService
     {
         return symbol switch
         {
-            "IBEXA.PA" => "IBEXAE.XD",
+            "IBEXA.PA" => "IBEXA.MC",
+            "IBEXAE.XD" => "IBEXA.MC",
             "DBPE.PA" => "DBPE.DU",
             "LVE.PA" => "LVE.PA",
             "XGDU.L" => "XGDU.MI",

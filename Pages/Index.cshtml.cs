@@ -114,7 +114,7 @@ public class IndexModel : PageModel
         {
             await _dataStore.SaveEntriesAsync(EtfsKey, new List<EtfHolding>
             {
-                new("Amundi Ibex 35 Doble Apalancado Diario (2x) (IBEXA)", "IBEXAE.XD", "LU1681043941", "ES", 437m, 11194.98m / 437m, "ING"),
+                new("Amundi Ibex 35 Doble Apalancado Diario (2x) (IBEXA)", "IBEXA.MC", "LU1681043941", "ES", 437m, 11194.98m / 437m, "ING"),
                 new("db x-trackers LevDAX Daily UCITS 1C", "DBPE.DU", "LU0322252738", "DE", 119m, 18979.98m / 119m, "ING"),
                 new("Amundi EURO STOXX 50 Daily (2x) Leveraged UCITS Ac", "LVE.PA", "FR0014005S97", "FR", 394m, 16745.71m / 394m, "ING"),
                 new("Xtrackers IE Physical Gold ETC (XGDU)", "XGDU.MI", "IE00B4ND5C91", "IT", 166.200468m, 53.60m, "TR"),
@@ -124,6 +124,15 @@ public class IndexModel : PageModel
         }
 
         EtfHoldings = await _dataStore.LoadEntriesAsync<EtfHolding>(EtfsKey);
+
+        var ibexaHolding = EtfHoldings.FirstOrDefault(h => h.Symbol == "IBEXAE.XD");
+        if (ibexaHolding != null)
+        {
+            var ibexaIndex = EtfHoldings.IndexOf(ibexaHolding);
+            EtfHoldings[ibexaIndex] = ibexaHolding with { Symbol = "IBEXA.MC" };
+            await _dataStore.SaveEntriesAsync(EtfsKey, EtfHoldings);
+        }
+
         var etfConfigs = EtfHoldings
             .Select(h => new QuoteConfig(h.Name, h.Symbol, h.Isin, h.CountryCode))
             .ToList();
