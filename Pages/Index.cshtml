@@ -729,6 +729,7 @@
                         <th class="text-align-right">Rentabilidad<br />12 meses</th>
                         <th class="text-align-right">Rentabilidad<br />desde inicio</th>
                         <th class="text-align-right">Saldo total</th>
+                        <th>Fecha/Hora Actualización</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -736,7 +737,7 @@
                     @if (Model.PensionPlans.Count == 0)
                     {
                         <tr>
-                            <td colspan="10" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
+                            <td colspan="11" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
                         </tr>
                     }
                     else
@@ -781,6 +782,7 @@
                                 <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
                                 <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")<br />@gananciaDesdeInicio.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-pensionplan-@Model.PensionPlans.IndexOf(item)" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeletePensionPlan" onsubmit="return confirm('¿Eliminar este plan de pensiones?');">
