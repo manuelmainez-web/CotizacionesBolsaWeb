@@ -908,6 +908,172 @@
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
+            <span>Acciones <span class="panel-head-subtitle">(Cartera)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-stock-holding-dialog">+ Añadir acción</button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.StockHoldingError))
+        {
+            <div class="form-error-banner">@Model.StockHoldingError</div>
+        }
+        <div class="table-wrap">
+            <table class="market-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Bróker</th>
+                        <th class="text-align-right notranslate" translate="no">COTIZACIÓN ACTUAL</th>
+                        <th class="text-align-right">Cambio %</th>
+                        <th class="text-align-right">TITULOS /PRECIO COMPRA</th>
+                        <th class="text-align-right">Valoración compra</th>
+                        <th class="text-align-right">Valoración actual</th>
+                        <th class="text-align-right">% Rentabilidad / Importe</th>
+                        <th>Fecha/Hora Actualización</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-portfolio-stocks">
+                    @if (Model.PortfolioStocks.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="10" class="empty-state-cell">No hay acciones añadidas. Usa "+ Añadir acción" para empezar.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.PortfolioStocks)
+                        {
+                            var holding = Model.StockHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
+                            var currentPrice = item.Price ?? 0m;
+                            var positionCount = holding?.PositionCount ?? 0m;
+                            var purchaseDisplayValue = holding?.UnitPurchasePrice ?? 0m;
+                            var purchaseValue = positionCount * purchaseDisplayValue;
+                            var currentValue = currentPrice * positionCount;
+                            var gainValue = currentValue - purchaseValue;
+                            var gainPercent = purchaseValue == 0 ? 0m : (gainValue / purchaseValue) * 100m;
+                            var isIngDirect = holding?.Broker == "ING";
+                            var isTradeRepublic = holding?.Broker == "TR";
+
+                            <tr>
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
+                                    </span>
+                                </td>
+                                <td class="broker-cell">
+                                    @if (isIngDirect)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                                    }
+                                    else if (isTradeRepublic)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
+                                    }
+                                </td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="purchase-cell">
+                                    @positionCount.ToString("#,##0.######")<br />
+                                    @purchaseDisplayValue.ToString("#,##0.00 €")
+                                </td>
+                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="time-cell">@item.UpdatedText</td>
+                                <td class="delete-cell">
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-stockholding-@item.Symbol" title="Editar">✎</button>
+                                    <form method="post" asp-page-handler="DeleteStockHolding" onsubmit="return confirm('¿Eliminar esta acción?');">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @foreach (var item in Model.PortfolioStocks)
+    {
+        var stockHolding = Model.StockHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
+        var stockPositionCount = stockHolding?.PositionCount ?? 0m;
+        var stockPurchaseDisplayValue = stockHolding?.UnitPurchasePrice ?? 0m;
+        var stockIsIngDirect = stockHolding?.Broker == "ING";
+        var stockIsTradeRepublic = stockHolding?.Broker == "TR";
+
+        <dialog id="edit-stockholding-@item.Symbol" class="add-entry-dialog">
+            <form method="post" asp-page-handler="EditStockHolding">
+                <h3>Editar @item.Name</h3>
+                <input type="hidden" name="symbol" value="@item.Symbol" />
+                <label>
+                    Bróker
+                    <select name="broker" required>
+                        <option value="ING" selected="@(stockIsIngDirect)">ING Direct</option>
+                        <option value="TR" selected="@(stockIsTradeRepublic)">Trade Republic</option>
+                    </select>
+                </label>
+                <label>
+                    Número de títulos
+                    <input type="number" name="positionCount" required min="0.000001" step="0.000001" value="@stockPositionCount" />
+                </label>
+                <label>
+                    Precio de compra (unitario)
+                    <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" value="@stockPurchaseDisplayValue" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </form>
+        </dialog>
+    }
+
+    <dialog id="add-stock-holding-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddStockHolding">
+            <h3>Añadir acción</h3>
+            <label>
+                Nombre
+                <input type="text" name="name" required maxlength="150" placeholder="Ej. Apple Inc." />
+            </label>
+            <label>
+                Número de títulos
+                <input type="number" name="positionCount" required min="0.000001" step="0.000001" placeholder="Ej. 10" />
+            </label>
+            <label>
+                Precio de compra (unitario)
+                <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" placeholder="Ej. 150.00" />
+            </label>
+            <label>
+                Mercado
+                <select name="market">
+                    <option value="IBEX35">IBEX-35</option>
+                    <option value="CAC40">CAC 40</option>
+                    <option value="DAX">DAX</option>
+                    <option value="EUROSTOXX50">EURO STOXX 50</option>
+                    <option value="DOWJONES">DOW JONES</option>
+                    <option value="NASDAQ">NASDAQ</option>
+                    <option value="SP500">S&amp;P 500</option>
+                </select>
+            </label>
+            <label>
+                Bróker
+                <select name="broker" required>
+                    <option value="ING">ING Direct</option>
+                    <option value="TR">Trade Republic</option>
+                </select>
+            </label>
+            <p class="dialog-hint">El símbolo se busca automáticamente a partir del nombre, priorizando el mercado seleccionado.</p>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
             <span>CUENTA CORRIENTE</span>
             <button type="button" class="mini-button" data-dialog-target="add-checkingaccount-dialog">+ Añadir Cuenta</button>
         </div>
@@ -1086,172 +1252,6 @@
                 Importe
                 <input type="number" name="importe" required step="0.01" placeholder="Ej. 200.00" />
             </label>
-            <div class="dialog-actions">
-                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
-                <button type="submit" class="mini-button">Añadir</button>
-            </div>
-        </form>
-    </dialog>
-
-    <div class="market-panel mt-4">
-        <div class="panel-head panel-head-row">
-            <span>Acciones <span class="panel-head-subtitle">(Cartera)</span></span>
-            <button type="button" class="mini-button" data-dialog-target="add-stock-holding-dialog">+ Añadir acción</button>
-        </div>
-        @if (!string.IsNullOrWhiteSpace(Model.StockHoldingError))
-        {
-            <div class="form-error-banner">@Model.StockHoldingError</div>
-        }
-        <div class="table-wrap">
-            <table class="market-table">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Bróker</th>
-                        <th class="text-align-right notranslate" translate="no">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right">Cambio %</th>
-                        <th class="text-align-right">TITULOS /PRECIO COMPRA</th>
-                        <th class="text-align-right">Valoración compra</th>
-                        <th class="text-align-right">Valoración actual</th>
-                        <th class="text-align-right">% Rentabilidad / Importe</th>
-                        <th>Fecha/Hora Actualización</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="tbody-portfolio-stocks">
-                    @if (Model.PortfolioStocks.Count == 0)
-                    {
-                        <tr>
-                            <td colspan="10" class="empty-state-cell">No hay acciones añadidas. Usa "+ Añadir acción" para empezar.</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        @foreach (var item in Model.PortfolioStocks)
-                        {
-                            var holding = Model.StockHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
-                            var currentPrice = item.Price ?? 0m;
-                            var positionCount = holding?.PositionCount ?? 0m;
-                            var purchaseDisplayValue = holding?.UnitPurchasePrice ?? 0m;
-                            var purchaseValue = positionCount * purchaseDisplayValue;
-                            var currentValue = currentPrice * positionCount;
-                            var gainValue = currentValue - purchaseValue;
-                            var gainPercent = purchaseValue == 0 ? 0m : (gainValue / purchaseValue) * 100m;
-                            var isIngDirect = holding?.Broker == "ING";
-                            var isTradeRepublic = holding?.Broker == "TR";
-
-                            <tr>
-                                <td class="name-cell">
-                                    <span class="name-with-flag">
-                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
-                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
-                                    </span>
-                                </td>
-                                <td class="broker-cell">
-                                    @if (isIngDirect)
-                                    {
-                                        <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
-                                    }
-                                    else if (isTradeRepublic)
-                                    {
-                                        <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
-                                    }
-                                </td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
-                                <td class="purchase-cell">
-                                    @positionCount.ToString("#,##0.######")<br />
-                                    @purchaseDisplayValue.ToString("#,##0.00 €")
-                                </td>
-                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
-                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
-                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
-                                <td class="time-cell">@item.UpdatedText</td>
-                                <td class="delete-cell">
-                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-stockholding-@item.Symbol" title="Editar">✎</button>
-                                    <form method="post" asp-page-handler="DeleteStockHolding" onsubmit="return confirm('¿Eliminar esta acción?');">
-                                        <input type="hidden" name="symbol" value="@item.Symbol" />
-                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    @foreach (var item in Model.PortfolioStocks)
-    {
-        var stockHolding = Model.StockHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
-        var stockPositionCount = stockHolding?.PositionCount ?? 0m;
-        var stockPurchaseDisplayValue = stockHolding?.UnitPurchasePrice ?? 0m;
-        var stockIsIngDirect = stockHolding?.Broker == "ING";
-        var stockIsTradeRepublic = stockHolding?.Broker == "TR";
-
-        <dialog id="edit-stockholding-@item.Symbol" class="add-entry-dialog">
-            <form method="post" asp-page-handler="EditStockHolding">
-                <h3>Editar @item.Name</h3>
-                <input type="hidden" name="symbol" value="@item.Symbol" />
-                <label>
-                    Bróker
-                    <select name="broker" required>
-                        <option value="ING" selected="@(stockIsIngDirect)">ING Direct</option>
-                        <option value="TR" selected="@(stockIsTradeRepublic)">Trade Republic</option>
-                    </select>
-                </label>
-                <label>
-                    Número de títulos
-                    <input type="number" name="positionCount" required min="0.000001" step="0.000001" value="@stockPositionCount" />
-                </label>
-                <label>
-                    Precio de compra (unitario)
-                    <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" value="@stockPurchaseDisplayValue" />
-                </label>
-                <div class="dialog-actions">
-                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
-                    <button type="submit" class="mini-button">Guardar</button>
-                </div>
-            </form>
-        </dialog>
-    }
-
-    <dialog id="add-stock-holding-dialog" class="add-entry-dialog">
-        <form method="post" asp-page-handler="AddStockHolding">
-            <h3>Añadir acción</h3>
-            <label>
-                Nombre
-                <input type="text" name="name" required maxlength="150" placeholder="Ej. Apple Inc." />
-            </label>
-            <label>
-                Número de títulos
-                <input type="number" name="positionCount" required min="0.000001" step="0.000001" placeholder="Ej. 10" />
-            </label>
-            <label>
-                Precio de compra (unitario)
-                <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" placeholder="Ej. 150.00" />
-            </label>
-            <label>
-                Mercado
-                <select name="market">
-                    <option value="IBEX35">IBEX-35</option>
-                    <option value="CAC40">CAC 40</option>
-                    <option value="DAX">DAX</option>
-                    <option value="EUROSTOXX50">EURO STOXX 50</option>
-                    <option value="DOWJONES">DOW JONES</option>
-                    <option value="NASDAQ">NASDAQ</option>
-                    <option value="SP500">S&amp;P 500</option>
-                </select>
-            </label>
-            <label>
-                Bróker
-                <select name="broker" required>
-                    <option value="ING">ING Direct</option>
-                    <option value="TR">Trade Republic</option>
-                </select>
-            </label>
-            <p class="dialog-hint">El símbolo se busca automáticamente a partir del nombre, priorizando el mercado seleccionado.</p>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
                 <button type="submit" class="mini-button">Añadir</button>
