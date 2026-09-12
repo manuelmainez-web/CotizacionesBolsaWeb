@@ -29,6 +29,8 @@ public sealed class Quote
     public string DisplayIsin => string.IsNullOrWhiteSpace(Isin) ? "—" : Isin;
     public string DisplayMarket => string.IsNullOrWhiteSpace(Market) ? "—" : Market;
     public string UpdatedText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("dd/MM/yyyy HH:mm") : "N/A";
+    public string UpdatedDateText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("dd/MM/yyyy") : "N/A";
+    public string UpdatedTimeText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("HH:mm") : string.Empty;
     public string TrendCssClass => PercentChange.HasValue && PercentChange.Value >= 0 ? "text-success" : "text-danger";
     public bool IsMarketOpen => ComputeMarketOpen(CountryCode);
     public string MarketStatusLabel => IsMarketOpen ? "Mercado abierto" : "Mercado cerrado";
