@@ -908,7 +908,7 @@
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
-            <span>CUENTA CORRIENTE <span class="panel-head-subtitle">(Cartera)</span></span>
+            <span>CUENTA CORRIENTE</span>
             <button type="button" class="mini-button" data-dialog-target="add-checkingaccount-dialog">+ Añadir Cuenta</button>
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.CheckingAccountError))
@@ -1002,6 +1002,89 @@
             <label>
                 Importe
                 <input type="number" name="importe" required step="0.01" placeholder="Ej. 1500.00" />
+            </label>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>EFECTIVO <span class="panel-head-subtitle">(Cartera)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-cash-dialog">+ Añadir Efectivo</button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.CashError))
+        {
+            <div class="form-error-banner">@Model.CashError</div>
+        }
+        <div class="table-wrap">
+            <table class="market-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th class="text-align-right">Importe</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-cash">
+                    @if (Model.CashHoldings.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="3" class="empty-state-cell">No hay efectivo añadido. Usa "+ Añadir Efectivo" para empezar.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @for (var i = 0; i < Model.CashHoldings.Count; i++)
+                        {
+                            var item = Model.CashHoldings[i];
+
+                            <tr>
+                                <td class="name-cell">@item.Name</td>
+                                <td class="price-cell price-cell-quote">@item.Amount.ToString("#,##0.00 €")</td>
+                                <td class="delete-cell">
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-cash-@i" title="Editar">✎</button>
+                                    <form method="post" asp-page-handler="DeleteCash" onsubmit="return confirm('¿Eliminar este efectivo?');">
+                                        <input type="hidden" name="index" value="@i" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @for (var i = 0; i < Model.CashHoldings.Count; i++)
+    {
+        var cashItem = Model.CashHoldings[i];
+
+        <dialog id="edit-cash-@i" class="add-entry-dialog">
+            <form method="post" asp-page-handler="EditCash">
+                <h3>Editar @cashItem.Name</h3>
+                <input type="hidden" name="index" value="@i" />
+                <label>
+                    Importe
+                    <input type="number" name="importe" required step="0.01" value="@cashItem.Amount" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </form>
+        </dialog>
+    }
+
+    <dialog id="add-cash-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddCash">
+            <h3>Añadir Efectivo</h3>
+            <label>
+                Importe
+                <input type="number" name="importe" required step="0.01" placeholder="Ej. 200.00" />
             </label>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
@@ -1194,6 +1277,7 @@
                 'tbody-funds',
                 'tbody-pensionplans',
                 'tbody-checkingaccounts',
+                'tbody-cash',
                 'tbody-portfolio-stocks'
             ];
 

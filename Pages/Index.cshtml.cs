@@ -16,6 +16,7 @@ public class IndexModel : PageModel
     private const string EtfControlKey = "custom-etf-control";
     private const string PensionPlansKey = "custom-pensionplans";
     private const string CheckingAccountsKey = "custom-checkingaccounts";
+    private const string CashKey = "custom-cash";
 
     private readonly YahooFinanceService _service = new();
     private readonly DataStore _dataStore;
@@ -46,6 +47,9 @@ public class IndexModel : PageModel
     [TempData]
     public string? CheckingAccountError { get; set; }
 
+    [TempData]
+    public string? CashError { get; set; }
+
     public List<Quote> Indices { get; private set; } = new();
     public List<Quote> Stocks { get; private set; } = new();
     public List<Quote> Etfs { get; private set; } = new();
@@ -58,6 +62,7 @@ public class IndexModel : PageModel
     public List<StockHolding> StockHoldings { get; private set; } = new();
     public List<PensionPlanHolding> PensionPlans { get; private set; } = new();
     public List<CheckingAccountHolding> CheckingAccounts { get; private set; } = new();
+    public List<CashHolding> CashHoldings { get; private set; } = new();
 
     public decimal EtfsPurchaseValue => EtfHoldings.Sum(h => h.PositionCount * h.UnitPurchasePrice);
     public decimal EtfsCurrentValue => EtfHoldings.Sum(h => (Etfs.FirstOrDefault(q => q.Symbol == h.Symbol)?.Price ?? 0m) * h.PositionCount);
@@ -77,7 +82,8 @@ public class IndexModel : PageModel
 
     public decimal PensionPlansTotalValue => PensionPlans.Sum(p => p.Participaciones * p.ValorLiquidativo);
     public decimal CheckingAccountsTotalValue => CheckingAccounts.Sum(a => a.Balance);
-    public decimal TotalGeneralConCuentasYEfectivo => EtfsCurrentValue + FundsCurrentValue + PensionPlansTotalValue + CheckingAccountsTotalValue;
+    public decimal CashTotalValue => CashHoldings.Sum(c => c.Amount);
+    public decimal TotalGeneralConCuentasYEfectivo => EtfsCurrentValue + FundsCurrentValue + PensionPlansTotalValue + CheckingAccountsTotalValue + CashTotalValue;
 
     private decimal PurchaseValueByBroker(string broker) =>
         EtfHoldings.Where(h => h.Broker == broker).Sum(h => h.PositionCount * h.UnitPurchasePrice) +
@@ -260,6 +266,16 @@ public class IndexModel : PageModel
         }
 
         CheckingAccounts = await _dataStore.LoadEntriesAsync<CheckingAccountHolding>(CheckingAccountsKey);
+
+        if (!await _dataStore.ExistsAsync(CashKey))
+        {
+            await _dataStore.SaveEntriesAsync(CashKey, new List<CashHolding>
+            {
+                new("Manuel Máinez Arrojo", 0m)
+            });
+        }
+
+        CashHoldings = await _dataStore.LoadEntriesAsync<CashHolding>(CashKey);
     }
 
     private static string ResolveCheckingAccountName(string? entidad) => entidad?.Trim().ToUpperInvariant() switch
@@ -309,6 +325,39 @@ public class IndexModel : PageModel
                 accounts.Remove(toRemove);
                 await _dataStore.SaveEntriesAsync(CheckingAccountsKey, accounts);
             }
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAddCashAsync(decimal importe)
+    {
+        var holdings = await _dataStore.LoadEntriesAsync<CashHolding>(CashKey);
+        holdings.Add(new CashHolding("Manuel Máinez Arrojo", importe));
+        await _dataStore.SaveEntriesAsync(CashKey, holdings);
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEditCashAsync(int index, decimal importe)
+    {
+        var holdings = await _dataStore.LoadEntriesAsync<CashHolding>(CashKey);
+        if (index >= 0 && index < holdings.Count)
+        {
+            holdings[index] = holdings[index] with { Amount = importe };
+            await _dataStore.SaveEntriesAsync(CashKey, holdings);
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostDeleteCashAsync(int index)
+    {
+        var holdings = await _dataStore.LoadEntriesAsync<CashHolding>(CashKey);
+        if (index >= 0 && index < holdings.Count)
+        {
+            holdings.RemoveAt(index);
+            await _dataStore.SaveEntriesAsync(CashKey, holdings);
         }
 
         return RedirectToPage();
