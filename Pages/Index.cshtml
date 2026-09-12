@@ -1110,7 +1110,7 @@
                                     </span>
                                 </td>
                                 <td class="price-cell price-cell-quote">@item.Balance.ToString("#,##0.00 €")</td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")<br />@DateTime.Now.ToString("HH:mm")</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-checkingaccount-@Model.CheckingAccounts.IndexOf(item)" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteCheckingAccount" onsubmit="return confirm('¿Eliminar esta cuenta corriente?');">
@@ -1211,7 +1211,7 @@
                             <tr>
                                 <td class="name-cell">@item.Name</td>
                                 <td class="price-cell price-cell-quote">@item.Amount.ToString("#,##0.00 €")</td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")<br />@DateTime.Now.ToString("HH:mm")</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-cash-@i" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteCash" onsubmit="return confirm('¿Eliminar este efectivo?');">
