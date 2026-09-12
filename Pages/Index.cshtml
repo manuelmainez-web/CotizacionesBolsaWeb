@@ -793,7 +793,7 @@
                                 <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
                                 <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")<br />@gananciaDesdeInicio.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")<br />@DateTime.Now.ToString("HH:mm")</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-pensionplan-@Model.PensionPlans.IndexOf(item)" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeletePensionPlan" onsubmit="return confirm('¿Eliminar este plan de pensiones?');">
