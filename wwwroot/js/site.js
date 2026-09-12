@@ -3,31 +3,37 @@
 
 // Write your JavaScript code.
 
-document.querySelectorAll('[data-dialog-target]').forEach(function (button) {
-    button.addEventListener('click', function () {
-        var dialog = document.getElementById(button.getAttribute('data-dialog-target'));
-        if (dialog && typeof dialog.showModal === 'function') {
-            dialog.showModal();
-        }
-    });
+document.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-dialog-target]');
+    if (!button) {
+        return;
+    }
+
+    var dialog = document.getElementById(button.getAttribute('data-dialog-target'));
+    if (dialog && typeof dialog.showModal === 'function') {
+        dialog.showModal();
+    }
 });
 
 // Botones de mostrar/ocultar las cajas de resumen por bróker
-document.querySelectorAll('[data-toggle-target]').forEach(function (button) {
-    button.addEventListener('click', function () {
-        var target = document.getElementById(button.getAttribute('data-toggle-target'));
-        if (!target) {
-            return;
-        }
+document.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-toggle-target]');
+    if (!button) {
+        return;
+    }
 
-        var estaOculto = target.classList.toggle('is-collapsed');
-        button.textContent = estaOculto ? 'Mostrar' : 'Ocultar';
+    var target = document.getElementById(button.getAttribute('data-toggle-target'));
+    if (!target) {
+        return;
+    }
 
-        var etiqueta = button.closest('.summary-strip-label');
-        if (etiqueta) {
-            etiqueta.classList.toggle('is-expanded', !estaOculto);
-        }
-    });
+    var estaOculto = target.classList.toggle('is-collapsed');
+    button.textContent = estaOculto ? 'Mostrar' : 'Ocultar';
+
+    var etiqueta = button.closest('.summary-strip-label');
+    if (etiqueta) {
+        etiqueta.classList.toggle('is-expanded', !estaOculto);
+    }
 });
 
 // Reloj con fecha y hora actual en la cabecera
