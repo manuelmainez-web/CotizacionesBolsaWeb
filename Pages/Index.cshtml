@@ -1087,7 +1087,7 @@
                     <tr>
                         <th>Nombre</th>
                         <th class="text-align-right">Saldo cuenta corriente</th>
-                        <th>Fecha actual</th>
+                        <th>Fecha/Hora Actualización</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -1110,7 +1110,7 @@
                                     </span>
                                 </td>
                                 <td class="price-cell price-cell-quote">@item.Balance.ToString("#,##0.00 €")</td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-checkingaccount-@Model.CheckingAccounts.IndexOf(item)" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteCheckingAccount" onsubmit="return confirm('¿Eliminar esta cuenta corriente?');">
@@ -1178,7 +1178,7 @@
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
-            <span>EFECTIVO <span class="panel-head-subtitle">(Cartera)</span></span>
+            <span>EFECTIVO</span>
             <button type="button" class="mini-button" data-dialog-target="add-cash-dialog">+ Añadir Efectivo</button>
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.CashError))
@@ -1191,6 +1191,7 @@
                     <tr>
                         <th>Nombre</th>
                         <th class="text-align-right">Importe</th>
+                        <th>Fecha/Hora Actualización</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -1198,7 +1199,7 @@
                     @if (Model.CashHoldings.Count == 0)
                     {
                         <tr>
-                            <td colspan="3" class="empty-state-cell">No hay efectivo añadido. Usa "+ Añadir Efectivo" para empezar.</td>
+                            <td colspan="4" class="empty-state-cell">No hay efectivo añadido. Usa "+ Añadir Efectivo" para empezar.</td>
                         </tr>
                     }
                     else
@@ -1210,6 +1211,7 @@
                             <tr>
                                 <td class="name-cell">@item.Name</td>
                                 <td class="price-cell price-cell-quote">@item.Amount.ToString("#,##0.00 €")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-cash-@i" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteCash" onsubmit="return confirm('¿Eliminar este efectivo?');">
