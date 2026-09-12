@@ -15,6 +15,7 @@ public class IndexModel : PageModel
     private const string StockHoldingsKey = "custom-stock-holdings";
     private const string EtfControlKey = "custom-etf-control";
     private const string PensionPlansKey = "custom-pensionplans";
+    private const string CheckingAccountsKey = "custom-checkingaccounts";
 
     private readonly YahooFinanceService _service = new();
     private readonly DataStore _dataStore;
@@ -42,6 +43,9 @@ public class IndexModel : PageModel
     [TempData]
     public string? PensionPlanError { get; set; }
 
+    [TempData]
+    public string? CheckingAccountError { get; set; }
+
     public List<Quote> Indices { get; private set; } = new();
     public List<Quote> Stocks { get; private set; } = new();
     public List<Quote> Etfs { get; private set; } = new();
@@ -53,6 +57,7 @@ public class IndexModel : PageModel
     public List<FundHolding> FundHoldings { get; private set; } = new();
     public List<StockHolding> StockHoldings { get; private set; } = new();
     public List<PensionPlanHolding> PensionPlans { get; private set; } = new();
+    public List<CheckingAccountHolding> CheckingAccounts { get; private set; } = new();
 
     public decimal EtfsPurchaseValue => EtfHoldings.Sum(h => h.PositionCount * h.UnitPurchasePrice);
     public decimal EtfsCurrentValue => EtfHoldings.Sum(h => (Etfs.FirstOrDefault(q => q.Symbol == h.Symbol)?.Price ?? 0m) * h.PositionCount);
@@ -240,6 +245,69 @@ public class IndexModel : PageModel
             PensionPlans[index] = gcoPlan with { CodigoDgsfp = "N2408 / N2408" };
             await _dataStore.SaveEntriesAsync(PensionPlansKey, PensionPlans);
         }
+
+        if (!await _dataStore.ExistsAsync(CheckingAccountsKey))
+        {
+            await _dataStore.SaveEntriesAsync(CheckingAccountsKey, new List<CheckingAccountHolding>
+            {
+                new("ING Direct", 0m),
+                new("Trade Republic", 0m)
+            });
+        }
+
+        CheckingAccounts = await _dataStore.LoadEntriesAsync<CheckingAccountHolding>(CheckingAccountsKey);
+    }
+
+    private static string ResolveCheckingAccountName(string? entidad) => entidad?.Trim().ToUpperInvariant() switch
+    {
+        "TR" => "Trade Republic",
+        _ => "ING Direct"
+    };
+
+    public async Task<IActionResult> OnPostAddCheckingAccountAsync(decimal importe, string entidad)
+    {
+        var name = ResolveCheckingAccountName(entidad);
+        var accounts = await _dataStore.LoadEntriesAsync<CheckingAccountHolding>(CheckingAccountsKey);
+        if (accounts.Any(a => a.Name == name))
+        {
+            CheckingAccountError = $"Ya existe una cuenta corriente para {name}.";
+            return RedirectToPage();
+        }
+
+        accounts.Add(new CheckingAccountHolding(name, importe));
+        await _dataStore.SaveEntriesAsync(CheckingAccountsKey, accounts);
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEditCheckingAccountAsync(string name, decimal importe, string entidad)
+    {
+        var accounts = await _dataStore.LoadEntriesAsync<CheckingAccountHolding>(CheckingAccountsKey);
+        var existing = accounts.FirstOrDefault(a => string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase));
+        if (existing != null)
+        {
+            var index = accounts.IndexOf(existing);
+            accounts[index] = existing with { Name = ResolveCheckingAccountName(entidad), Balance = importe };
+            await _dataStore.SaveEntriesAsync(CheckingAccountsKey, accounts);
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostDeleteCheckingAccountAsync(string name)
+    {
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            var accounts = await _dataStore.LoadEntriesAsync<CheckingAccountHolding>(CheckingAccountsKey);
+            var toRemove = accounts.FirstOrDefault(a => string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (toRemove != null)
+            {
+                accounts.Remove(toRemove);
+                await _dataStore.SaveEntriesAsync(CheckingAccountsKey, accounts);
+            }
+        }
+
+        return RedirectToPage();
     }
 
     private static string ResolvePensionBroker(string? broker) => broker?.Trim().ToUpperInvariant() switch

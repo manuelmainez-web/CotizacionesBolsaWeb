@@ -897,6 +897,110 @@
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
+            <span>CUENTA CORRIENTE <span class="panel-head-subtitle">(Cartera)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-checkingaccount-dialog">+ Añadir Cuenta</button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.CheckingAccountError))
+        {
+            <div class="form-error-banner">@Model.CheckingAccountError</div>
+        }
+        <div class="table-wrap">
+            <table class="market-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th class="text-align-right">Saldo cuenta corriente</th>
+                        <th>Fecha actual</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-checkingaccounts">
+                    @if (Model.CheckingAccounts.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4" class="empty-state-cell">No hay cuentas corrientes añadidas. Usa "+ Añadir Cuenta" para empezar.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.CheckingAccounts)
+                        {
+                            <tr>
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                        @item.Name
+                                    </span>
+                                </td>
+                                <td class="price-cell price-cell-quote">@item.Balance.ToString("#,##0.00 €")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")</td>
+                                <td class="delete-cell">
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-checkingaccount-@Model.CheckingAccounts.IndexOf(item)" title="Editar">✎</button>
+                                    <form method="post" asp-page-handler="DeleteCheckingAccount" onsubmit="return confirm('¿Eliminar esta cuenta corriente?');">
+                                        <input type="hidden" name="name" value="@item.Name" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @foreach (var item in Model.CheckingAccounts)
+    {
+        var accountIndex = Model.CheckingAccounts.IndexOf(item);
+        var accountIsIngDirect = item.Name == "ING Direct";
+        var accountIsTradeRepublic = item.Name == "Trade Republic";
+
+        <dialog id="edit-checkingaccount-@accountIndex" class="add-entry-dialog">
+            <form method="post" asp-page-handler="EditCheckingAccount">
+                <h3>Editar @item.Name</h3>
+                <input type="hidden" name="name" value="@item.Name" />
+                <label>
+                    Entidad
+                    <select name="entidad" required>
+                        <option value="ING" selected="@(accountIsIngDirect)">ING Direct</option>
+                        <option value="TR" selected="@(accountIsTradeRepublic)">Trade Republic</option>
+                    </select>
+                </label>
+                <label>
+                    Importe
+                    <input type="number" name="importe" required step="0.01" value="@item.Balance" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </form>
+        </dialog>
+    }
+
+    <dialog id="add-checkingaccount-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddCheckingAccount">
+            <h3>Añadir Cuenta Corriente</h3>
+            <label>
+                Entidad
+                <select name="entidad" required>
+                    <option value="ING">ING Direct</option>
+                    <option value="TR">Trade Republic</option>
+                </select>
+            </label>
+            <label>
+                Importe
+                <input type="number" name="importe" required step="0.01" placeholder="Ej. 1500.00" />
+            </label>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
             <span>Acciones <span class="panel-head-subtitle">(Cartera)</span></span>
             <button type="button" class="mini-button" data-dialog-target="add-stock-holding-dialog">+ Añadir acción</button>
         </div>
@@ -1077,6 +1181,7 @@
                 'tbody-etfs',
                 'tbody-funds',
                 'tbody-pensionplans',
+                'tbody-checkingaccounts',
                 'tbody-portfolio-stocks'
             ];
 
