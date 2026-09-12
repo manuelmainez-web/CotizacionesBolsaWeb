@@ -43,6 +43,17 @@
     </div>
 
     <div class="summary-strip-label">
+        <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-general" title="Mostrar/ocultar">Mostrar</button>
+        RESUMEN TOTAL DE LAS POSICIONES + CUENTA CORRIENTE + EFECTIVO
+    </div>
+    <div class="summary-strip is-collapsed" id="summary-strip-general">
+        <div class="summary-box">
+            <span>Importe total (ETF + Fondos + Planes de pensiones + Cuenta corriente)</span>
+            <strong>@Model.TotalGeneralConCuentasYEfectivo.ToString("#,##0.00 €")</strong>
+        </div>
+    </div>
+
+    <div class="summary-strip-label">
         <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip" title="Mostrar/ocultar">Mostrar</button>
         RESUMEN TOTAL DE LAS POSICIONES
     </div>
@@ -1171,6 +1182,7 @@
         (function () {
             var refreshIntervalMs = 15000;
             var idsAActualizar = [
+                'summary-strip-general',
                 'summary-strip',
                 'summary-strip-ing',
                 'summary-strip-tr',
