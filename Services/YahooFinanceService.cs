@@ -265,9 +265,93 @@ public sealed class YahooFinanceService
             }
         }
 
+        // Si Wikidata no encuentra nada buscando directamente por nombre (su buscador es poco tolerante
+        // con nombres largos/con coma), se prueba a localizar el artículo de Wikipedia (cuyo buscador de
+        // texto completo es mucho más permisivo) y de ahí se obtiene el elemento de Wikidata asociado.
+        foreach (var wikiHost in new[] { "es.wikipedia.org", "en.wikipedia.org" })
+        {
+            foreach (var candidate in candidates)
+            {
+                var isin = await LookupIsinViaWikipediaAsync(candidate, wikiHost, cancellationToken);
+                if (isin != null)
+                {
+                    return isin;
+                }
+            }
+        }
+
         return null;
     }
 
+    private async Task<string?> LookupIsinViaWikipediaAsync(string searchTerm, string wikiHost, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var searchUrl = $"https://{wikiHost}/w/api.php?action=query&list=search&format=json&srlimit=1&srsearch={Uri.EscapeDataString(searchTerm)}";
+            using var searchRequest = new HttpRequestMessage(HttpMethod.Get, searchUrl);
+            searchRequest.Headers.UserAgent.ParseAdd("CotizacionesBolsaWeb/1.0 (contacto: app privada)");
+            using var searchResponse = await _httpClient.SendAsync(searchRequest, cancellationToken);
+            if (!searchResponse.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var searchPayload = await searchResponse.Content.ReadAsStringAsync(cancellationToken);
+            using var searchJson = JsonDocument.Parse(searchPayload);
+            if (!searchJson.RootElement.TryGetProperty("query", out var queryElement) ||
+                !queryElement.TryGetProperty("search", out var searchResults) ||
+                searchResults.ValueKind != JsonValueKind.Array ||
+                searchResults.GetArrayLength() == 0)
+            {
+                return null;
+            }
+
+            var title = searchResults[0].GetProperty("title").GetString();
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return null;
+            }
+
+            var pagePropsUrl = $"https://{wikiHost}/w/api.php?action=query&prop=pageprops&format=json&titles={Uri.EscapeDataString(title)}";
+            using var pagePropsRequest = new HttpRequestMessage(HttpMethod.Get, pagePropsUrl);
+            pagePropsRequest.Headers.UserAgent.ParseAdd("CotizacionesBolsaWeb/1.0 (contacto: app privada)");
+            using var pagePropsResponse = await _httpClient.SendAsync(pagePropsRequest, cancellationToken);
+            if (!pagePropsResponse.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var pagePropsPayload = await pagePropsResponse.Content.ReadAsStringAsync(cancellationToken);
+            using var pagePropsJson = JsonDocument.Parse(pagePropsPayload);
+            if (!pagePropsJson.RootElement.TryGetProperty("query", out var pagesQuery) ||
+                !pagesQuery.TryGetProperty("pages", out var pages))
+            {
+                return null;
+            }
+
+            string? entityId = null;
+            foreach (var page in pages.EnumerateObject())
+            {
+                if (page.Value.TryGetProperty("pageprops", out var pageProps) &&
+                    pageProps.TryGetProperty("wikibase_item", out var wikibaseItemElement))
+                {
+                    entityId = wikibaseItemElement.GetString();
+                    break;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(entityId))
+            {
+                return null;
+            }
+
+            return await GetIsinFromWikidataEntityAsync(entityId, cancellationToken);
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     private async Task<string?> LookupIsinInternalAsync(string companyName, CancellationToken cancellationToken)
     {
@@ -297,6 +381,18 @@ public sealed class YahooFinanceService
                 return null;
             }
 
+            return await GetIsinFromWikidataEntityAsync(entityId, cancellationToken);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private async Task<string?> GetIsinFromWikidataEntityAsync(string entityId, CancellationToken cancellationToken)
+    {
+        try
+        {
             var claimsUrl = $"https://www.wikidata.org/w/api.php?action=wbgetclaims&entity={Uri.EscapeDataString(entityId)}&property=P946&format=json";
             using var claimsRequest = new HttpRequestMessage(HttpMethod.Get, claimsUrl);
             claimsRequest.Headers.UserAgent.ParseAdd("CotizacionesBolsaWeb/1.0 (contacto: app privada)");
