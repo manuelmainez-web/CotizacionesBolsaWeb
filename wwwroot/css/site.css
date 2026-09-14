@@ -662,6 +662,11 @@ body.wco-active .topbar-datetime {
   border-bottom: 1px solid #ffffff;
 }
 
+.market-table-grid th,
+.market-table-grid td {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
 .market-table-compact td {
   padding: 1px 12px;
   line-height: 1;
