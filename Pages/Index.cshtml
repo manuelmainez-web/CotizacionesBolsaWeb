@@ -380,20 +380,20 @@
         <form method="post" asp-page-handler="AddCommodity">
             <h3>Añadir Materia Prima</h3>
             <label>
-                Materia prima
-                <select name="symbol" required>
-                    @foreach (var commodity in IndexModel.AvailableCommodities)
+                Clasificación
+                <select name="classification" id="commodity-classification-select" required>
+                    @foreach (var classification in IndexModel.AvailableCommodityClassifications)
                     {
-                        <option value="@commodity.Key">@commodity.Value</option>
+                        <option value="@classification">@classification</option>
                     }
                 </select>
             </label>
             <label>
-                Clasificación
-                <select name="classification" required>
-                    @foreach (var classification in IndexModel.AvailableCommodityClassifications)
+                Materia prima
+                <select name="symbol" id="commodity-symbol-select" required>
+                    @foreach (var commodity in IndexModel.AvailableCommodityOptions)
                     {
-                        <option value="@classification">@classification</option>
+                        <option value="@commodity.Symbol" data-classification="@commodity.Classification">@commodity.Name</option>
                     }
                 </select>
             </label>
@@ -460,7 +460,7 @@
                         <th style="width: 220px;">Nombre</th>
                         <th style="width: 90px;">ISIN</th>
                         <th style="width: 60px;">Bróker</th>
-                        <th class="text-align-right" style="width: 100px;">TITULOS /PRECIO COMPRA</th>
+                        <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
                         <th class="text-align-right" style="width: 100px;">Valoración compra</th>
                         <th class="text-align-right notranslate" translate="no" style="width: 70px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 55px;">Cambio %</th>
@@ -627,7 +627,7 @@
                         <th style="width: 220px;">Nombre</th>
                         <th style="width: 90px;">ISIN</th>
                         <th style="width: 60px;">Bróker</th>
-                        <th class="text-align-right" style="width: 100px;">TITULOS /PRECIO COMPRA</th>
+                        <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
                         <th class="text-align-right" style="width: 100px;">Valoración compra</th>
                         <th class="text-align-right notranslate" translate="no" style="width: 70px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 55px;">Cambio %</th>
@@ -1305,6 +1305,39 @@
 </div>
 
 @section Scripts {
+    <script>
+        (function () {
+            var classificationSelect = document.getElementById('commodity-classification-select');
+            var symbolSelect = document.getElementById('commodity-symbol-select');
+
+            function filtrarMateriasPrimas() {
+                if (!classificationSelect || !symbolSelect) {
+                    return;
+                }
+                var seleccionada = classificationSelect.value;
+                var primeraVisible = null;
+                Array.prototype.forEach.call(symbolSelect.options, function (opcion) {
+                    var coincide = opcion.getAttribute('data-classification') === seleccionada;
+                    opcion.hidden = !coincide;
+                    opcion.disabled = !coincide;
+                    if (coincide && !primeraVisible) {
+                        primeraVisible = opcion;
+                    }
+                });
+                var actual = symbolSelect.options[symbolSelect.selectedIndex];
+                if (!actual || actual.disabled) {
+                    if (primeraVisible) {
+                        symbolSelect.value = primeraVisible.value;
+                    }
+                }
+            }
+
+            if (classificationSelect && symbolSelect) {
+                classificationSelect.addEventListener('change', filtrarMateriasPrimas);
+                filtrarMateriasPrimas();
+            }
+        })();
+    </script>
     <script>
         (function () {
             var refreshIntervalMs = 15000;

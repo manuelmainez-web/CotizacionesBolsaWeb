@@ -376,23 +376,23 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
-    public static readonly Dictionary<string, string> AvailableCommodities = new()
+    public static readonly List<(string Symbol, string Name, string Classification)> AvailableCommodityOptions = new()
     {
-        ["GC=F"] = "Oro",
-        ["SI=F"] = "Plata",
-        ["PL=F"] = "Platino",
-        ["PA=F"] = "Paladio",
-        ["HG=F"] = "Cobre",
-        ["BZ=F"] = "Petróleo Brent",
-        ["CL=F"] = "Petróleo Crudo WTI",
-        ["NG=F"] = "Gas Natural",
-        ["ZC=F"] = "Maíz",
-        ["ZW=F"] = "Trigo",
-        ["ZS=F"] = "Soja",
-        ["KC=F"] = "Café",
-        ["CT=F"] = "Algodón",
-        ["SB=F"] = "Azúcar",
-        ["CC=F"] = "Cacao"
+        ("GC=F", "Oro", "Metales preciosos"),
+        ("SI=F", "Plata", "Metales preciosos"),
+        ("PL=F", "Platino", "Metales preciosos"),
+        ("PA=F", "Paladio", "Metales preciosos"),
+        ("HG=F", "Cobre", "Metales industriales"),
+        ("BZ=F", "Petróleo Brent", "Energía"),
+        ("CL=F", "Petróleo Crudo WTI", "Energía"),
+        ("NG=F", "Gas Natural", "Energía"),
+        ("ZC=F", "Maíz", "Agrícolas"),
+        ("ZW=F", "Trigo", "Agrícolas"),
+        ("ZS=F", "Soja", "Agrícolas"),
+        ("KC=F", "Café", "Agrícolas"),
+        ("CT=F", "Algodón", "Agrícolas"),
+        ("SB=F", "Azúcar", "Agrícolas"),
+        ("CC=F", "Cacao", "Agrícolas")
     };
 
     public static readonly string[] AvailableCommodityClassifications = new[]
@@ -405,7 +405,8 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostAddCommodityAsync(string symbol, string classification)
     {
-        if (string.IsNullOrWhiteSpace(symbol) || !AvailableCommodities.TryGetValue(symbol, out var name))
+        var option = AvailableCommodityOptions.FirstOrDefault(o => o.Symbol == symbol);
+        if (string.IsNullOrWhiteSpace(symbol) || option.Symbol is null)
         {
             CommodityError = "Selecciona una materia prima válida.";
             return RedirectToPage();
@@ -414,11 +415,11 @@ public class IndexModel : PageModel
         var holdings = await _dataStore.LoadEntriesAsync<CommodityHolding>(CommoditiesKey);
         if (holdings.Any(h => h.Symbol == symbol))
         {
-            CommodityError = $"{name} ya está añadida.";
+            CommodityError = $"{option.Name} ya está añadida.";
             return RedirectToPage();
         }
 
-        holdings.Add(new CommodityHolding(name, symbol, string.IsNullOrWhiteSpace(classification) ? "Otras" : classification));
+        holdings.Add(new CommodityHolding(option.Name, symbol, string.IsNullOrWhiteSpace(classification) ? option.Classification : classification));
         await _dataStore.SaveEntriesAsync(CommoditiesKey, holdings);
 
         return RedirectToPage();
