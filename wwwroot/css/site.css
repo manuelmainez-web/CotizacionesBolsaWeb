@@ -917,14 +917,15 @@ body.wco-active .topbar-datetime {
   .market-table {
     table-layout: auto !important;
     width: 100% !important;
-    font-size: 8pt !important;
+    font-size: 6pt !important;
   }
 
   .market-table th,
   .market-table td {
     width: auto !important;
-    padding: 2px 4px !important;
-    font-size: 8pt !important;
+    padding: 1px 2px !important;
+    font-size: 6pt !important;
+    letter-spacing: normal !important;
     white-space: normal !important;
     word-break: break-word;
     color: #000000 !important;
