@@ -769,7 +769,11 @@ public class IndexModel : PageModel
                 Broker = string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING",
                 Isin = isin?.Trim() ?? string.Empty
             };
-            await _dataStore.SaveEntriesAsync(StockHoldingsKey, holdings);
+            var saved = await _dataStore.SaveEntriesAsync(StockHoldingsKey, holdings);
+            if (!saved)
+            {
+                StockHoldingError = "No se han podido guardar los cambios (fallo al escribir en el almacén de datos). Vuelve a intentarlo.";
+            }
         }
 
         return RedirectToPage();

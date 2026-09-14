@@ -71,7 +71,7 @@ public sealed class DataStore
         }
     }
 
-    public async Task SaveEntriesAsync<T>(string key, List<T> entries)
+    public async Task<bool> SaveEntriesAsync<T>(string key, List<T> entries)
     {
         if (_httpClient != null)
         {
@@ -80,18 +80,20 @@ public sealed class DataStore
             {
                 var url = $"{_restUrl!.TrimEnd('/')}/set/{Uri.EscapeDataString(key)}";
                 using var content = new StringContent(json, Encoding.UTF8, "text/plain");
-                await _httpClient.PostAsync(url, content);
+                using var response = await _httpClient.PostAsync(url, content);
+                return response.IsSuccessStatusCode;
             }
             catch
             {
-                // Si falla la escritura remota, no se interrumpe la petición del usuario.
+                // Si falla la escritura remota, no se interrumpe la petición del usuario,
+                // pero se informa al llamador para que pueda avisar si lo necesita.
+                return false;
             }
-
-            return;
         }
 
         var localJson = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true });
         await File.WriteAllTextAsync(GetLocalPath(key), localJson);
+        return true;
     }
 
     private async Task<string?> GetRawAsync(string key)
