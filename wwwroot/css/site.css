@@ -873,6 +873,7 @@ body.wco-active .topbar-datetime {
   .topbar,
   .panel-head-row button,
   .mini-button,
+  .btn-toggle-summary,
   .delete-cell,
   .market-table thead th:last-child,
   .broker-header,
@@ -884,6 +885,10 @@ body.wco-active .topbar-datetime {
   .portfolio-note,
   dialog {
     display: none !important;
+  }
+
+  .summary-strip.is-collapsed {
+    display: grid !important;
   }
 
   body {
