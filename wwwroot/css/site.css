@@ -877,6 +877,7 @@ body.wco-active .topbar-datetime {
   .market-table thead th:last-child,
   .broker-header,
   .broker-cell,
+  .isin-print-hide,
   .portfolio-header-image,
   .qr-box,
   .portfolio-subtitle,
