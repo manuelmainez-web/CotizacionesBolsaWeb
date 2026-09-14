@@ -706,7 +706,7 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostAddStockHoldingAsync(string name, string? market, decimal positionCount, decimal unitPurchasePrice, string broker)
+    public async Task<IActionResult> OnPostAddStockHoldingAsync(string name, decimal positionCount, decimal unitPurchasePrice, string? market = null, string? broker = null)
     {
         if (!string.IsNullOrWhiteSpace(name) && positionCount > 0 && unitPurchasePrice > 0)
         {
@@ -730,7 +730,7 @@ public class IndexModel : PageModel
             }
             else
             {
-                StockHoldingError = $"No se ha encontrado ninguna acción llamada \"{name}\". Prueba con otro nombre o mercado.";
+                StockHoldingError = $"No se ha encontrado ninguna acción llamada \"{name}\". Prueba con otro nombre.";
             }
         }
         else
