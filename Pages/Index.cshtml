@@ -963,14 +963,14 @@
                     <tr>
                         <th style="width: 220px;">Nombre</th>
                         <th style="width: 50px;">Bróker</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 70px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 55px;">Cambio</th>
                         <th class="text-align-right" style="width: 100px;">TITULOS /PRECIO COMPRA</th>
                         <th class="text-align-right" style="width: 100px;">Valoración compra</th>
+                        <th class="text-align-right notranslate" translate="no" style="width: 70px;">COTIZACIÓN ACTUAL</th>
+                        <th class="text-align-right" style="width: 55px;">Cambio</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
                         <th class="text-align-right" style="width: 140px;">Rentabilidad /<br />Importe</th>
                         <th style="width: 100px;">Fecha/Hora Actualización</th>
-                        <th style="width: 52px;"></th>
+                        <th style="width: 60px;"></th>
                     </tr>
                 </thead>
                 <tbody id="tbody-portfolio-stocks">
@@ -1012,13 +1012,13 @@
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
                                 </td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                                 <td class="purchase-cell">
                                     @positionCount.ToString("#,##0.######")<br />
                                     @purchaseDisplayValue.ToString("#,##0.00 €")
                                 </td>
                                 <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                                 <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedText</td>
