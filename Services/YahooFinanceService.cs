@@ -230,23 +230,44 @@ public sealed class YahooFinanceService
             return null;
         }
 
+        const string suffixPattern = @",?\s*(S\.?A\.?U?\.?|S\.?L\.?U?\.?|PLC|Inc\.?|Corp\.?|Ltd\.?|LLC|N\.?V\.?|AG|SE)\s*$";
+
         // Wikidata suele indexar las empresas sin la forma jurídica (", S.A.", ", Inc.", etc.),
         // así que se prueba primero con el nombre limpio y, si no hay resultado, con el original.
-        var cleanedName = Regex.Replace(companyName, @",?\s*(S\.?A\.?U?\.?|S\.?L\.?U?\.?|PLC|Inc\.?|Corp\.?|Ltd\.?|LLC|N\.?V\.?|AG|SE)\s*$", string.Empty, RegexOptions.IgnoreCase).Trim();
+        var cleanedName = Regex.Replace(companyName, suffixPattern, string.Empty, RegexOptions.IgnoreCase).Trim();
 
-        var isin = await LookupIsinInternalAsync(cleanedName, cancellationToken);
-        if (isin != null)
-        {
-            return isin;
-        }
+        var candidates = new List<string> { cleanedName };
 
         if (!string.Equals(cleanedName, companyName, StringComparison.OrdinalIgnoreCase))
         {
-            isin = await LookupIsinInternalAsync(companyName, cancellationToken);
+            candidates.Add(companyName);
         }
 
-        return isin;
+        // Algunos nombres largos vienen con el formato "TICKER, Descripción completa, S.A." (p. ej.
+        // "ACS, Actividades de Construcción y Servicios, S.A."), donde Wikidata solo indexa la parte
+        // descriptiva ("Actividades de Construcción y Servicios" → Grupo ACS). Se prueba también esa parte.
+        var commaIndex = companyName.IndexOf(',');
+        if (commaIndex > 0 && commaIndex < companyName.Length - 1)
+        {
+            var afterComma = Regex.Replace(companyName[(commaIndex + 1)..].Trim(), suffixPattern, string.Empty, RegexOptions.IgnoreCase).Trim();
+            if (afterComma.Length > 3 && !candidates.Contains(afterComma, StringComparer.OrdinalIgnoreCase))
+            {
+                candidates.Add(afterComma);
+            }
+        }
+
+        foreach (var candidate in candidates)
+        {
+            var isin = await LookupIsinInternalAsync(candidate, cancellationToken);
+            if (isin != null)
+            {
+                return isin;
+            }
+        }
+
+        return null;
     }
+
 
     private async Task<string?> LookupIsinInternalAsync(string companyName, CancellationToken cancellationToken)
     {
