@@ -461,7 +461,7 @@
                         <th style="width: 90px;">ISIN</th>
                         <th style="width: 60px;">Bróker</th>
                         <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
-                        <th class="text-align-right" style="width: 85px;">Valoración compra</th>
+                        <th class="text-align-right" style="width: 70px;">Valoración compra</th>
                         <th class="text-align-right notranslate" translate="no" style="width: 70px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 55px;">Cambio %</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
@@ -628,7 +628,7 @@
                         <th style="width: 90px;">ISIN</th>
                         <th style="width: 60px;">Bróker</th>
                         <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
-                        <th class="text-align-right" style="width: 85px;">Valoración compra</th>
+                        <th class="text-align-right" style="width: 70px;">Valoración compra</th>
                         <th class="text-align-right notranslate" translate="no" style="width: 70px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 55px;">Cambio %</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
@@ -1124,7 +1124,7 @@
             <div class="form-error-banner">@Model.CheckingAccountError</div>
         }
         <div class="table-wrap">
-            <table class="market-table" style="width: auto; min-width: 0;">
+            <table class="market-table market-table-grid" style="width: auto; min-width: 0;">
                 <thead>
                     <tr>
                         <th>Nombre</th>
@@ -1147,7 +1147,14 @@
                             <tr>
                                 <td class="name-cell">
                                     <span class="name-with-flag">
-                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                        @if (item.Name == "Trade Republic")
+                                        {
+                                            <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
+                                        }
+                                        else
+                                        {
+                                            <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                                        }
                                         @item.Name
                                     </span>
                                 </td>
@@ -1228,7 +1235,7 @@
             <div class="form-error-banner">@Model.CashError</div>
         }
         <div class="table-wrap">
-            <table class="market-table" style="width: auto; min-width: 0;">
+            <table class="market-table market-table-grid" style="width: auto; min-width: 0;">
                 <thead>
                     <tr>
                         <th>Nombre</th>
