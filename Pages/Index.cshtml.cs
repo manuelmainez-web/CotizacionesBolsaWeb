@@ -766,8 +766,11 @@ public class IndexModel : PageModel
             var trimmedIsin = isin?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(trimmedIsin))
             {
-                // Si se deja en blanco, se intenta rellenar automáticamente (Wikidata) antes de guardar.
-                trimmedIsin = await _service.LookupIsinByNameAsync(existing.Name) ?? string.Empty;
+                // Si se deja en blanco, se conserva el ISIN ya guardado (si lo había) para no
+                // borrarlo accidentalmente; solo se intenta la búsqueda automática si aún no había ninguno.
+                trimmedIsin = !string.IsNullOrWhiteSpace(existing.Isin)
+                    ? existing.Isin
+                    : await _service.LookupIsinByNameAsync(existing.Name) ?? string.Empty;
             }
 
             var index = holdings.IndexOf(existing);
