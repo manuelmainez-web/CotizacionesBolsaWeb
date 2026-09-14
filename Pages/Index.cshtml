@@ -783,7 +783,7 @@
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
                         <th class="text-align-right" style="width: 75px;">Rentabilidad /<br />Importe</th>
                         <th style="width: 80px;">Fecha/Hora Actualización</th>
-                        <th style="width: 70px;"></th>
+                        <th style="width: 52px;"></th>
                     </tr>
                 </thead>
                 <tbody id="tbody-portfolio-stocks">
@@ -1057,6 +1057,10 @@
                         <option value="ING" selected="@(stockIsIngDirect)">ING Direct</option>
                         <option value="TR" selected="@(stockIsTradeRepublic)">Trade Republic</option>
                     </select>
+                </label>
+                <label>
+                    ISIN
+                    <input type="text" name="isin" maxlength="20" value="@stockHolding?.Isin" placeholder="Ej. ES0113211835" />
                 </label>
                 <label>
                     Número de títulos

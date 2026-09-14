@@ -755,7 +755,7 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostEditStockHoldingAsync(string symbol, decimal positionCount, decimal unitPurchasePrice, string broker)
+    public async Task<IActionResult> OnPostEditStockHoldingAsync(string symbol, decimal positionCount, decimal unitPurchasePrice, string broker, string? isin)
     {
         var holdings = await _dataStore.LoadEntriesAsync<StockHolding>(StockHoldingsKey);
         var existing = holdings.FirstOrDefault(h => string.Equals(h.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
@@ -766,7 +766,8 @@ public class IndexModel : PageModel
             {
                 PositionCount = positionCount,
                 UnitPurchasePrice = unitPurchasePrice,
-                Broker = string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING"
+                Broker = string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING",
+                Isin = isin?.Trim() ?? string.Empty
             };
             await _dataStore.SaveEntriesAsync(StockHoldingsKey, holdings);
         }
