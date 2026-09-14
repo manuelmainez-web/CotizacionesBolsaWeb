@@ -863,3 +863,38 @@ body.wco-active .topbar-datetime {
     padding-right: 12px;
   }
 }
+
+@media print {
+  .topbar,
+  .panel-head-row button,
+  .mini-button,
+  .delete-cell,
+  .market-table thead th:last-child,
+  dialog {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .market-panel {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .table-wrap {
+    overflow: visible !important;
+  }
+
+  .market-table,
+  .market-table th,
+  .market-table td {
+    color: #000000 !important;
+    background: #ffffff !important;
+    border-color: #999999 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

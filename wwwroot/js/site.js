@@ -81,3 +81,15 @@ document.addEventListener('click', function (event) {
         window.location.reload();
     });
 })();
+
+// Botón de imprimir toda la página
+(function () {
+    var boton = document.getElementById('btn-print-page');
+    if (!boton) {
+        return;
+    }
+
+    boton.addEventListener('click', function () {
+        window.print();
+    });
+})();
