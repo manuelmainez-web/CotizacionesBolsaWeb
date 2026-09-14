@@ -171,6 +171,28 @@ public class IndexModel : PageModel
             .ToList();
 
         StockHoldings = await _dataStore.LoadEntriesAsync<StockHolding>(StockHoldingsKey);
+
+        var missingIsinHoldings = StockHoldings.Where(h => string.IsNullOrWhiteSpace(h.Isin)).ToList();
+        if (missingIsinHoldings.Count > 0)
+        {
+            var isinBackfilled = false;
+            foreach (var holdingMissingIsin in missingIsinHoldings)
+            {
+                var lookedUpIsin = await _service.LookupIsinByNameAsync(holdingMissingIsin.Name);
+                if (!string.IsNullOrWhiteSpace(lookedUpIsin))
+                {
+                    var idx = StockHoldings.IndexOf(holdingMissingIsin);
+                    StockHoldings[idx] = holdingMissingIsin with { Isin = lookedUpIsin };
+                    isinBackfilled = true;
+                }
+            }
+
+            if (isinBackfilled)
+            {
+                await _dataStore.SaveEntriesAsync(StockHoldingsKey, StockHoldings);
+            }
+        }
+
         var stockHoldingConfigs = StockHoldings
             .Select(h => new QuoteConfig(h.Name, h.Symbol, h.Isin, h.CountryCode))
             .ToList();
