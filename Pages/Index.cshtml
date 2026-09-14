@@ -762,57 +762,59 @@
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
-            <span>Planes de pensiones <span class="panel-head-subtitle">(Cartera)</span></span>
-            <button type="button" class="mini-button" data-dialog-target="add-pensionplan-dialog">+ Añadir Plan</button>
+            <span>Acciones <span class="panel-head-subtitle">(Cartera)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-stock-holding-dialog">+ Añadir acción</button>
         </div>
-        @if (!string.IsNullOrWhiteSpace(Model.PensionPlanError))
+        @if (!string.IsNullOrWhiteSpace(Model.StockHoldingError))
         {
-            <div class="form-error-banner">@Model.PensionPlanError</div>
+            <div class="form-error-banner">@Model.StockHoldingError</div>
         }
         <div class="table-wrap">
             <table class="market-table market-table-grid" style="table-layout: fixed;">
                 <thead>
                     <tr>
-                        <th style="width: 220px;">Nombre</th>
-                        <th style="width: 110px; white-space: nowrap;">Código DGSFP</th>
-                        <th style="width: 60px;">BROKER</th>
-                        <th class="text-align-right" style="width: 110px; white-space: nowrap;">Participaciones /<br />Valor liquidativo</th>
-                        <th class="text-align-right" style="width: 110px;">Capital invertido</th>
-                        <th class="text-align-right" style="width: 90px;">Rentabilidad<br />último mes</th>
-                        <th class="text-align-right" style="width: 90px;">Rentabilidad<br />12 meses</th>
+                        <th style="width: 300px;">Nombre</th>
+                        <th style="width: 50px;">Bróker</th>
+                        <th class="text-align-right" style="width: 100px;">TITULOS /PRECIO COMPRA</th>
+                        <th class="text-align-right" style="width: 100px;">Valoración compra</th>
+                        <th class="text-align-right notranslate" translate="no" style="width: 70px;">COTIZACIÓN ACTUAL</th>
+                        <th class="text-align-right" style="width: 55px;">Cambio</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
-                        <th class="text-align-right" style="width: 130px;">Rentabilidad<br />desde inicio</th>
+                        <th class="text-align-right" style="width: 110px;">Rentabilidad /<br />Importe</th>
                         <th style="width: 100px;">Fecha/Hora Actualización</th>
-                        <th style="width: 52px;"></th>
+                        <th style="width: 60px;"></th>
                     </tr>
                 </thead>
-                <tbody id="tbody-pensionplans">
-                    @if (Model.PensionPlans.Count == 0)
+                <tbody id="tbody-portfolio-stocks">
+                    @if (Model.PortfolioStocks.Count == 0)
                     {
                         <tr>
-                            <td colspan="11" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
+                            <td colspan="10" class="empty-state-cell">No hay acciones añadidas. Usa "+ Añadir acción" para empezar.</td>
                         </tr>
                     }
                     else
                     {
-                        @foreach (var item in Model.PensionPlans)
+                        @foreach (var item in Model.PortfolioStocks)
                         {
-                            var saldoTotal = item.Participaciones * item.ValorLiquidativo;
-                            var gananciaDesdeInicio = saldoTotal - item.CapitalInvertido;
-                            var rentabilidadDesdeInicio = item.CapitalInvertido > 0 ? (saldoTotal - item.CapitalInvertido) / item.CapitalInvertido * 100m : 0m;
-                            var isIngDirect = item.Broker == "ING";
-                            var isTradeRepublic = item.Broker == "TR";
-                            var isOccident = item.Broker == "OCCIDENT";
+                            var holding = Model.StockHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
+                            var currentPrice = item.Price ?? 0m;
+                            var positionCount = holding?.PositionCount ?? 0m;
+                            var purchaseDisplayValue = holding?.UnitPurchasePrice ?? 0m;
+                            var purchaseValue = positionCount * purchaseDisplayValue;
+                            var currentValue = currentPrice * positionCount;
+                            var gainValue = currentValue - purchaseValue;
+                            var gainPercent = purchaseValue == 0 ? 0m : (gainValue / purchaseValue) * 100m;
+                            var isIngDirect = holding?.Broker == "ING";
+                            var isTradeRepublic = holding?.Broker == "TR";
 
                             <tr>
                                 <td class="name-cell">
                                     <span class="name-with-flag">
                                         <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
-                                        @item.Name
+                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
                                     </span>
                                 </td>
-                                <td class="isin-cell" style="white-space: nowrap;">@item.CodigoDgsfp</td>
-                                <td class="broker-cell text-align-center">
+                                <td class="broker-cell">
                                     @if (isIngDirect)
                                     {
                                         <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
@@ -821,25 +823,21 @@
                                     {
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
-                                    else if (isOccident)
-                                    {
-                                        <img class="broker-logo" src="/images/brokers/occident.png" alt="Occident" title="Occident" />
-                                    }
                                 </td>
                                 <td class="purchase-cell">
-                                    @item.Participaciones.ToString("#,##0.######")<br />
-                                    @item.ValorLiquidativo.ToString("#,##0.00 €")
+                                    @positionCount.ToString("#,##0.######")<br />
+                                    @purchaseDisplayValue.ToString("#,##0.00 €")
                                 </td>
-                                <td class="price-cell price-cell-quote">@item.CapitalInvertido.ToString("#,##0.00 €")</td>
-                                <td class="@((item.RentabilidadUltimoMes >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadUltimoMes.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadUltimoMes >= 0 ? "▲" : "▼")</td>
-                                <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
-                                <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
-                                <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")<br />@gananciaDesdeInicio.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")<br />@DateTime.Now.ToString("HH:mm")</td>
+                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="time-cell">@item.UpdatedText</td>
                                 <td class="delete-cell">
-                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-pensionplan-@Model.PensionPlans.IndexOf(item)" title="Editar">✎</button>
-                                    <form method="post" asp-page-handler="DeletePensionPlan" onsubmit="return confirm('¿Eliminar este plan de pensiones?');">
-                                        <input type="hidden" name="name" value="@item.Name" />
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-stockholding-@item.Symbol" title="Editar">✎</button>
+                                    <form method="post" asp-page-handler="DeleteStockHolding" onsubmit="return confirm('¿Eliminar esta acción?');">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
                                         <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
                                     </form>
                                 </td>
@@ -950,59 +948,57 @@
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
-            <span>Acciones <span class="panel-head-subtitle">(Cartera)</span></span>
-            <button type="button" class="mini-button" data-dialog-target="add-stock-holding-dialog">+ Añadir acción</button>
+            <span>Planes de pensiones <span class="panel-head-subtitle">(Cartera)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-pensionplan-dialog">+ Añadir Plan</button>
         </div>
-        @if (!string.IsNullOrWhiteSpace(Model.StockHoldingError))
+        @if (!string.IsNullOrWhiteSpace(Model.PensionPlanError))
         {
-            <div class="form-error-banner">@Model.StockHoldingError</div>
+            <div class="form-error-banner">@Model.PensionPlanError</div>
         }
         <div class="table-wrap">
             <table class="market-table market-table-grid" style="table-layout: fixed;">
                 <thead>
                     <tr>
                         <th style="width: 260px;">Nombre</th>
-                        <th style="width: 50px;">Bróker</th>
-                        <th class="text-align-right" style="width: 100px;">TITULOS /PRECIO COMPRA</th>
-                        <th class="text-align-right" style="width: 100px;">Valoración compra</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 70px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 55px;">Cambio</th>
+                        <th style="width: 110px; white-space: nowrap;">Código DGSFP</th>
+                        <th style="width: 60px;">BROKER</th>
+                        <th class="text-align-right" style="width: 110px; white-space: nowrap;">Participaciones /<br />Valor liquidativo</th>
+                        <th class="text-align-right" style="width: 110px;">Capital invertido</th>
+                        <th class="text-align-right" style="width: 90px;">Rentabilidad<br />último mes</th>
+                        <th class="text-align-right" style="width: 90px;">Rentabilidad<br />12 meses</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
-                        <th class="text-align-right" style="width: 110px;">Rentabilidad /<br />Importe</th>
+                        <th class="text-align-right" style="width: 130px;">Rentabilidad<br />desde inicio</th>
                         <th style="width: 100px;">Fecha/Hora Actualización</th>
-                        <th style="width: 60px;"></th>
+                        <th style="width: 52px;"></th>
                     </tr>
                 </thead>
-                <tbody id="tbody-portfolio-stocks">
-                    @if (Model.PortfolioStocks.Count == 0)
+                <tbody id="tbody-pensionplans">
+                    @if (Model.PensionPlans.Count == 0)
                     {
                         <tr>
-                            <td colspan="10" class="empty-state-cell">No hay acciones añadidas. Usa "+ Añadir acción" para empezar.</td>
+                            <td colspan="11" class="empty-state-cell">No hay planes de pensiones añadidos. Usa "+ Añadir Plan" para empezar.</td>
                         </tr>
                     }
                     else
                     {
-                        @foreach (var item in Model.PortfolioStocks)
+                        @foreach (var item in Model.PensionPlans)
                         {
-                            var holding = Model.StockHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
-                            var currentPrice = item.Price ?? 0m;
-                            var positionCount = holding?.PositionCount ?? 0m;
-                            var purchaseDisplayValue = holding?.UnitPurchasePrice ?? 0m;
-                            var purchaseValue = positionCount * purchaseDisplayValue;
-                            var currentValue = currentPrice * positionCount;
-                            var gainValue = currentValue - purchaseValue;
-                            var gainPercent = purchaseValue == 0 ? 0m : (gainValue / purchaseValue) * 100m;
-                            var isIngDirect = holding?.Broker == "ING";
-                            var isTradeRepublic = holding?.Broker == "TR";
+                            var saldoTotal = item.Participaciones * item.ValorLiquidativo;
+                            var gananciaDesdeInicio = saldoTotal - item.CapitalInvertido;
+                            var rentabilidadDesdeInicio = item.CapitalInvertido > 0 ? (saldoTotal - item.CapitalInvertido) / item.CapitalInvertido * 100m : 0m;
+                            var isIngDirect = item.Broker == "ING";
+                            var isTradeRepublic = item.Broker == "TR";
+                            var isOccident = item.Broker == "OCCIDENT";
 
                             <tr>
                                 <td class="name-cell">
                                     <span class="name-with-flag">
                                         <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
-                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
+                                        @item.Name
                                     </span>
                                 </td>
-                                <td class="broker-cell">
+                                <td class="isin-cell" style="white-space: nowrap;">@item.CodigoDgsfp</td>
+                                <td class="broker-cell text-align-center">
                                     @if (isIngDirect)
                                     {
                                         <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
@@ -1011,21 +1007,25 @@
                                     {
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
+                                    else if (isOccident)
+                                    {
+                                        <img class="broker-logo" src="/images/brokers/occident.png" alt="Occident" title="Occident" />
+                                    }
                                 </td>
                                 <td class="purchase-cell">
-                                    @positionCount.ToString("#,##0.######")<br />
-                                    @purchaseDisplayValue.ToString("#,##0.00 €")
+                                    @item.Participaciones.ToString("#,##0.######")<br />
+                                    @item.ValorLiquidativo.ToString("#,##0.00 €")
                                 </td>
-                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
-                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
-                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
-                                <td class="time-cell">@item.UpdatedText</td>
+                                <td class="price-cell price-cell-quote">@item.CapitalInvertido.ToString("#,##0.00 €")</td>
+                                <td class="@((item.RentabilidadUltimoMes >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadUltimoMes.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadUltimoMes >= 0 ? "▲" : "▼")</td>
+                                <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
+                                <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
+                                <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")<br />@gananciaDesdeInicio.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")<br />@DateTime.Now.ToString("HH:mm")</td>
                                 <td class="delete-cell">
-                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-stockholding-@item.Symbol" title="Editar">✎</button>
-                                    <form method="post" asp-page-handler="DeleteStockHolding" onsubmit="return confirm('¿Eliminar esta acción?');">
-                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-pensionplan-@Model.PensionPlans.IndexOf(item)" title="Editar">✎</button>
+                                    <form method="post" asp-page-handler="DeletePensionPlan" onsubmit="return confirm('¿Eliminar este plan de pensiones?');">
+                                        <input type="hidden" name="name" value="@item.Name" />
                                         <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
                                     </form>
                                 </td>
