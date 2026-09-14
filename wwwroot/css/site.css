@@ -875,6 +875,10 @@ body.wco-active .topbar-datetime {
   .mini-button,
   .delete-cell,
   .market-table thead th:last-child,
+  .portfolio-header-image,
+  .qr-box,
+  .portfolio-subtitle,
+  .portfolio-note,
   dialog {
     display: none !important;
   }
