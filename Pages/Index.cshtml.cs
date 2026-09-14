@@ -714,11 +714,13 @@ public class IndexModel : PageModel
             var match = await _service.SearchSymbolAsync(name, preferredExchanges);
             if (match.HasValue)
             {
+                var isin = await _service.LookupIsinByNameAsync(match.Value.Name);
+
                 var holdings = await _dataStore.LoadEntriesAsync<StockHolding>(StockHoldingsKey);
                 holdings.Add(new StockHolding(
                     match.Value.Name,
                     match.Value.Symbol,
-                    string.Empty,
+                    isin ?? string.Empty,
                     match.Value.CountryCode,
                     positionCount,
                     unitPurchasePrice,
@@ -761,13 +763,20 @@ public class IndexModel : PageModel
         var existing = holdings.FirstOrDefault(h => string.Equals(h.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
         if (existing != null && positionCount > 0 && unitPurchasePrice > 0)
         {
+            var trimmedIsin = isin?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(trimmedIsin))
+            {
+                // Si se deja en blanco, se intenta rellenar automáticamente (Wikidata) antes de guardar.
+                trimmedIsin = await _service.LookupIsinByNameAsync(existing.Name) ?? string.Empty;
+            }
+
             var index = holdings.IndexOf(existing);
             holdings[index] = existing with
             {
                 PositionCount = positionCount,
                 UnitPurchasePrice = unitPurchasePrice,
                 Broker = string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase) ? "TR" : "ING",
-                Isin = isin?.Trim() ?? string.Empty
+                Isin = trimmedIsin
             };
             var saved = await _dataStore.SaveEntriesAsync(StockHoldingsKey, holdings);
             if (!saved)

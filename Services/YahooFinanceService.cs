@@ -218,6 +218,97 @@ public sealed class YahooFinanceService
         }
     }
 
+    /// <summary>
+    /// Busca el código ISIN de una empresa cotizada consultando Wikidata (propiedad P946 "ISIN"),
+    /// ya que las APIs gratuitas de Yahoo Finance / OpenFIGI no exponen este dato.
+    /// Devuelve null si no se encuentra ninguna coincidencia con ISIN registrado.
+    /// </summary>
+    public async Task<string?> LookupIsinByNameAsync(string companyName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(companyName))
+        {
+            return null;
+        }
+
+        // Wikidata suele indexar las empresas sin la forma jurídica (", S.A.", ", Inc.", etc.),
+        // así que se prueba primero con el nombre limpio y, si no hay resultado, con el original.
+        var cleanedName = Regex.Replace(companyName, @",?\s*(S\.?A\.?U?\.?|S\.?L\.?U?\.?|PLC|Inc\.?|Corp\.?|Ltd\.?|LLC|N\.?V\.?|AG|SE)\s*$", string.Empty, RegexOptions.IgnoreCase).Trim();
+
+        var isin = await LookupIsinInternalAsync(cleanedName, cancellationToken);
+        if (isin != null)
+        {
+            return isin;
+        }
+
+        if (!string.Equals(cleanedName, companyName, StringComparison.OrdinalIgnoreCase))
+        {
+            isin = await LookupIsinInternalAsync(companyName, cancellationToken);
+        }
+
+        return isin;
+    }
+
+    private async Task<string?> LookupIsinInternalAsync(string companyName, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var searchUrl = $"https://www.wikidata.org/w/api.php?action=wbsearchentities&search={Uri.EscapeDataString(companyName)}&language=es&format=json&type=item&limit=1";
+            using var searchRequest = new HttpRequestMessage(HttpMethod.Get, searchUrl);
+            searchRequest.Headers.UserAgent.ParseAdd("CotizacionesBolsaWeb/1.0 (contacto: app privada)");
+            using var searchResponse = await _httpClient.SendAsync(searchRequest, cancellationToken);
+            if (!searchResponse.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var searchPayload = await searchResponse.Content.ReadAsStringAsync(cancellationToken);
+            using var searchJson = JsonDocument.Parse(searchPayload);
+            if (!searchJson.RootElement.TryGetProperty("search", out var searchResults) ||
+                searchResults.ValueKind != JsonValueKind.Array ||
+                searchResults.GetArrayLength() == 0)
+            {
+                return null;
+            }
+
+            var entityId = searchResults[0].GetProperty("id").GetString();
+            if (string.IsNullOrWhiteSpace(entityId))
+            {
+                return null;
+            }
+
+            var claimsUrl = $"https://www.wikidata.org/w/api.php?action=wbgetclaims&entity={Uri.EscapeDataString(entityId)}&property=P946&format=json";
+            using var claimsRequest = new HttpRequestMessage(HttpMethod.Get, claimsUrl);
+            claimsRequest.Headers.UserAgent.ParseAdd("CotizacionesBolsaWeb/1.0 (contacto: app privada)");
+            using var claimsResponse = await _httpClient.SendAsync(claimsRequest, cancellationToken);
+            if (!claimsResponse.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var claimsPayload = await claimsResponse.Content.ReadAsStringAsync(cancellationToken);
+            using var claimsJson = JsonDocument.Parse(claimsPayload);
+            if (!claimsJson.RootElement.TryGetProperty("claims", out var claims) ||
+                !claims.TryGetProperty("P946", out var isinClaims) ||
+                isinClaims.ValueKind != JsonValueKind.Array ||
+                isinClaims.GetArrayLength() == 0)
+            {
+                return null;
+            }
+
+            var isin = isinClaims[0]
+                .GetProperty("mainsnak")
+                .GetProperty("datavalue")
+                .GetProperty("value")
+                .GetString();
+
+            return string.IsNullOrWhiteSpace(isin) ? null : isin;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private static string? MapExchangeToCountry(string? exchange) => exchange switch
     {
         "NMS" or "NYQ" or "NGM" or "PCX" or "ASE" or "BTS" => "US",
