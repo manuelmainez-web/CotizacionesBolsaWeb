@@ -866,7 +866,7 @@ body.wco-active .topbar-datetime {
 
 @media print {
   @page {
-    size: landscape;
+    size: portrait;
     margin: 8mm 5mm;
   }
 
