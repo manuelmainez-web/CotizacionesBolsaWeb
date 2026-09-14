@@ -323,23 +323,32 @@
     <div class="market-panel mt-4 notranslate" translate="no">
         <div class="panel-head panel-head-row">
             <span>Materias primas <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+            <button type="button" class="mini-button" data-dialog-target="add-commodity-dialog">+ Añadir Materia Prima</button>
         </div>
+        @if (!string.IsNullOrWhiteSpace(Model.CommodityError))
+        {
+            <div class="form-error-banner">@Model.CommodityError</div>
+        }
         <div class="table-wrap">
             <table class="market-table market-table-compact">
                 <thead>
                     <tr>
                         <th>Nombre</th>
+                        <th>Clasificación</th>
                         <th class="text-align-right">Último</th>
                         <th class="text-align-right">Máximo</th>
                         <th class="text-align-right">Mínimo</th>
                         <th class="text-align-right">Var.</th>
                         <th class="text-align-right">% Var.</th>
                         <th>Fecha/Hora</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody id="tbody-commodities">
                     @foreach (var item in Model.Commodities)
                     {
+                        var classification = Model.CommodityHoldings.FirstOrDefault(h => h.Symbol == item.Symbol)?.Classification ?? "—";
+
                         <tr>
                             <td class="name-cell">
                                 <span class="name-with-flag">
@@ -347,18 +356,53 @@
                                     <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
                                 </span>
                             </td>
+                            <td>@classification</td>
                             <td class="price-cell price-cell-quote">@item.DisplayPrice $</td>
                             <td class="price-cell price-cell-quote">@item.DisplayHigh $</td>
                             <td class="price-cell price-cell-quote">@item.DisplayLow $</td>
                             <td class="@item.TrendCssClass">@item.DisplayChange $</td>
                             <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                             <td class="time-cell">@item.UpdatedText</td>
+                            <td class="delete-cell">
+                                <form method="post" asp-page-handler="DeleteCommodity" onsubmit="return confirm('¿Eliminar esta materia prima?');">
+                                    <input type="hidden" name="symbol" value="@item.Symbol" />
+                                    <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                </form>
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
     </div>
+
+    <dialog id="add-commodity-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddCommodity">
+            <h3>Añadir Materia Prima</h3>
+            <label>
+                Materia prima
+                <select name="symbol" required>
+                    @foreach (var commodity in IndexModel.AvailableCommodities)
+                    {
+                        <option value="@commodity.Key">@commodity.Value</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Clasificación
+                <select name="classification" required>
+                    @foreach (var classification in IndexModel.AvailableCommodityClassifications)
+                    {
+                        <option value="@classification">@classification</option>
+                    }
+                </select>
+            </label>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
 
     <div class="blank-lines-2"></div>
 
@@ -410,7 +454,7 @@
             <button type="button" class="mini-button" data-dialog-target="add-etf-dialog">+ Añadir ETF</button>
         </div>
         <div class="table-wrap">
-            <table class="market-table" style="table-layout: fixed;">
+            <table class="market-table market-table-grid" style="table-layout: fixed;">
                 <thead>
                     <tr>
                         <th style="width: 260px;">Nombre</th>
@@ -577,7 +621,7 @@
             <div class="form-error-banner">@Model.FundError</div>
         }
         <div class="table-wrap">
-            <table class="market-table" style="table-layout: fixed;">
+            <table class="market-table market-table-grid" style="table-layout: fixed;">
                 <thead>
                     <tr>
                         <th style="width: 260px;">Nombre</th>

@@ -17,6 +17,7 @@ public class IndexModel : PageModel
     private const string PensionPlansKey = "custom-pensionplans";
     private const string CheckingAccountsKey = "custom-checkingaccounts";
     private const string CashKey = "custom-cash";
+    private const string CommoditiesKey = "custom-commodities";
 
     private readonly YahooFinanceService _service = new();
     private readonly DataStore _dataStore;
@@ -50,6 +51,9 @@ public class IndexModel : PageModel
     [TempData]
     public string? CashError { get; set; }
 
+    [TempData]
+    public string? CommodityError { get; set; }
+
     public List<Quote> Indices { get; private set; } = new();
     public List<Quote> Stocks { get; private set; } = new();
     public List<Quote> Etfs { get; private set; } = new();
@@ -57,6 +61,7 @@ public class IndexModel : PageModel
     public List<Quote> PortfolioStocks { get; private set; } = new();
     public List<Quote> EtfsControl { get; private set; } = new();
     public List<Quote> Commodities { get; private set; } = new();
+    public List<CommodityHolding> CommodityHoldings { get; private set; } = new();
     public List<EtfHolding> EtfHoldings { get; private set; } = new();
     public List<FundHolding> FundHoldings { get; private set; } = new();
     public List<StockHolding> StockHoldings { get; private set; } = new();
@@ -179,14 +184,22 @@ public class IndexModel : PageModel
         PortfolioStocks = stockHoldingConfigs.Count > 0 ? await _service.GetQuotesAsync(stockHoldingConfigs) : new List<Quote>();
         EtfsControl = etfControlConfigs.Count > 0 ? await _service.GetQuotesAsync(etfControlConfigs) : new List<Quote>();
 
-        var commoditiesConfigs = new List<QuoteConfig>
+        if (!await _dataStore.ExistsAsync(CommoditiesKey))
         {
-            new("Oro", "GC=F", null, "US"),
-            new("Plata", "SI=F", null, "US"),
-            new("Petróleo Brent", "BZ=F", null, "US"),
-            new("Petróleo Crudo WTI", "CL=F", null, "US")
-        };
-        Commodities = await _service.GetQuotesAsync(commoditiesConfigs);
+            await _dataStore.SaveEntriesAsync(CommoditiesKey, new List<CommodityHolding>
+            {
+                new("Oro", "GC=F", "Metales preciosos"),
+                new("Plata", "SI=F", "Metales preciosos"),
+                new("Petróleo Brent", "BZ=F", "Energía"),
+                new("Petróleo Crudo WTI", "CL=F", "Energía")
+            });
+        }
+
+        CommodityHoldings = await _dataStore.LoadEntriesAsync<CommodityHolding>(CommoditiesKey);
+        var commoditiesConfigs = CommodityHoldings
+            .Select(h => new QuoteConfig(h.Name, h.Symbol, null, "US"))
+            .ToList();
+        Commodities = commoditiesConfigs.Count > 0 ? await _service.GetQuotesAsync(commoditiesConfigs) : new List<Quote>();
 
         foreach (var quote in Indices)
         {
@@ -358,6 +371,70 @@ public class IndexModel : PageModel
         {
             holdings.RemoveAt(index);
             await _dataStore.SaveEntriesAsync(CashKey, holdings);
+        }
+
+        return RedirectToPage();
+    }
+
+    public static readonly Dictionary<string, string> AvailableCommodities = new()
+    {
+        ["GC=F"] = "Oro",
+        ["SI=F"] = "Plata",
+        ["PL=F"] = "Platino",
+        ["PA=F"] = "Paladio",
+        ["HG=F"] = "Cobre",
+        ["BZ=F"] = "Petróleo Brent",
+        ["CL=F"] = "Petróleo Crudo WTI",
+        ["NG=F"] = "Gas Natural",
+        ["ZC=F"] = "Maíz",
+        ["ZW=F"] = "Trigo",
+        ["ZS=F"] = "Soja",
+        ["KC=F"] = "Café",
+        ["CT=F"] = "Algodón",
+        ["SB=F"] = "Azúcar",
+        ["CC=F"] = "Cacao"
+    };
+
+    public static readonly string[] AvailableCommodityClassifications = new[]
+    {
+        "Metales preciosos",
+        "Metales industriales",
+        "Energía",
+        "Agrícolas"
+    };
+
+    public async Task<IActionResult> OnPostAddCommodityAsync(string symbol, string classification)
+    {
+        if (string.IsNullOrWhiteSpace(symbol) || !AvailableCommodities.TryGetValue(symbol, out var name))
+        {
+            CommodityError = "Selecciona una materia prima válida.";
+            return RedirectToPage();
+        }
+
+        var holdings = await _dataStore.LoadEntriesAsync<CommodityHolding>(CommoditiesKey);
+        if (holdings.Any(h => h.Symbol == symbol))
+        {
+            CommodityError = $"{name} ya está añadida.";
+            return RedirectToPage();
+        }
+
+        holdings.Add(new CommodityHolding(name, symbol, string.IsNullOrWhiteSpace(classification) ? "Otras" : classification));
+        await _dataStore.SaveEntriesAsync(CommoditiesKey, holdings);
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostDeleteCommodityAsync(string symbol)
+    {
+        if (!string.IsNullOrWhiteSpace(symbol))
+        {
+            var holdings = await _dataStore.LoadEntriesAsync<CommodityHolding>(CommoditiesKey);
+            var toRemove = holdings.FirstOrDefault(h => string.Equals(h.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
+            if (toRemove != null)
+            {
+                holdings.Remove(toRemove);
+                await _dataStore.SaveEntriesAsync(CommoditiesKey, holdings);
+            }
         }
 
         return RedirectToPage();
