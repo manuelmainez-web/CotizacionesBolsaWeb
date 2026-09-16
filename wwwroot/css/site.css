@@ -906,6 +906,10 @@ body.wco-active .topbar-datetime {
     margin: 2px 0 6px;
   }
 
+  body.print-cartera-only .market-panel-watchlist {
+    display: none !important;
+  }
+
   .summary-strip.is-collapsed {
     display: grid !important;
   }

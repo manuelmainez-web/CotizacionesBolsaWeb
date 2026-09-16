@@ -71,6 +71,24 @@ document.addEventListener('click', function (event) {
     window.addEventListener('beforeprint', updatePrintDateTime);
 })();
 
+// Botón "Imprimir cartera": imprime solo cartera, cuenta corriente, efectivo
+// y las casillas de resumen, ocultando los paneles de control de cotizaciones.
+(function () {
+    var boton = document.getElementById('btn-print-cartera');
+    if (!boton) {
+        return;
+    }
+
+    boton.addEventListener('click', function () {
+        document.body.classList.add('print-cartera-only');
+        window.print();
+    });
+
+    window.addEventListener('afterprint', function () {
+        document.body.classList.remove('print-cartera-only');
+    });
+})();
+
 // Reposiciona el reloj y el botón de actualizar junto a los controles de
 // ventana (minimizar/maximizar/cerrar) cuando la PWA está instalada y el
 // navegador soporta Window Controls Overlay.

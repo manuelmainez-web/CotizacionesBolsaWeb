@@ -32,6 +32,9 @@
                     <img class="quick-link-icon" src="/images/brokers/traderepublic.png" alt="Trade Republic" />
                     <span translate="no" class="notranslate">Trade Republic</span>
                 </a>
+                <button type="button" class="mini-button quick-link-button" id="btn-print-cartera" title="Imprime solo la cartera, cuenta corriente y efectivo con las casillas de resumen">
+                    <span>🖨️ Imprimir cartera</span>
+                </button>
             </div>
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.PublicUrl))
@@ -75,7 +78,7 @@
 
     <div class="blank-line-1"></div>
 
-    <div class="market-panel">
+    <div class="market-panel market-panel-watchlist">
         <div class="panel-head panel-head-row">
             <span>Índices <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
             <button type="button" class="mini-button" data-dialog-target="add-index-dialog">+ Añadir índice</button>
@@ -149,7 +152,7 @@
         </form>
     </dialog>
 
-    <div class="market-panel mt-4">
+    <div class="market-panel mt-4 market-panel-watchlist">
         <div class="panel-head panel-head-row">
             <span>Acciones <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
             <button type="button" class="mini-button" data-dialog-target="add-stock-dialog">+ Añadir acción</button>
@@ -241,7 +244,7 @@
         </form>
     </dialog>
 
-    <div class="market-panel mt-4">
+    <div class="market-panel mt-4 market-panel-watchlist">
         <div class="panel-head panel-head-row">
             <span>ETF <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
             <button type="button" class="mini-button" data-dialog-target="add-etf-control-dialog">+ Añadir ETF</button>
@@ -321,7 +324,7 @@
         </form>
     </dialog>
 
-    <div class="market-panel mt-4 notranslate" translate="no">
+    <div class="market-panel mt-4 notranslate market-panel-watchlist" translate="no">
         <div class="panel-head panel-head-row">
             <span>Materias primas <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
             <button type="button" class="mini-button" data-dialog-target="add-commodity-dialog">+ Añadir Materia Prima</button>
