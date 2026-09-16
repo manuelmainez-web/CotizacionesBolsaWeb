@@ -89,6 +89,33 @@ document.addEventListener('click', function (event) {
     });
 })();
 
+// Alinea verticalmente los botones de imprimir con la fila de enlaces
+// rápidos (Investing/Ingdirect/Trade Republic), manteniéndolos pegados al
+// borde derecho de toda la página.
+(function () {
+    var acciones = document.getElementById('print-actions');
+    var quickLinks = document.querySelector('.quick-links');
+    var header = document.querySelector('.portfolio-header');
+    if (!acciones || !quickLinks || !header) {
+        return;
+    }
+
+    function reposicionar() {
+        var headerRect = header.getBoundingClientRect();
+        var quickLinksRect = quickLinks.getBoundingClientRect();
+        acciones.style.top = (quickLinksRect.top - headerRect.top) + 'px';
+        acciones.style.height = quickLinksRect.height + 'px';
+    }
+
+    reposicionar();
+    window.addEventListener('resize', reposicionar);
+    window.addEventListener('load', reposicionar);
+
+    if (window.ResizeObserver) {
+        new ResizeObserver(reposicionar).observe(quickLinks);
+    }
+})();
+
 // Reposiciona el reloj y el botón de actualizar junto a los controles de
 // ventana (minimizar/maximizar/cerrar) cuando la PWA está instalada y el
 // navegador soporta Window Controls Overlay.

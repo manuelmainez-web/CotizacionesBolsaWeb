@@ -32,15 +32,15 @@
                     <img class="quick-link-icon" src="/images/brokers/traderepublic.png" alt="Trade Republic" />
                     <span translate="no" class="notranslate">Trade Republic</span>
                 </a>
-                <div class="print-actions">
-                    <button type="button" class="mini-button quick-link-button" id="btn-print-cartera" title="Imprime solo la cartera, cuenta corriente y efectivo con las casillas de resumen">
-                        <span>🖨️ Imprimir cartera</span>
-                    </button>
-                    <button type="button" class="mini-button quick-link-button" id="btn-print-page" title="Imprime toda la página">
-                        <span>🖨️ Imprimir todo</span>
-                    </button>
-                </div>
             </div>
+        </div>
+        <div class="print-actions" id="print-actions">
+            <button type="button" class="mini-button quick-link-button" id="btn-print-cartera" title="Imprime solo la cartera, cuenta corriente y efectivo con las casillas de resumen">
+                <span>🖨️ Imprimir cartera</span>
+            </button>
+            <button type="button" class="mini-button quick-link-button" id="btn-print-page" title="Imprime toda la página">
+                <span>🖨️ Imprimir todo</span>
+            </button>
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.PublicUrl))
         {
