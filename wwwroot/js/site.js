@@ -251,6 +251,74 @@ document.addEventListener('click', function (event) {
     });
 })();
 
+// Reorganiza, solo para "Imprimir cartera", las tablas de cartera (ETF,
+// Fondos, Acciones, Planes de pensiones) agrupándolas por bróker: primero
+// el logotipo de ING Direct seguido de sus tablas (solo filas ING), y
+// después el logotipo de Trade Republic seguido de sus tablas (solo filas
+// TR). Las tablas sin ninguna fila de ese bróker se omiten (igual que el
+// resto de casos de "tabla vacía").
+function reorganizarCarteraPorBroker(shellClone) {
+    var origen = window.location.origin;
+
+    function filtrarFilasPorBroker(tabla, broker) {
+        var algunaVisible = false;
+        tabla.querySelectorAll('tbody tr[data-broker]').forEach(function (fila) {
+            if (fila.getAttribute('data-broker') === broker) {
+                algunaVisible = true;
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+        return algunaVisible;
+    }
+
+    function construirGrupoBroker(paneles, broker, logoSrc, logoAlt) {
+        var grupo = document.createElement('div');
+        grupo.className = 'print-broker-group';
+
+        var logo = document.createElement('img');
+        logo.className = 'print-broker-group-logo';
+        logo.src = logoSrc;
+        logo.alt = logoAlt;
+        grupo.appendChild(logo);
+
+        paneles.forEach(function (panelOriginal) {
+            var panel = panelOriginal.cloneNode(true);
+            // Al clonar cada panel dos veces (una por bróker) se duplicarían
+            // ids (tbody, etc.), lo que confunde a paged.js al maquetar.
+            // Como en el HTML impreso no se usan, se eliminan del clon.
+            panel.removeAttribute('id');
+            panel.querySelectorAll('[id]').forEach(function (el) {
+                el.removeAttribute('id');
+            });
+            if (filtrarFilasPorBroker(panel, broker)) {
+                grupo.appendChild(panel);
+            }
+        });
+
+        return grupo;
+    }
+
+    var paneles = Array.prototype.filter.call(
+        shellClone.querySelectorAll('.market-panel'),
+        function (panel) { return panel.querySelector('tr[data-broker]'); }
+    );
+
+    if (paneles.length === 0) {
+        return;
+    }
+
+    var primerPanel = paneles[0];
+    var grupoIng = construirGrupoBroker(paneles, 'ING', origen + '/images/brokers/ing-direct-logo.png', 'ING Direct');
+    var grupoTr = construirGrupoBroker(paneles, 'TR', origen + '/images/brokers/logotipo-trade-republic.png', 'Trade Republic');
+
+    primerPanel.parentNode.insertBefore(grupoIng, primerPanel);
+    primerPanel.parentNode.insertBefore(grupoTr, primerPanel);
+    paneles.forEach(function (panel) {
+        panel.remove();
+    });
+}
+
 // Impresión con numeración real de página ("Página - N -") usando paged.js.
 // Chrome/Edge no exponen counter(page) ni los márgenes @page al imprimir de
 // forma nativa, así que se clona el contenido ya filtrado (reutilizando el
@@ -270,6 +338,10 @@ function imprimirConNumeracion(bodyClass) {
 
     if (bodyClass) {
         document.body.classList.remove(bodyClass);
+    }
+
+    if (bodyClass === 'print-cartera-only') {
+        reorganizarCarteraPorBroker(copiaContenido);
     }
 
     var anterior = document.getElementById('iframe-impresion-cartera');

@@ -981,6 +981,21 @@ body.wco-active .topbar-datetime {
     display: block;
   }
 
+  .print-broker-group {
+    margin-top: 18px;
+  }
+
+  .print-broker-group:first-of-type {
+    margin-top: 0;
+  }
+
+  .print-broker-group-logo {
+    max-width: 220px;
+    height: auto;
+    display: block;
+    margin-bottom: 10px;
+  }
+
   .print-broker-letterhead-name {
     color: #000000 !important;
     font-weight: 700;
