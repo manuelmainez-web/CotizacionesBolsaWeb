@@ -933,6 +933,8 @@ body.wco-active .topbar-datetime {
     font-size: 9pt;
     color: #000000;
     margin: 2px 0 6px;
+    padding-left: 0 !important;
+    text-indent: 0 !important;
   }
 
   .print-broker-letterhead {
@@ -963,7 +965,7 @@ body.wco-active .topbar-datetime {
   .print-cartera-letterhead-title {
     color: #000000 !important;
     font-weight: 700;
-    font-size: 15pt;
+    font-size: 20pt;
     margin: 0 0 10px;
   }
 
@@ -1019,6 +1021,8 @@ body.wco-active .topbar-datetime {
     color: #000000 !important;
     font-size: 9pt;
     margin: 2px 0 0;
+    padding-left: 0 !important;
+    text-indent: 0 !important;
   }
 
   body.print-cartera-only .market-panel-watchlist {
