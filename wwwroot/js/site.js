@@ -56,8 +56,12 @@ document.addEventListener('click', function (event) {
 
 // Fecha y hora de generación del informe, solo visible al imprimir
 (function () {
-    var el = document.getElementById('print-datetime');
-    if (!el) {
+    var elementos = [
+        document.getElementById('print-datetime'),
+        document.getElementById('print-datetime-ing')
+    ].filter(Boolean);
+
+    if (elementos.length === 0) {
         return;
     }
 
@@ -65,7 +69,10 @@ document.addEventListener('click', function (event) {
         var now = new Date();
         var fecha = now.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
         var hora = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        el.textContent = 'Informe generado el ' + fecha + ' a las ' + hora;
+        var texto = 'Informe generado el ' + fecha + ' a las ' + hora;
+        elementos.forEach(function (el) {
+            el.textContent = texto;
+        });
     }
 
     window.addEventListener('beforeprint', updatePrintDateTime);

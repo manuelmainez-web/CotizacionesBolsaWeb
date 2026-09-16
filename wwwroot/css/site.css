@@ -455,6 +455,10 @@ body.wco-active .topbar-datetime {
   display: none;
 }
 
+.print-broker-letterhead {
+  display: none;
+}
+
 .market-panel {
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
@@ -928,6 +932,35 @@ body.wco-active .topbar-datetime {
     font-size: 9pt;
     color: #000000;
     margin: 2px 0 6px;
+  }
+
+  .print-broker-letterhead {
+    display: none;
+    margin-bottom: 10px;
+  }
+
+  body.print-broker-ing .print-broker-letterhead-ing {
+    display: block !important;
+  }
+
+  .print-broker-letterhead-logo {
+    max-width: 220px;
+    height: auto;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .print-broker-letterhead-name {
+    color: #000000 !important;
+    font-weight: 700;
+    font-size: 12pt;
+    margin: 0;
+  }
+
+  .print-broker-letterhead-datetime {
+    color: #000000 !important;
+    font-size: 9pt;
+    margin: 2px 0 0;
   }
 
   body.print-cartera-only .market-panel-watchlist {
