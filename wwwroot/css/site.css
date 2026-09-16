@@ -948,11 +948,23 @@ body.wco-active .topbar-datetime {
     display: block !important;
   }
 
+  body.print-cartera-only .print-cartera-letterhead {
+    display: block !important;
+  }
+
   body.print-broker-ing .portfolio-avatar,
   body.print-broker-tr .portfolio-avatar,
+  body.print-cartera-only .portfolio-avatar,
   body.print-broker-ing #print-datetime,
   body.print-broker-tr #print-datetime {
     display: none !important;
+  }
+
+  .print-cartera-letterhead-title {
+    color: #000000 !important;
+    font-weight: 700;
+    font-size: 15pt;
+    margin: 0 0 10px;
   }
 
   .print-broker-letterhead-top {
