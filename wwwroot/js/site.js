@@ -393,10 +393,14 @@ function imprimirConNumeracion(bodyClass) {
     var scriptPaged = ventana.document.createElement('script');
     scriptPaged.src = 'https://unpkg.com/pagedjs/dist/paged.polyfill.js';
     scriptPaged.onload = function () {
+        // Se añade "?v=" con la hora actual para evitar que el navegador
+        // sirva una copia cacheada antigua de estos CSS (no llevan la
+        // versión que sí añade asp-append-version en la página principal).
+        var cacheBuster = '?v=' + Date.now();
         var hojasDeEstilo = [
-            origen + '/lib/bootstrap/dist/css/bootstrap.min.css',
-            origen + '/css/site.css',
-            origen + '/css/print-pagination.css'
+            origen + '/lib/bootstrap/dist/css/bootstrap.min.css' + cacheBuster,
+            origen + '/css/site.css' + cacheBuster,
+            origen + '/css/print-pagination.css' + cacheBuster
         ];
         var previsualizador = new ventana.Paged.Previewer();
         previsualizador.preview(copiaContenido.outerHTML, hojasDeEstilo, ventana.document.body).then(function () {

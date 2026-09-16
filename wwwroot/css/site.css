@@ -1013,6 +1013,11 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
+  body.print-cartera-only #summary-strip-label-ing,
+  body.print-cartera-only #summary-strip-label-tr {
+    display: none !important;
+  }
+
   body.print-broker-ing .market-panel-watchlist,
   body.print-broker-ing .market-panel-non-cartera,
   body.print-broker-ing #summary-strip-general,
