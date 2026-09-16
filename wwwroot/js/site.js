@@ -117,8 +117,30 @@ document.addEventListener('click', function (event) {
 
 // Al imprimir (cualquiera de los botones o Ctrl+P), oculta por completo los
 // paneles cuya tabla no tenga ninguna fila de datos visible (ni las vacías
-// por defecto, ni las descartadas por el filtro de bróker).
+// por defecto, ni las descartadas por el filtro de bróker). No se usa
+// getComputedStyle porque el navegador no garantiza que los estilos de
+// @media print ya estén aplicados en el momento del evento 'beforeprint';
+// en su lugar se replica la misma condición que usa el CSS de impresión
+// (atributo data-broker + clase del body) directamente en JS.
 (function () {
+    function filaTieneDatos(fila) {
+        if (fila.querySelector('.empty-state-cell')) {
+            return false;
+        }
+
+        var broker = fila.getAttribute('data-broker');
+        if (broker !== null) {
+            if (document.body.classList.contains('print-broker-ing') && broker !== 'ING') {
+                return false;
+            }
+            if (document.body.classList.contains('print-broker-tr') && broker !== 'TR') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     function ocultarPanelesVacios() {
         document.querySelectorAll('.market-panel').forEach(function (panel) {
             var filas = panel.querySelectorAll('tbody tr');
@@ -126,12 +148,7 @@ document.addEventListener('click', function (event) {
                 return;
             }
 
-            var tieneDatosVisibles = Array.prototype.some.call(filas, function (fila) {
-                if (fila.querySelector('.empty-state-cell')) {
-                    return false;
-                }
-                return getComputedStyle(fila).display !== 'none';
-            });
+            var tieneDatosVisibles = Array.prototype.some.call(filas, filaTieneDatos);
 
             if (!tieneDatosVisibles) {
                 panel.setAttribute('data-print-hidden-empty', 'true');
