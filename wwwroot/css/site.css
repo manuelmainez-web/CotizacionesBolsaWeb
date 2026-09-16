@@ -943,6 +943,10 @@ body.wco-active .topbar-datetime {
     display: block !important;
   }
 
+  body.print-broker-tr .print-broker-letterhead-tr {
+    display: block !important;
+  }
+
   .print-broker-letterhead-logo {
     max-width: 220px;
     height: auto;

@@ -58,7 +58,8 @@ document.addEventListener('click', function (event) {
 (function () {
     var elementos = [
         document.getElementById('print-datetime'),
-        document.getElementById('print-datetime-ing')
+        document.getElementById('print-datetime-ing'),
+        document.getElementById('print-datetime-tr')
     ].filter(Boolean);
 
     if (elementos.length === 0) {
