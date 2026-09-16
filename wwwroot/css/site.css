@@ -962,4 +962,8 @@ body.wco-active .topbar-datetime {
     width: 105px !important;
     min-width: 105px !important;
   }
+
+  .market-table.market-table-cartera {
+    table-layout: fixed !important;
+  }
 }
