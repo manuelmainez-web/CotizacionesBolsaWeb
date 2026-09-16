@@ -963,6 +963,10 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
+  body.print-cartera-only .portfolio-header {
+    display: none !important;
+  }
+
   .print-cartera-letterhead-title {
     color: #000000 !important;
     font-weight: 700;
