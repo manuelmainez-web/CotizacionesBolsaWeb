@@ -455,6 +455,10 @@ body.wco-active .topbar-datetime {
   display: none;
 }
 
+.print-page-numbers {
+  display: none;
+}
+
 .market-panel {
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
@@ -902,7 +906,7 @@ body.wco-active .topbar-datetime {
 
 @media print {
   @page {
-    size: portrait;
+    size: A4 portrait;
     margin: 8mm 5mm;
   }
 
@@ -921,6 +925,21 @@ body.wco-active .topbar-datetime {
   .portfolio-note,
   dialog {
     display: none !important;
+  }
+
+  .print-page-numbers {
+    display: block !important;
+    position: relative;
+    height: 0;
+  }
+
+  .print-page-numbers .page-number-marker {
+    position: absolute;
+    right: 0;
+    width: auto;
+    text-align: right;
+    font-size: 8pt;
+    color: #000000;
   }
 
   .print-only {

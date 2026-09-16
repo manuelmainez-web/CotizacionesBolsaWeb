@@ -148,9 +148,23 @@ document.addEventListener('click', function (event) {
                 return;
             }
 
-            var tieneDatosVisibles = Array.prototype.some.call(filas, filaTieneDatos);
+            var algunaVisible = false;
 
-            if (!tieneDatosVisibles) {
+            filas.forEach(function (fila) {
+                if (filaTieneDatos(fila)) {
+                    algunaVisible = true;
+                } else if (fila.hasAttribute('data-broker')) {
+                    // Oculta también por JS (además del CSS de @media print)
+                    // las filas descartadas por el filtro de bróker, para que
+                    // el cálculo de altura/páginas sea fiable sin depender de
+                    // que el navegador ya haya aplicado los estilos de
+                    // impresión en el momento de 'beforeprint'.
+                    fila.setAttribute('data-print-hidden-row', 'true');
+                    fila.style.display = 'none';
+                }
+            });
+
+            if (!algunaVisible) {
                 panel.setAttribute('data-print-hidden-empty', 'true');
                 panel.style.display = 'none';
             }
@@ -161,6 +175,10 @@ document.addEventListener('click', function (event) {
         document.querySelectorAll('[data-print-hidden-empty="true"]').forEach(function (panel) {
             panel.style.display = '';
             panel.removeAttribute('data-print-hidden-empty');
+        });
+        document.querySelectorAll('[data-print-hidden-row="true"]').forEach(function (fila) {
+            fila.style.display = '';
+            fila.removeAttribute('data-print-hidden-row');
         });
     }
 
@@ -233,4 +251,48 @@ document.addEventListener('click', function (event) {
     boton.addEventListener('click', function () {
         window.print();
     });
+})();
+
+// Numeración de páginas al imprimir, en la esquina inferior derecha de cada
+// hoja ("Página - N -"). El navegador no expone el número real de página
+// (Chrome no implementa los márgenes @page ni counter(page)), así que se
+// calcula una aproximación: se mide la altura total del contenido visible
+// (una vez ocultados paneles/filas vacías o descartadas por el filtro de
+// bróker) y se divide entre la altura útil de una hoja A4 con los márgenes
+// configurados en el CSS de impresión, colocando un marcador por página
+// resultante. Puede desajustarse ligeramente si algún bloque salta de
+// página por las reglas "evitar salto dentro" (break-inside: avoid).
+(function () {
+    var contenedor = document.getElementById('print-page-numbers');
+    var shell = document.getElementById('market-shell');
+    if (!contenedor || !shell) {
+        return;
+    }
+
+    var MM_A_PX = 96 / 25.4;
+    var ALTO_PAGINA_MM = 297;
+    var MARGEN_VERTICAL_MM = 8;
+    var ALTO_UTIL_PX = (ALTO_PAGINA_MM - MARGEN_VERTICAL_MM * 2) * MM_A_PX;
+
+    function generarNumerosDePagina() {
+        contenedor.innerHTML = '';
+
+        var alturaContenido = shell.scrollHeight - contenedor.getBoundingClientRect().height;
+        var numPaginas = Math.max(1, Math.ceil(alturaContenido / ALTO_UTIL_PX));
+
+        for (var i = 1; i <= numPaginas; i++) {
+            var marcador = document.createElement('div');
+            marcador.className = 'page-number-marker';
+            marcador.style.top = (i * ALTO_UTIL_PX - 22) + 'px';
+            marcador.textContent = 'Página - ' + i + ' -';
+            contenedor.appendChild(marcador);
+        }
+    }
+
+    function limpiarNumerosDePagina() {
+        contenedor.innerHTML = '';
+    }
+
+    window.addEventListener('beforeprint', generarNumerosDePagina);
+    window.addEventListener('afterprint', limpiarNumerosDePagina);
 })();
