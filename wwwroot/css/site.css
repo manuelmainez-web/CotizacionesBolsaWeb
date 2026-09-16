@@ -1021,9 +1021,13 @@ body.wco-active .topbar-datetime {
   .print-broker-letterhead-datetime {
     color: #000000 !important;
     font-size: 9pt;
-    margin: 2px 0 0;
+    margin: 6px 0 0;
     padding-left: 0 !important;
     text-indent: 0 !important;
+  }
+
+  #summary-strip-label {
+    color: #000000 !important;
   }
 
   body.print-cartera-only .market-panel-watchlist {
