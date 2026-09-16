@@ -115,6 +115,42 @@ document.addEventListener('click', function (event) {
     });
 })();
 
+// Al imprimir (cualquiera de los botones o Ctrl+P), oculta por completo los
+// paneles cuya tabla no tenga ninguna fila de datos visible (ni las vacías
+// por defecto, ni las descartadas por el filtro de bróker).
+(function () {
+    function ocultarPanelesVacios() {
+        document.querySelectorAll('.market-panel').forEach(function (panel) {
+            var filas = panel.querySelectorAll('tbody tr');
+            if (filas.length === 0) {
+                return;
+            }
+
+            var tieneDatosVisibles = Array.prototype.some.call(filas, function (fila) {
+                if (fila.querySelector('.empty-state-cell')) {
+                    return false;
+                }
+                return getComputedStyle(fila).display !== 'none';
+            });
+
+            if (!tieneDatosVisibles) {
+                panel.setAttribute('data-print-hidden-empty', 'true');
+                panel.style.display = 'none';
+            }
+        });
+    }
+
+    function restaurarPanelesVacios() {
+        document.querySelectorAll('[data-print-hidden-empty="true"]').forEach(function (panel) {
+            panel.style.display = '';
+            panel.removeAttribute('data-print-hidden-empty');
+        });
+    }
+
+    window.addEventListener('beforeprint', ocultarPanelesVacios);
+    window.addEventListener('afterprint', restaurarPanelesVacios);
+})();
+
 // Alinea verticalmente los botones de imprimir con la fila de enlaces
 // rápidos (Investing/Ingdirect/Trade Republic), manteniéndolos pegados al
 // borde derecho de toda la página.
