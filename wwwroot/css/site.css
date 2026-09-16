@@ -929,6 +929,7 @@ body.wco-active .topbar-datetime {
   body.print-broker-ing #summary-strip-general,
   body.print-broker-ing #summary-strip,
   body.print-broker-ing #summary-strip-tr,
+  body.print-broker-ing #summary-strip-label-tr,
   body.print-broker-ing tr[data-broker]:not([data-broker="ING"]) {
     display: none !important;
   }
@@ -938,6 +939,7 @@ body.wco-active .topbar-datetime {
   body.print-broker-tr #summary-strip-general,
   body.print-broker-tr #summary-strip,
   body.print-broker-tr #summary-strip-ing,
+  body.print-broker-tr #summary-strip-label-ing,
   body.print-broker-tr tr[data-broker]:not([data-broker="TR"]) {
     display: none !important;
   }
