@@ -368,6 +368,9 @@ body.wco-active .topbar-datetime {
 
 .btn-toggle-summary {
   margin-left: auto;
+  width: 92px;
+  box-sizing: border-box;
+  text-align: center;
   border: 1px solid rgba(148, 163, 184, 0.24);
   background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);
   color: #eff9ff;
@@ -398,7 +401,14 @@ body.wco-active .topbar-datetime {
 }
 
 .btn-print-broker {
-  margin-left: auto;
+  width: 92px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3px 10px;
+  font-size: 0.68rem;
 }
 
 .btn-toggle-summary:hover {
