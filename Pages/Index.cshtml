@@ -421,7 +421,7 @@
             <span>Rentabilidad total</span>
             <strong>@Model.IngGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.IngGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</strong>
         </div>
-        <div class="summary-box">
+        <div class="summary-box @(Model.IngGainValue >= 0 ? "gain" : "loss")">
             <span>Importe total</span>
             <strong>@((Model.IngPurchaseValue + Model.IngGainValue).ToString("#,##0.00 €"))</strong>
         </div>
@@ -442,7 +442,7 @@
             <span>Rentabilidad total</span>
             <strong>@Model.TrGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.TrGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</strong>
         </div>
-        <div class="summary-box">
+        <div class="summary-box @(Model.TrGainValue >= 0 ? "gain" : "loss")">
             <span>Importe total</span>
             <strong>@((Model.TrPurchaseValue + Model.TrGainValue).ToString("#,##0.00 €"))</strong>
         </div>
