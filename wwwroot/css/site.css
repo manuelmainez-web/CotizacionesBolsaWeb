@@ -947,11 +947,30 @@ body.wco-active .topbar-datetime {
     display: block !important;
   }
 
+  .print-broker-letterhead-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .print-broker-letterhead-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .print-broker-letterhead-info {
+    display: flex;
+    flex-direction: column;
+  }
+
   .print-broker-letterhead-logo {
     max-width: 220px;
     height: auto;
     display: block;
-    margin-bottom: 6px;
   }
 
   .print-broker-letterhead-name {
