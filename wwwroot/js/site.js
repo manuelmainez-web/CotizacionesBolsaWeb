@@ -80,12 +80,7 @@ document.addEventListener('click', function (event) {
     }
 
     boton.addEventListener('click', function () {
-        document.body.classList.add('print-cartera-only');
-        window.print();
-    });
-
-    window.addEventListener('afterprint', function () {
-        document.body.classList.remove('print-cartera-only');
+        imprimirConNumeracion('print-cartera-only');
     });
 })();
 
@@ -105,12 +100,7 @@ document.addEventListener('click', function (event) {
         }
 
         boton.addEventListener('click', function () {
-            document.body.classList.add(config.clase);
-            window.print();
-        });
-
-        window.addEventListener('afterprint', function () {
-            document.body.classList.remove(config.clase);
+            imprimirConNumeracion(config.clase);
         });
     });
 })();
@@ -249,30 +239,73 @@ document.addEventListener('click', function (event) {
     }
 
     boton.addEventListener('click', function () {
-        window.print();
+        imprimirConNumeracion(null);
     });
 })();
 
-// Numeración de páginas al imprimir, en la esquina inferior derecha.
-// IMPORTANTE: Chrome/Edge no exponen el número real de página al CSS/JS
-// (no implementan counter(page) ni los márgenes @page), así que no es
-// posible calcular de forma fiable en cuántas hojas se va a repartir el
-// contenido antes de imprimir. Un intento anterior calculaba la altura del
-// contenido para generar un marcador por página, pero al medir la altura
-// con el ancho de pantalla (no el ancho real de impresión, más estrecho) el
-// cálculo salía mal: la página 1 se quedaba sin marcador y, si se
-// sobrestimaba el número de páginas, los marcadores de más generaban hojas
-// en blanco adicionales (al ser position:absolute, sí cuentan para la
-// paginación). Por eso se usa un único marcador con position:fixed: el
-// motor de impresión de Chrome SÍ repite los elementos fixed de forma
-// idéntica en cada hoja física, sin añadir contenido ni alterar la
-// paginación, garantizando que aparezca en la primera página y en todas las
-// siguientes (aunque no se pueda numerarlas de forma distinta).
-(function () {
-    var marcador = document.getElementById('print-page-number');
-    if (!marcador) {
+// Impresión con numeración real de página ("Página - N -") usando paged.js.
+// Chrome/Edge no exponen counter(page) ni los márgenes @page al imprimir de
+// forma nativa, así que se abre una ventana nueva, se clona el contenido ya
+// filtrado (reutilizando el mismo 'beforeprint'/'afterprint' que aplican los
+// filtros de bróker/cartera y ocultan paneles vacíos) y se repagina esa copia
+// con la librería paged.js, que sí soporta counter(page) en @page, antes de
+// invocar la impresión de esa ventana.
+function imprimirConNumeracion(bodyClass) {
+    if (bodyClass) {
+        document.body.classList.add(bodyClass);
+    }
+
+    window.dispatchEvent(new Event('beforeprint'));
+    var copiaContenido = document.getElementById('market-shell').cloneNode(true);
+    window.dispatchEvent(new Event('afterprint'));
+
+    if (bodyClass) {
+        document.body.classList.remove(bodyClass);
+    }
+
+    var ventana = window.open('', 'ventana-impresion-cartera');
+    if (!ventana) {
+        // El navegador bloqueó la ventana emergente: recurrir a la impresión normal
+        if (bodyClass) {
+            document.body.classList.add(bodyClass);
+        }
+        window.print();
+        window.addEventListener('afterprint', function limpiar() {
+            if (bodyClass) {
+                document.body.classList.remove(bodyClass);
+            }
+            window.removeEventListener('afterprint', limpiar);
+        });
         return;
     }
 
-    marcador.textContent = 'Página - 1 -';
-})();
+    var origen = window.location.origin;
+    var clasesBody = 'notranslate' + (bodyClass ? ' ' + bodyClass : '');
+
+    ventana.document.open();
+    ventana.document.write(
+        '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">' +
+        '<title>Imprimiendo...</title></head><body class="' + clasesBody + '"></body></html>'
+    );
+    ventana.document.close();
+
+    var scriptConfig = ventana.document.createElement('script');
+    scriptConfig.textContent = 'window.PagedConfig = { auto: false };';
+    ventana.document.head.appendChild(scriptConfig);
+
+    var scriptPaged = ventana.document.createElement('script');
+    scriptPaged.src = 'https://unpkg.com/pagedjs/dist/paged.polyfill.js';
+    scriptPaged.onload = function () {
+        var hojasDeEstilo = [
+            origen + '/lib/bootstrap/dist/css/bootstrap.min.css',
+            origen + '/css/site.css',
+            origen + '/css/print-pagination.css'
+        ];
+        var previsualizador = new ventana.Paged.Previewer();
+        previsualizador.preview(copiaContenido.outerHTML, hojasDeEstilo, ventana.document.body).then(function () {
+            ventana.focus();
+            ventana.print();
+        });
+    };
+    ventana.document.head.appendChild(scriptPaged);
+}

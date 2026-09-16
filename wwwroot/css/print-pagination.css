@@ -1,0 +1,15 @@
+/* Reglas @page exclusivas para la vista paginada generada con paged.js.
+   Solo se cargan en la ventana emergente de impresión (ver site.js,
+   función imprimirConNumeracion). Paged.js sí implementa los márgenes
+   @page (@bottom-right, counter(page)...), a diferencia de Chrome/Edge
+   en su modo de impresión nativo. */
+@page {
+  size: A4 portrait;
+  margin: 8mm 5mm 14mm 5mm;
+
+  @bottom-right {
+    content: "Página - " counter(page) " -";
+    font-size: 8pt;
+    color: #000000;
+  }
+}
