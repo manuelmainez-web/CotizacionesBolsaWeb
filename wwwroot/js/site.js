@@ -245,11 +245,12 @@ document.addEventListener('click', function (event) {
 
 // Impresión con numeración real de página ("Página - N -") usando paged.js.
 // Chrome/Edge no exponen counter(page) ni los márgenes @page al imprimir de
-// forma nativa, así que se abre una ventana nueva, se clona el contenido ya
-// filtrado (reutilizando el mismo 'beforeprint'/'afterprint' que aplican los
-// filtros de bróker/cartera y ocultan paneles vacíos) y se repagina esa copia
-// con la librería paged.js, que sí soporta counter(page) en @page, antes de
-// invocar la impresión de esa ventana.
+// forma nativa, así que se clona el contenido ya filtrado (reutilizando el
+// mismo 'beforeprint'/'afterprint' que aplican los filtros de bróker/cartera
+// y ocultan paneles vacíos), se repagina esa copia con la librería paged.js
+// dentro de un <iframe> oculto (no se abre ninguna ventana/pestaña visible)
+// y se invoca la impresión de ese iframe. El iframe se elimina solo al
+// terminar de imprimir (o cancelar).
 function imprimirConNumeracion(bodyClass) {
     if (bodyClass) {
         document.body.classList.add(bodyClass);
@@ -263,24 +264,26 @@ function imprimirConNumeracion(bodyClass) {
         document.body.classList.remove(bodyClass);
     }
 
-    var ventana = window.open('', 'ventana-impresion-cartera');
-    if (!ventana) {
-        // El navegador bloqueó la ventana emergente: recurrir a la impresión normal
-        if (bodyClass) {
-            document.body.classList.add(bodyClass);
-        }
-        window.print();
-        window.addEventListener('afterprint', function limpiar() {
-            if (bodyClass) {
-                document.body.classList.remove(bodyClass);
-            }
-            window.removeEventListener('afterprint', limpiar);
-        });
-        return;
+    var anterior = document.getElementById('iframe-impresion-cartera');
+    if (anterior) {
+        anterior.remove();
     }
+
+    var iframe = document.createElement('iframe');
+    iframe.id = 'iframe-impresion-cartera';
+    iframe.style.position = 'fixed';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.opacity = '0';
+    iframe.style.pointerEvents = 'none';
+    document.body.appendChild(iframe);
 
     var origen = window.location.origin;
     var clasesBody = 'notranslate' + (bodyClass ? ' ' + bodyClass : '');
+    var ventana = iframe.contentWindow;
 
     ventana.document.open();
     ventana.document.write(
@@ -288,6 +291,14 @@ function imprimirConNumeracion(bodyClass) {
         '<title>Imprimiendo...</title></head><body class="' + clasesBody + '"></body></html>'
     );
     ventana.document.close();
+
+    function limpiarIframe() {
+        if (iframe && iframe.parentNode) {
+            iframe.parentNode.removeChild(iframe);
+        }
+    }
+
+    ventana.addEventListener('afterprint', limpiarIframe);
 
     var scriptConfig = ventana.document.createElement('script');
     scriptConfig.textContent = 'window.PagedConfig = { auto: false };';
@@ -305,6 +316,8 @@ function imprimirConNumeracion(bodyClass) {
         previsualizador.preview(copiaContenido.outerHTML, hojasDeEstilo, ventana.document.body).then(function () {
             ventana.focus();
             ventana.print();
+            // Salvaguarda por si el navegador no dispara 'afterprint' en el iframe
+            setTimeout(limpiarIframe, 60000);
         });
     };
     ventana.document.head.appendChild(scriptPaged);
