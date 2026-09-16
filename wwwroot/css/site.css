@@ -966,4 +966,13 @@ body.wco-active .topbar-datetime {
   .market-table.market-table-cartera {
     table-layout: fixed !important;
   }
+
+  .market-table.market-table-cuentas {
+    table-layout: fixed !important;
+  }
+
+  .market-table.market-table-cuentas th.col-nombre-wide,
+  .market-table.market-table-cuentas td.name-cell {
+    width: 70% !important;
+  }
 }
