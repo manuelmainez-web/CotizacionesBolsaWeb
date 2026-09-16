@@ -455,10 +455,6 @@ body.wco-active .topbar-datetime {
   display: none;
 }
 
-.print-page-number {
-  display: none;
-}
-
 .market-panel {
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
@@ -907,13 +903,7 @@ body.wco-active .topbar-datetime {
 @media print {
   @page {
     size: portrait;
-    margin: 8mm 5mm 14mm 5mm;
-
-    @bottom-right {
-      content: "Página - " counter(page) " -";
-      font-size: 8pt;
-      color: #000000;
-    }
+    margin: 8mm 5mm;
   }
 
   .topbar,
@@ -940,14 +930,11 @@ body.wco-active .topbar-datetime {
     margin: 2px 0 6px;
   }
 
-.print-page-number {
-  display: block !important;
-  position: fixed;
-  bottom: 4mm;
-  right: 5mm;
-  font-size: 8pt;
-  color: #000000;
-}
+  body.print-cartera-only .market-panel-watchlist {
+    display: none !important;
+  }
+
+  body.print-broker-ing .market-panel-watchlist,
   body.print-broker-ing .market-panel-non-cartera,
   body.print-broker-ing #summary-strip-general,
   body.print-broker-ing #summary-strip-label-general,
