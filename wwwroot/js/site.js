@@ -54,6 +54,23 @@ document.addEventListener('click', function (event) {
     setInterval(updateDateTime, 1000);
 })();
 
+// Fecha y hora de generación del informe, solo visible al imprimir
+(function () {
+    var el = document.getElementById('print-datetime');
+    if (!el) {
+        return;
+    }
+
+    function updatePrintDateTime() {
+        var now = new Date();
+        var fecha = now.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        var hora = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        el.textContent = 'Informe generado el ' + fecha + ' a las ' + hora;
+    }
+
+    window.addEventListener('beforeprint', updatePrintDateTime);
+})();
+
 // Reposiciona el reloj y el botón de actualizar junto a los controles de
 // ventana (minimizar/maximizar/cerrar) cuando la PWA está instalada y el
 // navegador soporta Window Controls Overlay.

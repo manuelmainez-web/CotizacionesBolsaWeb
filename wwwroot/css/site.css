@@ -427,6 +427,10 @@ body.wco-active .topbar-datetime {
   color: #0a58ff;
 }
 
+.print-only {
+  display: none;
+}
+
 .market-panel {
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
@@ -893,6 +897,13 @@ body.wco-active .topbar-datetime {
   .portfolio-note,
   dialog {
     display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+    font-size: 9pt;
+    color: #000000;
+    margin: 2px 0 6px;
   }
 
   .summary-strip.is-collapsed {
