@@ -205,6 +205,13 @@ body.wco-active .topbar-datetime {
   margin-top: 12px;
 }
 
+.print-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 4px 0 16px;
+}
+
 .quick-link-button {
   display: inline-flex;
   align-items: center;
