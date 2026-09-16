@@ -272,7 +272,7 @@ function reorganizarCarteraPorBroker(shellClone) {
         return algunaVisible;
     }
 
-    function construirGrupoBroker(paneles, broker, logoSrc, logoAlt) {
+    function construirGrupoBroker(paneles, broker, logoSrc, logoAlt, resumen) {
         var grupo = document.createElement('div');
         grupo.className = 'print-broker-group';
 
@@ -281,6 +281,10 @@ function reorganizarCarteraPorBroker(shellClone) {
         logo.src = logoSrc;
         logo.alt = logoAlt;
         grupo.appendChild(logo);
+
+        if (resumen) {
+            grupo.appendChild(resumen);
+        }
 
         paneles.forEach(function (panelOriginal) {
             var panel = panelOriginal.cloneNode(true);
@@ -309,8 +313,10 @@ function reorganizarCarteraPorBroker(shellClone) {
     }
 
     var primerPanel = paneles[0];
-    var grupoIng = construirGrupoBroker(paneles, 'ING', origen + '/images/brokers/ing-direct-logo.png', 'ING Direct');
-    var grupoTr = construirGrupoBroker(paneles, 'TR', origen + '/images/brokers/logotipo-trade-republic.png', 'Trade Republic');
+    var resumenIng = shellClone.querySelector('#summary-strip-ing');
+    var resumenTr = shellClone.querySelector('#summary-strip-tr');
+    var grupoIng = construirGrupoBroker(paneles, 'ING', origen + '/images/brokers/ing-direct-logo.png', 'ING Direct', resumenIng);
+    var grupoTr = construirGrupoBroker(paneles, 'TR', origen + '/images/brokers/logotipo-trade-republic.png', 'Trade Republic', resumenTr);
 
     primerPanel.parentNode.insertBefore(grupoIng, primerPanel);
     primerPanel.parentNode.insertBefore(grupoTr, primerPanel);
