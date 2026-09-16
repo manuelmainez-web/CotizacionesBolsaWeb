@@ -253,46 +253,26 @@ document.addEventListener('click', function (event) {
     });
 })();
 
-// Numeración de páginas al imprimir, en la esquina inferior derecha de cada
-// hoja ("Página - N -"). El navegador no expone el número real de página
-// (Chrome no implementa los márgenes @page ni counter(page)), así que se
-// calcula una aproximación: se mide la altura total del contenido visible
-// (una vez ocultados paneles/filas vacías o descartadas por el filtro de
-// bróker) y se divide entre la altura útil de una hoja A4 con los márgenes
-// configurados en el CSS de impresión, colocando un marcador por página
-// resultante. Puede desajustarse ligeramente si algún bloque salta de
-// página por las reglas "evitar salto dentro" (break-inside: avoid).
+// Numeración de páginas al imprimir, en la esquina inferior derecha.
+// IMPORTANTE: Chrome/Edge no exponen el número real de página al CSS/JS
+// (no implementan counter(page) ni los márgenes @page), así que no es
+// posible calcular de forma fiable en cuántas hojas se va a repartir el
+// contenido antes de imprimir. Un intento anterior calculaba la altura del
+// contenido para generar un marcador por página, pero al medir la altura
+// con el ancho de pantalla (no el ancho real de impresión, más estrecho) el
+// cálculo salía mal: la página 1 se quedaba sin marcador y, si se
+// sobrestimaba el número de páginas, los marcadores de más generaban hojas
+// en blanco adicionales (al ser position:absolute, sí cuentan para la
+// paginación). Por eso se usa un único marcador con position:fixed: el
+// motor de impresión de Chrome SÍ repite los elementos fixed de forma
+// idéntica en cada hoja física, sin añadir contenido ni alterar la
+// paginación, garantizando que aparezca en la primera página y en todas las
+// siguientes (aunque no se pueda numerarlas de forma distinta).
 (function () {
-    var contenedor = document.getElementById('print-page-numbers');
-    var shell = document.getElementById('market-shell');
-    if (!contenedor || !shell) {
+    var marcador = document.getElementById('print-page-number');
+    if (!marcador) {
         return;
     }
 
-    var MM_A_PX = 96 / 25.4;
-    var ALTO_PAGINA_MM = 297;
-    var MARGEN_VERTICAL_MM = 8;
-    var ALTO_UTIL_PX = (ALTO_PAGINA_MM - MARGEN_VERTICAL_MM * 2) * MM_A_PX;
-
-    function generarNumerosDePagina() {
-        contenedor.innerHTML = '';
-
-        var alturaContenido = shell.scrollHeight - contenedor.getBoundingClientRect().height;
-        var numPaginas = Math.max(1, Math.ceil(alturaContenido / ALTO_UTIL_PX));
-
-        for (var i = 1; i <= numPaginas; i++) {
-            var marcador = document.createElement('div');
-            marcador.className = 'page-number-marker';
-            marcador.style.top = (i * ALTO_UTIL_PX - 22) + 'px';
-            marcador.textContent = 'Página - ' + i + ' -';
-            contenedor.appendChild(marcador);
-        }
-    }
-
-    function limpiarNumerosDePagina() {
-        contenedor.innerHTML = '';
-    }
-
-    window.addEventListener('beforeprint', generarNumerosDePagina);
-    window.addEventListener('afterprint', limpiarNumerosDePagina);
+    marcador.textContent = 'Página - 1 -';
 })();
