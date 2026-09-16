@@ -920,6 +920,24 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
+  body.print-broker-ing .market-panel-watchlist,
+  body.print-broker-ing .market-panel-non-cartera,
+  body.print-broker-ing #summary-strip-general,
+  body.print-broker-ing #summary-strip,
+  body.print-broker-ing #summary-strip-tr,
+  body.print-broker-ing tr[data-broker]:not([data-broker="ING"]) {
+    display: none !important;
+  }
+
+  body.print-broker-tr .market-panel-watchlist,
+  body.print-broker-tr .market-panel-non-cartera,
+  body.print-broker-tr #summary-strip-general,
+  body.print-broker-tr #summary-strip,
+  body.print-broker-tr #summary-strip-ing,
+  body.print-broker-tr tr[data-broker]:not([data-broker="TR"]) {
+    display: none !important;
+  }
+
   .summary-strip.is-collapsed {
     display: grid !important;
   }

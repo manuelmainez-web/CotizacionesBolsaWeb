@@ -89,6 +89,32 @@ document.addEventListener('click', function (event) {
     });
 })();
 
+// Botones "Imprimir" de ING Direct y Trade Republic: imprimen solo las filas
+// de la cartera de ese bróker, ocultando el resto de brókeres, cuenta
+// corriente, efectivo y los paneles de control de cotizaciones.
+(function () {
+    var configuraciones = [
+        { id: 'btn-print-ing', clase: 'print-broker-ing' },
+        { id: 'btn-print-tr', clase: 'print-broker-tr' }
+    ];
+
+    configuraciones.forEach(function (config) {
+        var boton = document.getElementById(config.id);
+        if (!boton) {
+            return;
+        }
+
+        boton.addEventListener('click', function () {
+            document.body.classList.add(config.clase);
+            window.print();
+        });
+
+        window.addEventListener('afterprint', function () {
+            document.body.classList.remove(config.clase);
+        });
+    });
+})();
+
 // Alinea verticalmente los botones de imprimir con la fila de enlaces
 // rápidos (Investing/Ingdirect/Trade Republic), manteniéndolos pegados al
 // borde derecho de toda la página.
