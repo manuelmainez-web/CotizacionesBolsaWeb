@@ -66,7 +66,7 @@
             <span>Rentabilidad total</span>
             <strong>@Model.TotalGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.TotalGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</strong>
         </div>
-        <div class="summary-box">
+        <div class="summary-box @(Model.TotalGainValue >= 0 ? "gain" : "loss")">
             <span>Importe total</span>
             <strong>@((Model.TotalPurchaseValue + Model.TotalGainValue).ToString("#,##0.00 €"))</strong>
         </div>

@@ -419,6 +419,10 @@ body.wco-active .topbar-datetime {
   color: #7ef0a7;
 }
 
+.summary-box.loss strong {
+  color: #ff5d73;
+}
+
 .market-panel {
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
