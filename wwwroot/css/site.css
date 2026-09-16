@@ -950,4 +950,16 @@ body.wco-active .topbar-datetime {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+
+  .market-table th.col-cambio,
+  .market-table td.col-cambio {
+    width: 85px !important;
+    min-width: 85px !important;
+  }
+
+  .market-table th.col-rent-importe,
+  .market-table td.col-rent-importe {
+    width: 105px !important;
+    min-width: 105px !important;
+  }
 }

@@ -463,9 +463,9 @@
                         <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
                         <th class="text-align-right" style="width: 90px;">Valoración compra</th>
                         <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 55px;">Cambio</th>
+                        <th class="text-align-right col-cambio" style="width: 55px;">Cambio</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
-                        <th class="text-align-right" style="width: 75px;">Rentabilidad /<br />Importe</th>
+                        <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
                         <th style="width: 80px;">Fecha/Hora Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
@@ -516,9 +516,9 @@
                                 </td>
                                 <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
                                 <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
-                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedDateText<br />@item.UpdatedTimeText</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-etf-@item.Symbol" title="Editar">✎</button>
@@ -630,9 +630,9 @@
                         <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
                         <th class="text-align-right" style="width: 90px;">Valoración compra</th>
                         <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 55px;">Cambio</th>
+                        <th class="text-align-right col-cambio" style="width: 55px;">Cambio</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
-                        <th class="text-align-right" style="width: 75px;">Rentabilidad /<br />Importe</th>
+                        <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
                         <th style="width: 80px;">Fecha/Hora Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
@@ -683,9 +683,9 @@
                                 </td>
                                 <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
                                 <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
-                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedDateText<br />@item.UpdatedTimeText</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-fund-@item.Symbol" title="Editar">✎</button>
@@ -779,9 +779,9 @@
                         <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
                         <th class="text-align-right" style="width: 90px;">Valoración compra</th>
                         <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 55px;">Cambio</th>
+                        <th class="text-align-right col-cambio" style="width: 55px;">Cambio</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
-                        <th class="text-align-right" style="width: 75px;">Rentabilidad /<br />Importe</th>
+                        <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
                         <th style="width: 80px;">Fecha/Hora Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
@@ -832,9 +832,9 @@
                                 </td>
                                 <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
                                 <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
-                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger"))">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedText</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-stockholding-@item.Symbol" title="Editar">✎</button>
