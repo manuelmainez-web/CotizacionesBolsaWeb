@@ -947,11 +947,18 @@ body.wco-active .topbar-datetime {
     display: block !important;
   }
 
+  body.print-broker-ing .portfolio-avatar,
+  body.print-broker-tr .portfolio-avatar,
+  body.print-broker-ing #print-datetime,
+  body.print-broker-tr #print-datetime {
+    display: none !important;
+  }
+
   .print-broker-letterhead-top {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 24px;
   }
 
   .print-broker-letterhead-avatar {
