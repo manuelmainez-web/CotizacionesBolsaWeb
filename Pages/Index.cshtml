@@ -170,20 +170,23 @@
         <form method="post" asp-page-handler="AddIndex">
             <h3>Añadir índice</h3>
             <label>
-                Nombre
-                <input type="text" name="name" required maxlength="100" placeholder="Ej. FTSE 100" />
+                País
+                <select id="add-index-country" required>
+                    <option value="" selected disabled>Selecciona un país</option>
+                </select>
             </label>
             <label>
-                Símbolo (Yahoo Finance)
-                <input type="text" name="symbol" required maxlength="20" placeholder="Ej. ^FTSE" />
+                Índice
+                <select id="add-index-select" required disabled>
+                    <option value="" selected disabled>Selecciona primero un país</option>
+                </select>
             </label>
-            <label>
-                País (código, opcional)
-                <input type="text" name="countryCode" maxlength="2" placeholder="Ej. GB" />
-            </label>
+            <input type="hidden" name="name" id="add-index-name-hidden" />
+            <input type="hidden" name="symbol" id="add-index-symbol-hidden" />
+            <input type="hidden" name="countryCode" id="add-index-country-hidden" />
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
-                <button type="submit" class="mini-button">Añadir</button>
+                <button type="submit" class="mini-button" id="add-index-submit" disabled>Añadir</button>
             </div>
         </form>
     </dialog>

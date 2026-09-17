@@ -597,7 +597,8 @@ body.wco-active .topbar-datetime {
   font-style: italic;
 }
 
-.add-entry-dialog input {
+.add-entry-dialog input,
+.add-entry-dialog select {
   background: #0b1320;
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 8px;
@@ -606,9 +607,15 @@ body.wco-active .topbar-datetime {
   font-size: 0.92rem;
 }
 
-.add-entry-dialog input:focus {
+.add-entry-dialog input:focus,
+.add-entry-dialog select:focus {
   outline: none;
   border-color: rgba(96, 165, 250, 0.6);
+}
+
+.add-entry-dialog select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .dialog-actions {

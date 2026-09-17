@@ -240,6 +240,127 @@ document.addEventListener('click', function (event) {
     });
 })();
 
+// Diálogo "Añadir índice": selección guiada por país -> índice, sin
+// escribir nombre, símbolo ni país a mano. El país determina las opciones
+// del segundo desplegable (catálogo de índices conocidos); al elegir un
+// índice se rellenan por JS los campos ocultos que espera el backend
+// (name, symbol, countryCode).
+(function () {
+    var catalogoIndicesPorPais = {
+        ES: { etiqueta: 'España', indices: [{ symbol: '^IBEX', name: 'IBEX 35' }] },
+        DE: { etiqueta: 'Alemania', indices: [{ symbol: '^GDAXI', name: 'DAX' }] },
+        EU: { etiqueta: 'Zona Euro', indices: [{ symbol: '^STOXX50E', name: 'EURO STOXX 50' }] },
+        US: {
+            etiqueta: 'Estados Unidos',
+            indices: [
+                { symbol: '^GSPC', name: 'S&P 500' },
+                { symbol: '^DJI', name: 'Dow Jones Industrial Average' },
+                { symbol: '^IXIC', name: 'Nasdaq Composite' }
+            ]
+        },
+        FR: { etiqueta: 'Francia', indices: [{ symbol: '^FCHI', name: 'CAC 40' }] },
+        JP: { etiqueta: 'Japón', indices: [{ symbol: '^N225', name: 'Nikkei 225' }] },
+        IT: { etiqueta: 'Italia', indices: [{ symbol: 'FTSEMIB.MI', name: 'FTSE MIB' }] },
+        CH: { etiqueta: 'Suiza', indices: [{ symbol: '^SSMI', name: 'SMI' }] },
+        GB: { etiqueta: 'Reino Unido', indices: [{ symbol: '^FTSE', name: 'FTSE 100' }] }
+    };
+
+    var dialogo = document.getElementById('add-index-dialog');
+    var selectPais = document.getElementById('add-index-country');
+    var selectIndice = document.getElementById('add-index-select');
+    var inputNombre = document.getElementById('add-index-name-hidden');
+    var inputSimbolo = document.getElementById('add-index-symbol-hidden');
+    var inputPais = document.getElementById('add-index-country-hidden');
+    var botonAnadir = document.getElementById('add-index-submit');
+
+    if (!dialogo || !selectPais || !selectIndice || !inputNombre || !inputSimbolo || !inputPais || !botonAnadir) {
+        return;
+    }
+
+    function poblarPaises() {
+        Object.keys(catalogoIndicesPorPais).forEach(function (codigo) {
+            var opcion = document.createElement('option');
+            opcion.value = codigo;
+            opcion.textContent = catalogoIndicesPorPais[codigo].etiqueta;
+            selectPais.appendChild(opcion);
+        });
+    }
+
+    function resetIndice(mensaje) {
+        selectIndice.innerHTML = '';
+        var opcion = document.createElement('option');
+        opcion.value = '';
+        opcion.disabled = true;
+        opcion.selected = true;
+        opcion.textContent = mensaje;
+        selectIndice.appendChild(opcion);
+        selectIndice.disabled = true;
+        inputNombre.value = '';
+        inputSimbolo.value = '';
+        botonAnadir.disabled = true;
+    }
+
+    function resetTodo() {
+        selectPais.value = '';
+        inputPais.value = '';
+        resetIndice('Selecciona primero un país');
+    }
+
+    function poblarIndices(codigoPais) {
+        var pais = catalogoIndicesPorPais[codigoPais];
+        selectIndice.innerHTML = '';
+
+        var opcionVacia = document.createElement('option');
+        opcionVacia.value = '';
+        opcionVacia.disabled = true;
+        opcionVacia.selected = true;
+        opcionVacia.textContent = 'Selecciona un índice';
+        selectIndice.appendChild(opcionVacia);
+
+        pais.indices.forEach(function (indice) {
+            var opcion = document.createElement('option');
+            opcion.value = indice.symbol;
+            opcion.textContent = indice.name;
+            opcion.setAttribute('data-name', indice.name);
+            selectIndice.appendChild(opcion);
+        });
+
+        selectIndice.disabled = false;
+        inputNombre.value = '';
+        inputSimbolo.value = '';
+        botonAnadir.disabled = true;
+    }
+
+    selectPais.addEventListener('change', function () {
+        inputPais.value = selectPais.value;
+        if (selectPais.value && catalogoIndicesPorPais[selectPais.value]) {
+            poblarIndices(selectPais.value);
+        } else {
+            resetIndice('Selecciona primero un país');
+        }
+    });
+
+    selectIndice.addEventListener('change', function () {
+        var opcionSeleccionada = selectIndice.options[selectIndice.selectedIndex];
+        if (!opcionSeleccionada || !opcionSeleccionada.value) {
+            inputNombre.value = '';
+            inputSimbolo.value = '';
+            botonAnadir.disabled = true;
+            return;
+        }
+        inputSimbolo.value = opcionSeleccionada.value;
+        inputNombre.value = opcionSeleccionada.getAttribute('data-name') || opcionSeleccionada.textContent;
+        botonAnadir.disabled = false;
+    });
+
+    // Al cerrar el diálogo (cancelar o tras añadir), resetear la selección
+    // para que la próxima vez que se abra empiece limpio.
+    dialogo.addEventListener('close', resetTodo);
+
+    poblarPaises();
+    resetTodo();
+})();
+
 // Botón de imprimir toda la página
 (function () {
     var boton = document.getElementById('btn-print-page');
