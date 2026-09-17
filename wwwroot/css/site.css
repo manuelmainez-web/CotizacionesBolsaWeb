@@ -218,15 +218,15 @@ body.wco-active .topbar-datetime {
 .quick-link-button.mini-button {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 0.26rem 0.5rem;
-  font-size: 0.62rem;
-  border-radius: 7px;
+  gap: 5px;
+  padding: 0.38rem 0.65rem;
+  font-size: 0.76rem;
+  border-radius: 8px;
 }
 
 .quick-link-icon {
-  width: 12px;
-  height: 12px;
+  width: 15px;
+  height: 15px;
   object-fit: contain;
   border-radius: 3px;
 }
