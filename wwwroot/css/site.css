@@ -1070,6 +1070,10 @@ body.wco-active .topbar-datetime {
     margin-bottom: 24pt;
   }
 
+  .print-cartera-letterhead .print-broker-letterhead-top {
+    margin-bottom: 0;
+  }
+
   #summary-strip-label {
     color: #000000 !important;
   }
