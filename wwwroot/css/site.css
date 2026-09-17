@@ -168,6 +168,14 @@ body.wco-active .topbar-datetime {
   line-height: 1.1;
 }
 
+.page-main-title {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1.25;
+}
+
 .portfolio-label {
   font-weight: 700;
 }
@@ -355,6 +363,10 @@ body.wco-active .topbar-datetime {
 .summary-strip-label.is-expanded {
   flex-direction: column;
   align-items: flex-start;
+}
+
+.summary-strip-label-black {
+  color: #000;
 }
 
 .blank-lines-2 {
