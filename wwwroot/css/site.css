@@ -990,6 +990,10 @@ body.wco-active .topbar-datetime {
     color: #000000 !important;
   }
 
+  body.print-all .portfolio-name-text {
+    color: #000000 !important;
+  }
+
   .print-cartera-letterhead-title {
     color: #000000 !important;
     font-weight: 700;
