@@ -248,7 +248,7 @@ document.addEventListener('click', function (event) {
     }
 
     boton.addEventListener('click', function () {
-        imprimirConNumeracion(null);
+        imprimirConNumeracion('print-all');
     });
 })();
 
@@ -353,7 +353,7 @@ function imprimirConNumeracion(bodyClass) {
         document.body.classList.remove(bodyClass);
     }
 
-    if (bodyClass === 'print-cartera-only' || bodyClass === null) {
+    if (bodyClass === 'print-cartera-only' || bodyClass === 'print-all') {
         reorganizarCarteraPorBroker(copiaContenido);
     }
 

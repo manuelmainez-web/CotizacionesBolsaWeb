@@ -459,6 +459,10 @@ body.wco-active .topbar-datetime {
   display: none;
 }
 
+.print-all-title {
+  display: none;
+}
+
 .print-broker-letterhead {
   display: none;
 }
@@ -972,6 +976,18 @@ body.wco-active .topbar-datetime {
 
   body.print-cartera-only .portfolio-header {
     display: none !important;
+  }
+
+  body.print-all .print-all-title {
+    display: block !important;
+    color: #000000 !important;
+    font-weight: 700;
+    font-size: 20pt;
+    margin: 0 0 6px;
+  }
+
+  body.print-all .summary-general-label-text {
+    color: #000000 !important;
   }
 
   .print-cartera-letterhead-title {
