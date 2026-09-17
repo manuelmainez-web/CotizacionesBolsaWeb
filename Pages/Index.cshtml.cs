@@ -568,6 +568,8 @@ public class IndexModel : PageModel
         "DAX" => new[] { "GER", "ETR", "FRA" },
         "EUROSTOXX50" => new[] { "PAR", "GER", "ETR", "FRA", "MCE", "AMS", "MIL", "BRU" },
         "DOWJONES" or "SP500" or "NASDAQ" => new[] { "NMS", "NGM", "NYQ", "ASE", "PCX", "BTS" },
+        "NIKKEI225" => new[] { "TYO", "JPX" },
+        "HANGSENG" => new[] { "HKG" },
         _ => null
     };
 

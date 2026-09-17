@@ -438,6 +438,7 @@ public sealed class YahooFinanceService
         "TOR" => "CA",
         "TYO" or "JPX" => "JP",
         "SWX" or "EBS" => "CH",
+        "HKG" => "HK",
         _ => null
     };
 

@@ -260,25 +260,30 @@
         <form method="post" asp-page-handler="AddStock">
             <h3>Añadir acción</h3>
             <label>
-                Nombre
-                <input type="text" name="name" required maxlength="100" placeholder="Ej. Apple Inc." />
-            </label>
-            <label>
-                Mercado
-                <select name="market">
+                Índice
+                <select id="add-stock-market" name="market" required>
+                    <option value="" selected disabled>Selecciona un índice</option>
                     <option value="IBEX35">IBEX-35</option>
                     <option value="CAC40">CAC 40</option>
                     <option value="DAX">DAX</option>
                     <option value="EUROSTOXX50">EURO STOXX 50</option>
                     <option value="DOWJONES">DOW JONES</option>
-                    <option value="NASDAQ">NASDAQ</option>
+                    <option value="NASDAQ">NASDAQ-100</option>
                     <option value="SP500">S&amp;P 500</option>
+                    <option value="NIKKEI225">NIKKEI 225</option>
+                    <option value="HANGSENG">HANG SENG</option>
                 </select>
             </label>
-            <p class="dialog-hint">El símbolo se busca automáticamente a partir del nombre, priorizando el mercado seleccionado.</p>
+            <label>
+                Acción
+                <select id="add-stock-name" name="name" required disabled>
+                    <option value="" selected disabled>Selecciona primero un índice</option>
+                </select>
+            </label>
+            <p class="dialog-hint">El símbolo se busca automáticamente a partir del nombre, priorizando el índice seleccionado.</p>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
-                <button type="submit" class="mini-button">Añadir</button>
+                <button type="submit" class="mini-button" id="add-stock-submit" disabled>Añadir</button>
             </div>
         </form>
     </dialog>

@@ -23,6 +23,7 @@ public sealed class Quote
         "GB" => "£",
         "JP" => "¥",
         "CH" => "CHF",
+        "HK" => "HK$",
         _ => "€"
     };
 
@@ -54,6 +55,7 @@ public sealed class Quote
         "IT" => "https://flagcdn.com/w40/it.png",
         "CH" => "https://flagcdn.com/w40/ch.png",
         "LU" => "https://flagcdn.com/w40/lu.png",
+        "HK" => "https://flagcdn.com/w40/hk.png",
         _ => "https://flagcdn.com/w40/gb.png"
     };
 
