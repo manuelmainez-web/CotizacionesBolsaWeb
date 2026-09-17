@@ -1018,10 +1018,14 @@ body.wco-active .topbar-datetime {
 
   .print-broker-group {
     margin-top: 18px;
+    break-before: page;
+    page-break-before: always;
   }
 
   .print-broker-group:first-of-type {
     margin-top: 0;
+    break-before: auto;
+    page-break-before: auto;
   }
 
   .print-broker-group-logo {
