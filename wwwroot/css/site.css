@@ -1078,6 +1078,10 @@ body.wco-active .topbar-datetime {
     color: #000000 !important;
   }
 
+  body.print-cartera-only #summary-strip-label {
+    margin-top: 12pt;
+  }
+
   body.print-cartera-only .market-panel-watchlist {
     display: none !important;
   }
