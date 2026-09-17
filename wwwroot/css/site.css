@@ -940,6 +940,10 @@ body.wco-active .topbar-datetime {
     text-indent: 0 !important;
   }
 
+  .summary-box strong {
+    font-size: 1.1rem;
+  }
+
   .print-broker-letterhead {
     display: none;
     margin-bottom: 10px;
