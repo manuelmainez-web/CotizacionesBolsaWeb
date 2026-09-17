@@ -252,12 +252,12 @@ document.addEventListener('click', function (event) {
     });
 })();
 
-// Reorganiza, solo para "Imprimir cartera", las tablas de cartera (ETF,
-// Fondos, Acciones, Planes de pensiones) agrupándolas por bróker: primero
-// el logotipo de ING Direct seguido de sus tablas (solo filas ING), y
-// después el logotipo de Trade Republic seguido de sus tablas (solo filas
-// TR). Las tablas sin ninguna fila de ese bróker se omiten (igual que el
-// resto de casos de "tabla vacía").
+// Reorganiza, para "Imprimir cartera" e "Imprimir todo", las tablas de
+// cartera (ETF, Fondos, Acciones, Planes de pensiones) agrupándolas por
+// bróker: primero el logotipo de ING Direct seguido de sus tablas (solo
+// filas ING), y después el logotipo de Trade Republic seguido de sus
+// tablas (solo filas TR). Las tablas sin ninguna fila de ese bróker se
+// omiten (igual que el resto de casos de "tabla vacía").
 function reorganizarCarteraPorBroker(shellClone) {
     var origen = window.location.origin;
 
@@ -347,7 +347,7 @@ function imprimirConNumeracion(bodyClass) {
         document.body.classList.remove(bodyClass);
     }
 
-    if (bodyClass === 'print-cartera-only') {
+    if (bodyClass === 'print-cartera-only' || bodyClass === null) {
         reorganizarCarteraPorBroker(copiaContenido);
     }
 
