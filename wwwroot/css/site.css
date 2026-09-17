@@ -172,7 +172,7 @@ body.wco-active .topbar-datetime {
   margin: 0 0 4px;
   font-size: 1.9rem;
   font-weight: 700;
-  color: #000;
+  color: #f8fafc;
   line-height: 1.25;
 }
 
@@ -189,7 +189,6 @@ body.wco-active .topbar-datetime {
 
 .portfolio-name-text {
   font-size: calc(1em - 8pt);
-  color: #000;
 }
 
 .portfolio-avatar {
