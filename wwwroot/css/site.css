@@ -1001,7 +1001,7 @@ body.wco-active .topbar-datetime {
   .print-cartera-letterhead-title {
     color: #000000 !important;
     font-weight: 700;
-    font-size: 26pt;
+    font-size: 22pt;
     margin: 0 0 10px;
   }
 
@@ -1056,6 +1056,10 @@ body.wco-active .topbar-datetime {
     font-weight: 700;
     font-size: 12pt;
     margin: 0;
+  }
+
+  .print-cartera-letterhead .print-broker-letterhead-name {
+    font-weight: 400;
   }
 
   .print-broker-letterhead-datetime {
