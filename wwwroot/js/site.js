@@ -319,6 +319,12 @@ function reorganizarCarteraPorBroker(shellClone) {
     var grupoIng = construirGrupoBroker(paneles, 'ING', origen + '/images/brokers/ing-direct-logo.png', 'ING Direct', resumenIng);
     var grupoTr = construirGrupoBroker(paneles, 'TR', origen + '/images/brokers/logotipo-trade-republic.png', 'Trade Republic', resumenTr);
 
+    // Salto de página antes del grupo de Trade Republic para que cada
+    // bróker empiece en una página distinta (no se usa ":first-of-type"
+    // en CSS porque ese pseudo-selector compara por etiqueta <div>, no por
+    // clase, y no distinguiría de forma fiable el primer grupo del resto).
+    grupoTr.classList.add('print-broker-group-break');
+
     primerPanel.parentNode.insertBefore(grupoIng, primerPanel);
     primerPanel.parentNode.insertBefore(grupoTr, primerPanel);
     paneles.forEach(function (panel) {
