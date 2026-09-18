@@ -419,8 +419,8 @@
                         <th class="text-align-right">Último</th>
                         <th class="text-align-right">Máximo</th>
                         <th class="text-align-right">Mínimo</th>
-                        <th class="text-align-right">Var.</th>
                         <th class="text-align-right">% Var.</th>
+                        <th class="text-align-right">Var.</th>
                         <th>Fecha/Hora</th>
                         <th></th>
                     </tr>
@@ -441,8 +441,8 @@
                             <td class="price-cell price-cell-quote">@item.DisplayPrice $</td>
                             <td class="price-cell price-cell-quote">@item.DisplayHigh $</td>
                             <td class="price-cell price-cell-quote">@item.DisplayLow $</td>
-                            <td class="@item.TrendCssClass">@item.DisplayChange $</td>
                             <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                            <td class="@item.TrendCssClass">@item.DisplayChange $</td>
                             <td class="time-cell">@item.UpdatedText</td>
                             <td class="delete-cell">
                                 <form method="post" asp-page-handler="DeleteCommodity" onsubmit="return confirm('¿Eliminar esta materia prima?');">
