@@ -1193,7 +1193,14 @@
                 Importe por título
                 <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" placeholder="Ej. 150.00" />
             </label>
-            <p class="dialog-hint">El símbolo, el bróker (ING Direct por defecto) y el ISIN se buscan automáticamente a partir de la acción elegida, priorizando el índice seleccionado. Puedes ajustarlos después con "Editar".</p>
+            <label>
+                Bróker
+                <select name="broker" required>
+                    <option value="ING">ING Direct</option>
+                    <option value="TR">Trade Republic</option>
+                </select>
+            </label>
+            <p class="dialog-hint">El símbolo y el ISIN se buscan automáticamente a partir de la acción elegida, priorizando el índice seleccionado. Puedes ajustarlos después con "Editar".</p>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
                 <button type="submit" class="mini-button" id="add-stock-holding-submit" disabled>Añadir</button>
