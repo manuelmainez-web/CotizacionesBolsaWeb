@@ -135,9 +135,12 @@
                     </tr>
                 </thead>
                 <tbody id="tbody-indices">
-                    @foreach (var item in Model.Indices)
+                    @for (var indexRow = 0; indexRow < Model.Indices.Count; indexRow++)
                     {
-                        <tr class="@(item.Symbol == "^STOXX50E" || item.Symbol == "^GSPC" ? "row-divider-bottom" : "")">
+                        var item = Model.Indices[indexRow];
+                        var isLastOfRegion = indexRow < Model.Indices.Count - 1
+                            && Model.GetIndexRegionOrder(item.CountryCode) != Model.GetIndexRegionOrder(Model.Indices[indexRow + 1].CountryCode);
+                        <tr class="@(isLastOfRegion ? "row-divider-bottom" : "")">
                             <td class="name-cell">
                                 <span class="name-with-flag">
                                     <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />

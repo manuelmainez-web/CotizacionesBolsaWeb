@@ -199,7 +199,9 @@ public class IndexModel : PageModel
 
         var etfControlConfigs = await _dataStore.LoadEntriesAsync<QuoteConfig>(EtfControlKey);
 
-        Indices = await _service.GetQuotesAsync(indexConfigs);
+        Indices = (await _service.GetQuotesAsync(indexConfigs))
+            .OrderBy(q => GetIndexRegionOrder(q.CountryCode))
+            .ToList();
         Stocks = stockConfigs.Count > 0 ? await _service.GetQuotesAsync(stockConfigs) : new List<Quote>();
         Etfs = await _service.GetQuotesAsync(etfConfigs);
         Funds = fundConfigs.Count > 0 ? await _service.GetQuotesAsync(fundConfigs) : new List<Quote>();
@@ -829,8 +831,24 @@ public class IndexModel : PageModel
             null,
             string.IsNullOrWhiteSpace(countryCode) ? null : countryCode.Trim().ToUpperInvariant()));
 
+        if (key == IndicesKey)
+        {
+            entries = entries.OrderBy(e => GetIndexRegionOrder(e.CountryCode)).ToList();
+        }
+
         await _dataStore.SaveEntriesAsync(key, entries);
     }
+
+    /// <summary>
+    /// Agrupa los índices por región: Europa (0), América (1), Asia (2), resto (3).
+    /// </summary>
+    public int GetIndexRegionOrder(string? countryCode) => countryCode?.Trim().ToUpperInvariant() switch
+    {
+        "ES" or "DE" or "FR" or "EU" or "GB" or "IT" or "CH" or "LU" => 0,
+        "US" => 1,
+        "JP" or "HK" => 2,
+        _ => 3
+    };
 
     private async Task RemoveCustomEntryAsync(string key, string symbol)
     {
