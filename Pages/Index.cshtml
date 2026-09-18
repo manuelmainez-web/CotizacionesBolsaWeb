@@ -357,7 +357,7 @@
     </div>
 
     <dialog id="add-etf-control-dialog" class="add-entry-dialog">
-        <form method="post" asp-page-handler="AddEtfControl">
+        <form method="post" asp-page-handler="AddEtfControlBySector" id="add-etf-control-form">
             <h3>Añadir ETF</h3>
             <div class="dialog-mode-switch" role="radiogroup" aria-label="Método para añadir ETF">
                 <label>
@@ -390,7 +390,10 @@
                 </label>
             </div>
             <input type="hidden" name="isin" id="add-etf-control-isin-hidden" />
-            <p class="dialog-hint">El nombre, el símbolo y el país se buscan automáticamente a partir del ISIN, tanto si lo escribes como si lo eliges por sector.</p>
+            <input type="hidden" name="name" id="add-etf-control-name-hidden" />
+            <input type="hidden" name="symbol" id="add-etf-control-symbol-hidden" />
+            <input type="hidden" name="countryCode" id="add-etf-control-country-hidden" />
+            <p class="dialog-hint" id="add-etf-control-hint">El símbolo y el país ya vienen predefinidos al elegir un ETF del catálogo por sector.</p>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
                 <button type="submit" class="mini-button" id="add-etf-control-submit" disabled>Añadir</button>

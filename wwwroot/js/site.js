@@ -657,57 +657,82 @@ document.addEventListener('click', function (event) {
 // sector y luego un ETF conocido de ese sector mediante desplegables
 // guiados, o (2) escribiendo directamente el código ISIN a mano (modo ya
 // existente). En ambos casos el valor final se copia a un único campo
-// oculto "isin" que es el que procesa el backend (SearchSymbolAsync
-// resuelve nombre/símbolo/país a partir del ISIN), así que no hace falta
-// tocar el handler del servidor. IMPORTANTE: cada ISIN de este catálogo se
-// ha probado manualmente contra el backend (SearchSymbolAsync) y solo se
-// han dejado los que devuelven el fondo correcto; varios candidatos
-// iniciales (bonos, oro/materias primas, ETF apalancados) se descartaron
-// porque la búsqueda por ISIN del servicio Yahoo Finance no los encuentra
-// o devuelve un fondo distinto al esperado — limitación del propio
-// servicio de búsqueda, no de este catálogo. Si en el futuro se quiere
-// ampliar la lista, cualquier ISIN nuevo debe verificarse igual antes de
-// añadirlo (si falla, el backend ya muestra un error claro y el usuario
-// puede recurrir al modo manual "Por ISIN").
+// oculto "isin" que es el que procesa el backend en modo manual
+// (`OnPostAddEtfControlAsync`, que sigue usando SearchSymbolAsync a partir
+// del ISIN escrito). El modo "Por sector" usa un handler DISTINTO,
+// `OnPostAddEtfControlBySectorAsync`, que da de alta el ETF DIRECTAMENTE con
+// nombre+símbolo+ISIN+país ya conocidos por catálogo (sin pasar por
+// ninguna búsqueda en tiempo real) — necesario porque la búsqueda de Yahoo
+// por ISIN/nombre resultó nada fiable para bonos, materias primas y ETF
+// apalancados/inversos (ver histórico de pruebas en la nota de memoria del
+// repositorio): a veces no encuentra el ISIN y a veces devuelve un fondo
+// DISTINTO al esperado sin avisar. Por eso cada entrada de
+// `catalogoEtfsPorSector` lleva ya el símbolo real de Yahoo Finance y el
+// país de cotización, verificados de antemano (varios coinciden con datos
+// ya usados en producción en `custom-etfs.json`/`custom-funds.json`, y el
+// resto se comprobó manualmente añadiéndolos y confirmando que cargan
+// cotización real antes de incluirlos aquí). Si en el futuro se amplía el
+// catálogo, cualquier símbolo nuevo debe verificarse primero de la misma
+// forma (añadirlo y comprobar que la fila muestra precio real, no "N/A").
 (function () {
     var catalogoEtfsPorSector = {
         Global: {
             etiqueta: 'Renta variable global',
             etfs: [
-                { name: 'iShares Core MSCI World UCITS ETF (Acc)', isin: 'IE00B4L5Y983' },
-                { name: 'Vanguard FTSE All-World UCITS ETF (Acc)', isin: 'IE00BK5BQT80' }
+                { name: 'iShares Core MSCI World UCITS ETF USD (Acc)', isin: 'IE00B4L5Y983', symbol: 'IWDA.L', countryCode: 'GB' },
+                { name: 'Vanguard FTSE All-World UCITS ETF USD (Acc)', isin: 'IE00BK5BQT80', symbol: 'VWRA.L', countryCode: 'GB' }
             ]
         },
         USA: {
             etiqueta: 'Renta variable EE.UU.',
             etfs: [
-                { name: 'iShares Core S&P 500 UCITS ETF (Acc)', isin: 'IE00B5BMR087' },
-                { name: 'Invesco EQQQ Nasdaq-100 UCITS ETF', isin: 'IE0032077012' }
+                { name: 'iShares Core S&P 500 UCITS ETF USD (Acc)', isin: 'IE00B5BMR087', symbol: 'CSSPX.MI', countryCode: 'IT' },
+                { name: 'Invesco EQQQ Nasdaq-100 UCITS ETF', isin: 'IE0032077012', symbol: 'EQQQ.SW', countryCode: 'CH' },
+                { name: 'Vanguard S&P 500 UCITS ETF', isin: 'IE00B3XXRP09', symbol: 'VUSA.L', countryCode: 'GB' }
             ]
         },
         Europa: {
             etiqueta: 'Renta variable Europa',
             etfs: [
-                { name: 'iShares STOXX Europe 600 UCITS ETF', isin: 'DE0002635307' }
+                { name: 'iShares STOXX Europe 600 UCITS ETF (DE)', isin: 'DE0002635307', symbol: 'EXSA.DE', countryCode: 'DE' },
+                { name: 'Amundi CAC 40 UCITS ETF', isin: 'FR0007052782', symbol: 'CAC.PA', countryCode: 'FR' }
             ]
         },
         Emergentes: {
             etiqueta: 'Renta variable emergentes',
             etfs: [
-                { name: 'iShares Core MSCI EM IMI UCITS ETF', isin: 'IE00BKM4GZ66' },
-                { name: 'Vanguard FTSE Emerging Markets UCITS ETF (Acc)', isin: 'IE00BK5BR733' }
+                { name: 'iShares Core MSCI EM IMI UCITS ETF USD (Acc)', isin: 'IE00BKM4GZ66', symbol: 'EIMI.L', countryCode: 'GB' },
+                { name: 'Vanguard FTSE Emerging Markets UCITS ETF USD (Acc)', isin: 'IE00BK5BR733', symbol: 'VFEA.L', countryCode: 'GB' }
             ]
         },
         Sectoriales: {
             etiqueta: 'Sectoriales / Temáticos',
             etfs: [
-                { name: 'iShares Global Clean Energy UCITS ETF', isin: 'IE00B1XNHC34' },
-                { name: 'iShares Automation & Robotics UCITS ETF', isin: 'IE00BYZK4552' }
+                { name: 'iShares Global Clean Energy UCITS ETF', isin: 'IE00B1XNHC34', symbol: 'INRG.SW', countryCode: 'CH' },
+                { name: 'iShares Automation & Robotics UCITS ETF', isin: 'IE00BYZK4552', symbol: 'RBOT.L', countryCode: 'GB' },
+                { name: 'iShares S&P 500 Information Technology Sector UCITS ETF', isin: 'IE00B3WJKG14', symbol: 'IUIT.L', countryCode: 'GB' }
+            ]
+        },
+        Apalancados: {
+            etiqueta: 'Apalancados / Inversos',
+            etfs: [
+                { name: 'Amundi Ibex 35 Doble Apalancado Diario (2x)', isin: 'LU1681043941', symbol: 'IBEXA.MC', countryCode: 'ES' },
+                { name: 'db x-trackers LevDAX Daily UCITS 1C', isin: 'LU0322252738', symbol: 'DBPE.DU', countryCode: 'DE' },
+                { name: 'Amundi EURO STOXX 50 Daily (2x) Leveraged UCITS Ac', isin: 'FR0014005S97', symbol: 'LVE.PA', countryCode: 'FR' },
+                { name: 'db x-trackers S&P 500 2x Leveraged Daily UCITS 1C', isin: 'LU0322252886', symbol: 'DBPG.DU', countryCode: 'DE' }
+            ]
+        },
+        MateriasPrimas: {
+            etiqueta: 'Materias primas / Oro',
+            etfs: [
+                { name: 'Xtrackers IE Physical Gold ETC (XGDU)', isin: 'IE00B4ND5C91', symbol: 'XGDU.MI', countryCode: 'IT' },
+                { name: 'BlackRock Global Funds - World Gold Fund E2 EUR ACC', isin: 'LU0171306680', symbol: '0P0000VHO3', countryCode: 'LU' }
             ]
         }
     };
 
     var dialogo = document.getElementById('add-etf-control-dialog');
+    var formulario = document.getElementById('add-etf-control-form');
     var modoSector = document.getElementById('add-etf-control-mode-sector');
     var modoIsin = document.getElementById('add-etf-control-mode-isin');
     var camposSector = document.getElementById('add-etf-control-sector-fields');
@@ -716,11 +741,26 @@ document.addEventListener('click', function (event) {
     var selectEtf = document.getElementById('add-etf-control-name');
     var inputIsinManual = document.getElementById('add-etf-control-isin-input');
     var inputIsinOculto = document.getElementById('add-etf-control-isin-hidden');
+    var inputNombreOculto = document.getElementById('add-etf-control-name-hidden');
+    var inputSimboloOculto = document.getElementById('add-etf-control-symbol-hidden');
+    var inputPaisOculto = document.getElementById('add-etf-control-country-hidden');
+    var textoAyuda = document.getElementById('add-etf-control-hint');
     var botonAnadirEtf = document.getElementById('add-etf-control-submit');
 
-    if (!dialogo || !modoSector || !modoIsin || !camposSector || !camposIsin || !selectSector ||
-        !selectEtf || !inputIsinManual || !inputIsinOculto || !botonAnadirEtf) {
+    if (!dialogo || !formulario || !modoSector || !modoIsin || !camposSector || !camposIsin || !selectSector ||
+        !selectEtf || !inputIsinManual || !inputIsinOculto || !inputNombreOculto || !inputSimboloOculto ||
+        !inputPaisOculto || !textoAyuda || !botonAnadirEtf) {
         return;
+    }
+
+    var handlerSector = 'AddEtfControlBySector';
+    var handlerIsin = 'AddEtfControl';
+    var ayudaSector = 'El símbolo y el país ya vienen predefinidos al elegir un ETF del catálogo por sector.';
+    var ayudaIsin = 'El nombre, el símbolo y el país se buscan automáticamente a partir del ISIN.';
+
+    function establecerHandler(nombreHandler) {
+        var base = formulario.action.split('?')[0];
+        formulario.action = base + '?handler=' + nombreHandler;
     }
 
     function poblarSectores() {
@@ -758,21 +798,33 @@ document.addEventListener('click', function (event) {
             var opcion = document.createElement('option');
             opcion.value = etf.isin;
             opcion.textContent = etf.name;
+            opcion.setAttribute('data-name', etf.name);
+            opcion.setAttribute('data-symbol', etf.symbol);
+            opcion.setAttribute('data-country', etf.countryCode);
             selectEtf.appendChild(opcion);
         });
 
         selectEtf.disabled = false;
     }
 
+    function limpiarCamposOcultos() {
+        inputIsinOculto.value = '';
+        inputNombreOculto.value = '';
+        inputSimboloOculto.value = '';
+        inputPaisOculto.value = '';
+    }
+
     function actualizarBoton() {
-        botonAnadirEtf.disabled = !inputIsinOculto.value;
+        botonAnadirEtf.disabled = modoSector.checked ? !inputSimboloOculto.value : !inputIsinOculto.value;
     }
 
     function activarModoSector() {
         camposSector.classList.remove('is-hidden');
         camposIsin.classList.add('is-hidden');
         inputIsinManual.value = '';
-        inputIsinOculto.value = selectEtf.value || '';
+        limpiarCamposOcultos();
+        establecerHandler(handlerSector);
+        textoAyuda.textContent = ayudaSector;
         actualizarBoton();
     }
 
@@ -781,7 +833,10 @@ document.addEventListener('click', function (event) {
         camposSector.classList.add('is-hidden');
         selectSector.value = '';
         resetEtf('Selecciona primero un sector');
+        limpiarCamposOcultos();
         inputIsinOculto.value = inputIsinManual.value.trim().toUpperCase();
+        establecerHandler(handlerIsin);
+        textoAyuda.textContent = ayudaIsin;
         actualizarBoton();
     }
 
@@ -803,12 +858,21 @@ document.addEventListener('click', function (event) {
         } else {
             resetEtf('Selecciona primero un sector');
         }
-        inputIsinOculto.value = '';
+        limpiarCamposOcultos();
         actualizarBoton();
     });
 
     selectEtf.addEventListener('change', function () {
-        inputIsinOculto.value = selectEtf.value || '';
+        var opcionSeleccionada = selectEtf.options[selectEtf.selectedIndex];
+        if (!opcionSeleccionada || !opcionSeleccionada.value) {
+            limpiarCamposOcultos();
+            actualizarBoton();
+            return;
+        }
+        inputIsinOculto.value = opcionSeleccionada.value;
+        inputNombreOculto.value = opcionSeleccionada.getAttribute('data-name') || opcionSeleccionada.textContent;
+        inputSimboloOculto.value = opcionSeleccionada.getAttribute('data-symbol') || '';
+        inputPaisOculto.value = opcionSeleccionada.getAttribute('data-country') || '';
         actualizarBoton();
     });
 
@@ -822,7 +886,9 @@ document.addEventListener('click', function (event) {
         selectSector.value = '';
         resetEtf('Selecciona primero un sector');
         inputIsinManual.value = '';
-        inputIsinOculto.value = '';
+        limpiarCamposOcultos();
+        establecerHandler(handlerSector);
+        textoAyuda.textContent = ayudaSector;
         actualizarBoton();
         camposSector.classList.remove('is-hidden');
         camposIsin.classList.add('is-hidden');
@@ -830,6 +896,7 @@ document.addEventListener('click', function (event) {
 
     poblarSectores();
     resetEtf('Selecciona primero un sector');
+    establecerHandler(handlerSector);
     actualizarBoton();
 })();
 

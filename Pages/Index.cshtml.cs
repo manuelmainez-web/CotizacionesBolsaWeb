@@ -540,6 +540,12 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostAddEtfControlBySectorAsync(string name, string symbol, string? isin, string? countryCode)
+    {
+        await AddCustomEntryWithIsinAsync(EtfControlKey, name, symbol, isin, countryCode);
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnPostAddStockAsync(string name, string? market)
     {
         var preferredExchanges = MapMarketToExchanges(market);
@@ -835,6 +841,28 @@ public class IndexModel : PageModel
         {
             entries = entries.OrderBy(e => GetIndexRegionOrder(e.CountryCode)).ToList();
         }
+
+        await _dataStore.SaveEntriesAsync(key, entries);
+    }
+
+    /// <summary>
+    /// Igual que <see cref="AddCustomEntryAsync"/> pero permitiendo indicar el ISIN
+    /// directamente (usado por el alta de ETF por sector, donde el ISIN, símbolo y
+    /// país ya se conocen de antemano por catálogo y no hace falta buscarlos).
+    /// </summary>
+    private async Task AddCustomEntryWithIsinAsync(string key, string name, string symbol, string? isin, string? countryCode)
+    {
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(symbol))
+        {
+            return;
+        }
+
+        var entries = await _dataStore.LoadEntriesAsync<QuoteConfig>(key);
+        entries.Add(new QuoteConfig(
+            name.Trim(),
+            symbol.Trim(),
+            string.IsNullOrWhiteSpace(isin) ? null : isin.Trim().ToUpperInvariant(),
+            string.IsNullOrWhiteSpace(countryCode) ? null : countryCode.Trim().ToUpperInvariant()));
 
         await _dataStore.SaveEntriesAsync(key, entries);
     }
