@@ -618,6 +618,27 @@ body.wco-active .topbar-datetime {
   cursor: not-allowed;
 }
 
+.dialog-mode-switch {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 2px;
+}
+
+.dialog-mode-switch label {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.dialog-mode-switch input[type="radio"] {
+  width: auto;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
 .dialog-actions {
   display: flex;
   justify-content: flex-end;

@@ -7,3 +7,5 @@ cloudflared-log.txt
 .vs/
 tools/
 test-pid.txt
+
+.playwright-mcp/

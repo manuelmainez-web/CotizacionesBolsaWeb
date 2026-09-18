@@ -652,6 +652,187 @@ document.addEventListener('click', function (event) {
     resetAccion('Selecciona primero un índice');
 })();
 
+// Diálogo "Añadir ETF" (Control de cotizaciones): permite elegir el ETF de
+// dos formas excluyentes, "o una cosa u otra": (1) seleccionando primero un
+// sector y luego un ETF conocido de ese sector mediante desplegables
+// guiados, o (2) escribiendo directamente el código ISIN a mano (modo ya
+// existente). En ambos casos el valor final se copia a un único campo
+// oculto "isin" que es el que procesa el backend (SearchSymbolAsync
+// resuelve nombre/símbolo/país a partir del ISIN), así que no hace falta
+// tocar el handler del servidor. IMPORTANTE: cada ISIN de este catálogo se
+// ha probado manualmente contra el backend (SearchSymbolAsync) y solo se
+// han dejado los que devuelven el fondo correcto; varios candidatos
+// iniciales (bonos, oro/materias primas, ETF apalancados) se descartaron
+// porque la búsqueda por ISIN del servicio Yahoo Finance no los encuentra
+// o devuelve un fondo distinto al esperado — limitación del propio
+// servicio de búsqueda, no de este catálogo. Si en el futuro se quiere
+// ampliar la lista, cualquier ISIN nuevo debe verificarse igual antes de
+// añadirlo (si falla, el backend ya muestra un error claro y el usuario
+// puede recurrir al modo manual "Por ISIN").
+(function () {
+    var catalogoEtfsPorSector = {
+        Global: {
+            etiqueta: 'Renta variable global',
+            etfs: [
+                { name: 'iShares Core MSCI World UCITS ETF (Acc)', isin: 'IE00B4L5Y983' },
+                { name: 'Vanguard FTSE All-World UCITS ETF (Acc)', isin: 'IE00BK5BQT80' }
+            ]
+        },
+        USA: {
+            etiqueta: 'Renta variable EE.UU.',
+            etfs: [
+                { name: 'iShares Core S&P 500 UCITS ETF (Acc)', isin: 'IE00B5BMR087' },
+                { name: 'Invesco EQQQ Nasdaq-100 UCITS ETF', isin: 'IE0032077012' }
+            ]
+        },
+        Europa: {
+            etiqueta: 'Renta variable Europa',
+            etfs: [
+                { name: 'iShares STOXX Europe 600 UCITS ETF', isin: 'DE0002635307' }
+            ]
+        },
+        Emergentes: {
+            etiqueta: 'Renta variable emergentes',
+            etfs: [
+                { name: 'iShares Core MSCI EM IMI UCITS ETF', isin: 'IE00BKM4GZ66' },
+                { name: 'Vanguard FTSE Emerging Markets UCITS ETF (Acc)', isin: 'IE00BK5BR733' }
+            ]
+        },
+        Sectoriales: {
+            etiqueta: 'Sectoriales / Temáticos',
+            etfs: [
+                { name: 'iShares Global Clean Energy UCITS ETF', isin: 'IE00B1XNHC34' },
+                { name: 'iShares Automation & Robotics UCITS ETF', isin: 'IE00BYZK4552' }
+            ]
+        }
+    };
+
+    var dialogo = document.getElementById('add-etf-control-dialog');
+    var modoSector = document.getElementById('add-etf-control-mode-sector');
+    var modoIsin = document.getElementById('add-etf-control-mode-isin');
+    var camposSector = document.getElementById('add-etf-control-sector-fields');
+    var camposIsin = document.getElementById('add-etf-control-isin-fields');
+    var selectSector = document.getElementById('add-etf-control-sector');
+    var selectEtf = document.getElementById('add-etf-control-name');
+    var inputIsinManual = document.getElementById('add-etf-control-isin-input');
+    var inputIsinOculto = document.getElementById('add-etf-control-isin-hidden');
+    var botonAnadirEtf = document.getElementById('add-etf-control-submit');
+
+    if (!dialogo || !modoSector || !modoIsin || !camposSector || !camposIsin || !selectSector ||
+        !selectEtf || !inputIsinManual || !inputIsinOculto || !botonAnadirEtf) {
+        return;
+    }
+
+    function poblarSectores() {
+        Object.keys(catalogoEtfsPorSector).forEach(function (codigo) {
+            var opcion = document.createElement('option');
+            opcion.value = codigo;
+            opcion.textContent = catalogoEtfsPorSector[codigo].etiqueta;
+            selectSector.appendChild(opcion);
+        });
+    }
+
+    function resetEtf(mensaje) {
+        selectEtf.innerHTML = '';
+        var opcion = document.createElement('option');
+        opcion.value = '';
+        opcion.disabled = true;
+        opcion.selected = true;
+        opcion.textContent = mensaje;
+        selectEtf.appendChild(opcion);
+        selectEtf.disabled = true;
+    }
+
+    function poblarEtfs(codigoSector) {
+        var sector = catalogoEtfsPorSector[codigoSector];
+        selectEtf.innerHTML = '';
+
+        var opcionVacia = document.createElement('option');
+        opcionVacia.value = '';
+        opcionVacia.disabled = true;
+        opcionVacia.selected = true;
+        opcionVacia.textContent = 'Selecciona un ETF';
+        selectEtf.appendChild(opcionVacia);
+
+        sector.etfs.forEach(function (etf) {
+            var opcion = document.createElement('option');
+            opcion.value = etf.isin;
+            opcion.textContent = etf.name;
+            selectEtf.appendChild(opcion);
+        });
+
+        selectEtf.disabled = false;
+    }
+
+    function actualizarBoton() {
+        botonAnadirEtf.disabled = !inputIsinOculto.value;
+    }
+
+    function activarModoSector() {
+        camposSector.classList.remove('is-hidden');
+        camposIsin.classList.add('is-hidden');
+        inputIsinManual.value = '';
+        inputIsinOculto.value = selectEtf.value || '';
+        actualizarBoton();
+    }
+
+    function activarModoIsin() {
+        camposIsin.classList.remove('is-hidden');
+        camposSector.classList.add('is-hidden');
+        selectSector.value = '';
+        resetEtf('Selecciona primero un sector');
+        inputIsinOculto.value = inputIsinManual.value.trim().toUpperCase();
+        actualizarBoton();
+    }
+
+    modoSector.addEventListener('change', function () {
+        if (modoSector.checked) {
+            activarModoSector();
+        }
+    });
+
+    modoIsin.addEventListener('change', function () {
+        if (modoIsin.checked) {
+            activarModoIsin();
+        }
+    });
+
+    selectSector.addEventListener('change', function () {
+        if (selectSector.value && catalogoEtfsPorSector[selectSector.value]) {
+            poblarEtfs(selectSector.value);
+        } else {
+            resetEtf('Selecciona primero un sector');
+        }
+        inputIsinOculto.value = '';
+        actualizarBoton();
+    });
+
+    selectEtf.addEventListener('change', function () {
+        inputIsinOculto.value = selectEtf.value || '';
+        actualizarBoton();
+    });
+
+    inputIsinManual.addEventListener('input', function () {
+        inputIsinOculto.value = inputIsinManual.value.trim().toUpperCase();
+        actualizarBoton();
+    });
+
+    dialogo.addEventListener('close', function () {
+        modoSector.checked = true;
+        selectSector.value = '';
+        resetEtf('Selecciona primero un sector');
+        inputIsinManual.value = '';
+        inputIsinOculto.value = '';
+        actualizarBoton();
+        camposSector.classList.remove('is-hidden');
+        camposIsin.classList.add('is-hidden');
+    });
+
+    poblarSectores();
+    resetEtf('Selecciona primero un sector');
+    actualizarBoton();
+})();
+
 // Botón de imprimir toda la página
 (function () {
     var boton = document.getElementById('btn-print-page');

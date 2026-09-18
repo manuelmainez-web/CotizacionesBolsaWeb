@@ -359,14 +359,41 @@
     <dialog id="add-etf-control-dialog" class="add-entry-dialog">
         <form method="post" asp-page-handler="AddEtfControl">
             <h3>Añadir ETF</h3>
-            <label>
-                Código ISIN
-                <input type="text" name="isin" required maxlength="20" placeholder="Ej. IE00B5BMR087" />
-            </label>
-            <p class="dialog-hint">El nombre, el símbolo y el país se buscan automáticamente a partir del ISIN.</p>
+            <div class="dialog-mode-switch" role="radiogroup" aria-label="Método para añadir ETF">
+                <label>
+                    <input type="radio" name="etf-control-mode" id="add-etf-control-mode-sector" value="sector" checked />
+                    Por sector
+                </label>
+                <label>
+                    <input type="radio" name="etf-control-mode" id="add-etf-control-mode-isin" value="isin" />
+                    Por ISIN
+                </label>
+            </div>
+            <div id="add-etf-control-sector-fields">
+                <label>
+                    Sector
+                    <select id="add-etf-control-sector">
+                        <option value="" selected disabled>Selecciona un sector</option>
+                    </select>
+                </label>
+                <label>
+                    ETF
+                    <select id="add-etf-control-name" disabled>
+                        <option value="" selected disabled>Selecciona primero un sector</option>
+                    </select>
+                </label>
+            </div>
+            <div id="add-etf-control-isin-fields" class="is-hidden">
+                <label>
+                    Código ISIN
+                    <input type="text" id="add-etf-control-isin-input" maxlength="20" placeholder="Ej. IE00B5BMR087" />
+                </label>
+            </div>
+            <input type="hidden" name="isin" id="add-etf-control-isin-hidden" />
+            <p class="dialog-hint">El nombre, el símbolo y el país se buscan automáticamente a partir del ISIN, tanto si lo escribes como si lo eliges por sector.</p>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
-                <button type="submit" class="mini-button">Añadir</button>
+                <button type="submit" class="mini-button" id="add-etf-control-submit" disabled>Añadir</button>
             </div>
         </form>
     </dialog>
