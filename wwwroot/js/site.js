@@ -680,7 +680,9 @@ document.addEventListener('click', function (event) {
             etiqueta: 'Renta variable global',
             etfs: [
                 { name: 'iShares Core MSCI World UCITS ETF USD (Acc)', isin: 'IE00B4L5Y983', symbol: 'IWDA.L', countryCode: 'GB' },
-                { name: 'Vanguard FTSE All-World UCITS ETF USD (Acc)', isin: 'IE00BK5BQT80', symbol: 'VWRA.L', countryCode: 'GB' }
+                { name: 'Vanguard FTSE All-World UCITS ETF USD (Acc)', isin: 'IE00BK5BQT80', symbol: 'VWRA.L', countryCode: 'GB' },
+                { name: 'iShares MSCI ACWI UCITS ETF', isin: 'IE00B6R52259', symbol: 'SSAC.L', countryCode: 'GB' },
+                { name: 'Xtrackers MSCI World UCITS ETF 1C', isin: 'IE00BJ0KDQ92', symbol: 'XDWD.DE', countryCode: 'DE' }
             ]
         },
         USA: {
@@ -688,21 +690,26 @@ document.addEventListener('click', function (event) {
             etfs: [
                 { name: 'iShares Core S&P 500 UCITS ETF USD (Acc)', isin: 'IE00B5BMR087', symbol: 'CSSPX.MI', countryCode: 'IT' },
                 { name: 'Invesco EQQQ Nasdaq-100 UCITS ETF', isin: 'IE0032077012', symbol: 'EQQQ.SW', countryCode: 'CH' },
-                { name: 'Vanguard S&P 500 UCITS ETF', isin: 'IE00B3XXRP09', symbol: 'VUSA.L', countryCode: 'GB' }
+                { name: 'Vanguard S&P 500 UCITS ETF', isin: 'IE00B3XXRP09', symbol: 'VUSA.L', countryCode: 'GB' },
+                { name: 'iShares S&P 500 UCITS ETF (Dist)', isin: 'IE0031442068', symbol: 'IUSA.L', countryCode: 'GB' },
+                { name: 'SPDR S&P 500 UCITS ETF', isin: 'IE00B6YX5C33', symbol: 'SPY5.L', countryCode: 'GB' }
             ]
         },
         Europa: {
             etiqueta: 'Renta variable Europa',
             etfs: [
                 { name: 'iShares STOXX Europe 600 UCITS ETF (DE)', isin: 'DE0002635307', symbol: 'EXSA.DE', countryCode: 'DE' },
-                { name: 'Amundi CAC 40 UCITS ETF', isin: 'FR0007052782', symbol: 'CAC.PA', countryCode: 'FR' }
+                { name: 'Amundi CAC 40 UCITS ETF', isin: 'FR0007052782', symbol: 'CAC.PA', countryCode: 'FR' },
+                { name: 'iShares Core DAX UCITS ETF (DE)', isin: 'DE0005933931', symbol: 'EXS1.DE', countryCode: 'DE' },
+                { name: 'iShares FTSE 100 UCITS ETF', isin: 'IE0005042456', symbol: 'ISF.L', countryCode: 'GB' }
             ]
         },
         Emergentes: {
             etiqueta: 'Renta variable emergentes',
             etfs: [
                 { name: 'iShares Core MSCI EM IMI UCITS ETF USD (Acc)', isin: 'IE00BKM4GZ66', symbol: 'EIMI.L', countryCode: 'GB' },
-                { name: 'Vanguard FTSE Emerging Markets UCITS ETF USD (Acc)', isin: 'IE00BK5BR733', symbol: 'VFEA.L', countryCode: 'GB' }
+                { name: 'Vanguard FTSE Emerging Markets UCITS ETF USD (Acc)', isin: 'IE00BK5BR733', symbol: 'VFEA.L', countryCode: 'GB' },
+                { name: 'Amundi MSCI Emerging Markets UCITS ETF', isin: 'LU1681045370', symbol: 'AEEM.PA', countryCode: 'FR' }
             ]
         },
         Sectoriales: {
@@ -710,7 +717,9 @@ document.addEventListener('click', function (event) {
             etfs: [
                 { name: 'iShares Global Clean Energy UCITS ETF', isin: 'IE00B1XNHC34', symbol: 'INRG.SW', countryCode: 'CH' },
                 { name: 'iShares Automation & Robotics UCITS ETF', isin: 'IE00BYZK4552', symbol: 'RBOT.L', countryCode: 'GB' },
-                { name: 'iShares S&P 500 Information Technology Sector UCITS ETF', isin: 'IE00B3WJKG14', symbol: 'IUIT.L', countryCode: 'GB' }
+                { name: 'iShares S&P 500 Information Technology Sector UCITS ETF', isin: 'IE00B3WJKG14', symbol: 'IUIT.L', countryCode: 'GB' },
+                { name: 'iShares Digital Security UCITS ETF', isin: 'IE00BG0J4C88', symbol: 'LOCK.L', countryCode: 'GB' },
+                { name: 'iShares Healthcare Innovation UCITS ETF', isin: 'IE00BYZK4776', symbol: 'HEAL.L', countryCode: 'GB' }
             ]
         },
         Apalancados: {
@@ -719,14 +728,19 @@ document.addEventListener('click', function (event) {
                 { name: 'Amundi Ibex 35 Doble Apalancado Diario (2x)', isin: 'LU1681043941', symbol: 'IBEXA.MC', countryCode: 'ES' },
                 { name: 'db x-trackers LevDAX Daily UCITS 1C', isin: 'LU0322252738', symbol: 'DBPE.DU', countryCode: 'DE' },
                 { name: 'Amundi EURO STOXX 50 Daily (2x) Leveraged UCITS Ac', isin: 'FR0014005S97', symbol: 'LVE.PA', countryCode: 'FR' },
-                { name: 'db x-trackers S&P 500 2x Leveraged Daily UCITS 1C', isin: 'LU0322252886', symbol: 'DBPG.DU', countryCode: 'DE' }
+                { name: 'db x-trackers S&P 500 2x Leveraged Daily UCITS 1C', isin: 'LU0322252886', symbol: 'DBPG.DU', countryCode: 'DE' },
+                { name: 'Amundi Nasdaq-100 Daily (2x) Leveraged UCITS ETF', isin: 'FR0010342592', symbol: 'LQQ.PA', countryCode: 'FR' },
+                { name: 'Lyxor CAC 40 Daily (2x) Leveraged UCITS ETF', isin: 'FR0010592014', symbol: 'LVC.PA', countryCode: 'FR' },
+                { name: 'Lyxor CAC 40 Daily (-1x) Inverse UCITS ETF', isin: 'FR0010591366', symbol: 'BX4.PA', countryCode: 'FR' }
             ]
         },
         MateriasPrimas: {
             etiqueta: 'Materias primas / Oro',
             etfs: [
                 { name: 'Xtrackers IE Physical Gold ETC (XGDU)', isin: 'IE00B4ND5C91', symbol: 'XGDU.MI', countryCode: 'IT' },
-                { name: 'BlackRock Global Funds - World Gold Fund E2 EUR ACC', isin: 'LU0171306680', symbol: '0P0000VHO3', countryCode: 'LU' }
+                { name: 'BlackRock Global Funds - World Gold Fund E2 EUR ACC', isin: 'LU0171306680', symbol: '0P0000VHO3', countryCode: 'LU' },
+                { name: 'iShares Physical Gold ETC', isin: 'IE00B4ND3602', symbol: 'SGLN.L', countryCode: 'GB' },
+                { name: 'WisdomTree Physical Silver', isin: 'JE00B1VS3333', symbol: 'PHAG.L', countryCode: 'GB' }
             ]
         }
     };
