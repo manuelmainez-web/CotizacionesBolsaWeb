@@ -1165,8 +1165,25 @@
         <form method="post" asp-page-handler="AddStockHolding">
             <h3>Añadir acción</h3>
             <label>
-                Nombre
-                <input type="text" name="name" required maxlength="150" placeholder="Ej. Apple Inc." />
+                Índice
+                <select id="add-stock-holding-market" name="market" required>
+                    <option value="" selected disabled>Selecciona un índice</option>
+                    <option value="IBEX35">IBEX-35</option>
+                    <option value="CAC40">CAC 40</option>
+                    <option value="DAX">DAX</option>
+                    <option value="EUROSTOXX50">EURO STOXX 50</option>
+                    <option value="DOWJONES">DOW JONES</option>
+                    <option value="NASDAQ">NASDAQ-100</option>
+                    <option value="SP500">S&amp;P 500</option>
+                    <option value="NIKKEI225">NIKKEI 225</option>
+                    <option value="HANGSENG">HANG SENG</option>
+                </select>
+            </label>
+            <label>
+                Acción
+                <select id="add-stock-holding-name" name="name" required disabled>
+                    <option value="" selected disabled>Selecciona primero un índice</option>
+                </select>
             </label>
             <label>
                 Número de títulos
@@ -1176,10 +1193,10 @@
                 Importe por título
                 <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" placeholder="Ej. 150.00" />
             </label>
-            <p class="dialog-hint">El símbolo, el mercado, el bróker (ING Direct por defecto) y el ISIN se buscan automáticamente a partir del nombre. Puedes ajustarlos después con "Editar".</p>
+            <p class="dialog-hint">El símbolo, el bróker (ING Direct por defecto) y el ISIN se buscan automáticamente a partir de la acción elegida, priorizando el índice seleccionado. Puedes ajustarlos después con "Editar".</p>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
-                <button type="submit" class="mini-button">Añadir</button>
+                <button type="submit" class="mini-button" id="add-stock-holding-submit" disabled>Añadir</button>
             </div>
         </form>
     </dialog>

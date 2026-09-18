@@ -361,13 +361,19 @@ document.addEventListener('click', function (event) {
     resetTodo();
 })();
 
-// Diálogo "Añadir acción": selección guiada por índice -> acción, sin
+// Diálogo(s) "Añadir acción": selección guiada por índice -> acción, sin
 // escribir el nombre a mano. El símbolo se sigue resolviendo en el
 // servidor (SearchSymbolAsync) a partir del nombre elegido, priorizando el
-// índice seleccionado, igual que antes. NOTA: los catálogos de NASDAQ-100
-// y, sobre todo, S&P 500 son listas muy extensas y cambian de vez en
-// cuando (altas/bajas trimestrales); esto es un mejor esfuerzo a fecha de
-// creación de este catálogo, no una fuente oficial en vivo.
+// índice seleccionado, igual que antes. Se reutiliza el MISMO catálogo y la
+// MISMA lógica de desplegables dependientes tanto para "Acciones (Control
+// de cotizaciones)" (`add-stock-dialog`) como para "Acciones (Cartera)"
+// (`add-stock-holding-dialog`), ya que ambos formularios envían "market" y
+// "name" con los mismos nombres de campo que espera el backend
+// (`OnPostAddStockAsync` / `OnPostAddStockHoldingAsync`). NOTA: los
+// catálogos de NASDAQ-100 y, sobre todo, S&P 500 son listas muy extensas y
+// cambian de vez en cuando (altas/bajas trimestrales); esto es un mejor
+// esfuerzo a fecha de creación de este catálogo, no una fuente oficial en
+// vivo.
 (function () {
     var catalogoAccionesPorIndice = {
         IBEX35: [
@@ -589,67 +595,72 @@ document.addEventListener('click', function (event) {
         ]
     };
 
-    var selectMercado = document.getElementById('add-stock-market');
-    var selectAccion = document.getElementById('add-stock-name');
-    var botonAnadirAccion = document.getElementById('add-stock-submit');
-    var dialogoAccion = document.getElementById('add-stock-dialog');
+    function configurarDialogoIndiceAccion(idDialogo, idSelectMercado, idSelectAccion, idBoton) {
+        var dialogo = document.getElementById(idDialogo);
+        var selectMercado = document.getElementById(idSelectMercado);
+        var selectAccion = document.getElementById(idSelectAccion);
+        var botonAnadir = document.getElementById(idBoton);
 
-    if (!selectMercado || !selectAccion || !botonAnadirAccion || !dialogoAccion) {
-        return;
-    }
+        if (!dialogo || !selectMercado || !selectAccion || !botonAnadir) {
+            return;
+        }
 
-    function resetAccion(mensaje) {
-        selectAccion.innerHTML = '';
-        var opcion = document.createElement('option');
-        opcion.value = '';
-        opcion.disabled = true;
-        opcion.selected = true;
-        opcion.textContent = mensaje;
-        selectAccion.appendChild(opcion);
-        selectAccion.disabled = true;
-        botonAnadirAccion.disabled = true;
-    }
-
-    function poblarAcciones(codigoIndice) {
-        var acciones = catalogoAccionesPorIndice[codigoIndice] || [];
-        selectAccion.innerHTML = '';
-
-        var opcionVacia = document.createElement('option');
-        opcionVacia.value = '';
-        opcionVacia.disabled = true;
-        opcionVacia.selected = true;
-        opcionVacia.textContent = 'Selecciona una acción';
-        selectAccion.appendChild(opcionVacia);
-
-        acciones.slice().sort(function (a, b) { return a.localeCompare(b, 'es'); }).forEach(function (nombre) {
+        function resetAccion(mensaje) {
+            selectAccion.innerHTML = '';
             var opcion = document.createElement('option');
-            opcion.value = nombre;
-            opcion.textContent = nombre;
+            opcion.value = '';
+            opcion.disabled = true;
+            opcion.selected = true;
+            opcion.textContent = mensaje;
             selectAccion.appendChild(opcion);
+            selectAccion.disabled = true;
+            botonAnadir.disabled = true;
+        }
+
+        function poblarAcciones(codigoIndice) {
+            var acciones = catalogoAccionesPorIndice[codigoIndice] || [];
+            selectAccion.innerHTML = '';
+
+            var opcionVacia = document.createElement('option');
+            opcionVacia.value = '';
+            opcionVacia.disabled = true;
+            opcionVacia.selected = true;
+            opcionVacia.textContent = 'Selecciona una acción';
+            selectAccion.appendChild(opcionVacia);
+
+            acciones.slice().sort(function (a, b) { return a.localeCompare(b, 'es'); }).forEach(function (nombre) {
+                var opcion = document.createElement('option');
+                opcion.value = nombre;
+                opcion.textContent = nombre;
+                selectAccion.appendChild(opcion);
+            });
+
+            selectAccion.disabled = acciones.length === 0;
+            botonAnadir.disabled = true;
+        }
+
+        selectMercado.addEventListener('change', function () {
+            if (selectMercado.value && catalogoAccionesPorIndice[selectMercado.value]) {
+                poblarAcciones(selectMercado.value);
+            } else {
+                resetAccion('Selecciona primero un índice');
+            }
         });
 
-        selectAccion.disabled = acciones.length === 0;
-        botonAnadirAccion.disabled = true;
+        selectAccion.addEventListener('change', function () {
+            botonAnadir.disabled = !selectAccion.value;
+        });
+
+        dialogo.addEventListener('close', function () {
+            selectMercado.value = '';
+            resetAccion('Selecciona primero un índice');
+        });
+
+        resetAccion('Selecciona primero un índice');
     }
 
-    selectMercado.addEventListener('change', function () {
-        if (selectMercado.value && catalogoAccionesPorIndice[selectMercado.value]) {
-            poblarAcciones(selectMercado.value);
-        } else {
-            resetAccion('Selecciona primero un índice');
-        }
-    });
-
-    selectAccion.addEventListener('change', function () {
-        botonAnadirAccion.disabled = !selectAccion.value;
-    });
-
-    dialogoAccion.addEventListener('close', function () {
-        selectMercado.value = '';
-        resetAccion('Selecciona primero un índice');
-    });
-
-    resetAccion('Selecciona primero un índice');
+    configurarDialogoIndiceAccion('add-stock-dialog', 'add-stock-market', 'add-stock-name', 'add-stock-submit');
+    configurarDialogoIndiceAccion('add-stock-holding-dialog', 'add-stock-holding-market', 'add-stock-holding-name', 'add-stock-holding-submit');
 })();
 
 // Diálogo "Añadir ETF" (Control de cotizaciones): permite elegir el ETF de
