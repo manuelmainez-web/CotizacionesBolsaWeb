@@ -1042,6 +1042,17 @@ function imprimirConNumeracion(bodyClass) {
         reorganizarCarteraPorBroker(copiaContenido);
     }
 
+    // El HTML clonado se serializa e inyecta en un iframe cuyo documento no
+    // tiene URL base propia (se crea con document.write, sin "src"), así que
+    // las rutas de imagen relativas a la raíz (ej. "/images/foo.jpg") no se
+    // resuelven de forma fiable contra el origen real de la app y la imagen
+    // no llega a cargarse. Se reescriben aquí a absolutas antes de pasar el
+    // HTML al previsualizador de paged.js.
+    var origenParaImagenes = window.location.origin;
+    copiaContenido.querySelectorAll('img[src^="/"]').forEach(function (img) {
+        img.setAttribute('src', origenParaImagenes + img.getAttribute('src'));
+    });
+
     var anterior = document.getElementById('iframe-impresion-cartera');
     if (anterior) {
         anterior.remove();

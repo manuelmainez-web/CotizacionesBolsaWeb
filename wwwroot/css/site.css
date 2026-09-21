@@ -463,6 +463,10 @@ body.wco-active .topbar-datetime {
   display: none;
 }
 
+.print-all-cash-image {
+  display: none;
+}
+
 .print-broker-letterhead {
   display: none;
 }
@@ -1026,6 +1030,13 @@ body.wco-active .topbar-datetime {
     color: #000000 !important;
   }
 
+  body.print-all .print-all-cash-image {
+    display: block !important;
+    max-width: 100%;
+    height: auto;
+    margin: 12px 0;
+  }
+
   .print-cartera-letterhead-title {
     color: #000000 !important;
     font-weight: 700;
@@ -1073,7 +1084,7 @@ body.wco-active .topbar-datetime {
   }
 
   .print-broker-group-logo {
-    max-width: 220px;
+    max-width: 140px;
     height: auto;
     display: block;
     margin-bottom: 10px;
