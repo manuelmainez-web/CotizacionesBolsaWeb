@@ -1141,6 +1141,11 @@ body.wco-active .topbar-datetime {
     margin-bottom: 24pt;
   }
 
+  body.print-broker-ing .blank-lines-2,
+  body.print-broker-tr .blank-lines-2 {
+    display: none !important;
+  }
+
   .print-cartera-letterhead .print-broker-letterhead-top {
     margin-bottom: 0;
   }
