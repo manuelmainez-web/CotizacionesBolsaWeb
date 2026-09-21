@@ -1081,6 +1081,12 @@ body.wco-active .topbar-datetime {
     margin-bottom: 0;
   }
 
+  .print-broker-letterhead-tr .print-broker-letterhead-logo {
+    max-width: 150px;
+    margin-top: 15px;
+    margin-bottom: 0;
+  }
+
   .print-broker-group {
     margin-top: 18px;
   }
