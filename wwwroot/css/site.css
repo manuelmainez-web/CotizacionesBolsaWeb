@@ -1118,6 +1118,10 @@ body.wco-active .topbar-datetime {
     max-width: 100px;
   }
 
+  body.print-cartera-only .print-broker-group-logo-ing {
+    max-width: 130px;
+  }
+
   .print-broker-letterhead-name {
     color: #000000 !important;
     font-weight: 700;

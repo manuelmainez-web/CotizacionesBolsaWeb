@@ -963,7 +963,7 @@ function reorganizarCarteraPorBroker(shellClone) {
         grupo.className = 'print-broker-group';
 
         var logo = document.createElement('img');
-        logo.className = 'print-broker-group-logo';
+        logo.className = 'print-broker-group-logo print-broker-group-logo-' + broker.toLowerCase();
         logo.src = logoSrc;
         logo.alt = logoAlt;
         grupo.appendChild(logo);
