@@ -86,8 +86,13 @@ public sealed class Quote
         {
             "ES" or "FR" => ("Romance Standard Time", "Europe/Madrid", new TimeSpan(9, 0, 0), new TimeSpan(17, 30, 0)),
             "DE" or "EU" => ("W. Europe Standard Time", "Europe/Berlin", new TimeSpan(9, 0, 0), new TimeSpan(17, 30, 0)),
+            "IT" => ("W. Europe Standard Time", "Europe/Rome", new TimeSpan(9, 0, 0), new TimeSpan(17, 30, 0)),
+            "CH" => ("W. Europe Standard Time", "Europe/Zurich", new TimeSpan(9, 0, 0), new TimeSpan(17, 30, 0)),
+            "LU" => ("W. Europe Standard Time", "Europe/Luxembourg", new TimeSpan(9, 0, 0), new TimeSpan(17, 30, 0)),
+            "GB" => ("GMT Standard Time", "Europe/London", new TimeSpan(8, 0, 0), new TimeSpan(16, 30, 0)),
             "US" => ("Eastern Standard Time", "America/New_York", new TimeSpan(9, 30, 0), new TimeSpan(16, 0, 0)),
             "JP" => ("Tokyo Standard Time", "Asia/Tokyo", new TimeSpan(9, 0, 0), new TimeSpan(15, 0, 0)),
+            "HK" => ("China Standard Time", "Asia/Hong_Kong", new TimeSpan(9, 30, 0), new TimeSpan(16, 0, 0)),
             _ => (string.Empty, string.Empty, TimeSpan.Zero, TimeSpan.Zero)
         };
 

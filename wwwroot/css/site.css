@@ -1049,6 +1049,13 @@ body.wco-active .topbar-datetime {
     margin: 0 0 10px;
   }
 
+  .print-broker-letterhead-title {
+    color: #000000 !important;
+    font-weight: 700;
+    font-size: 22pt;
+    margin: 0 0 10px;
+  }
+
   .print-broker-letterhead-top {
     display: flex;
     align-items: center;
