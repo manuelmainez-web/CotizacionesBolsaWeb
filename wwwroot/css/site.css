@@ -1010,6 +1010,11 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
+  body.print-broker-ing .portfolio-header,
+  body.print-broker-tr .portfolio-header {
+    display: none !important;
+  }
+
   body.print-all .print-all-title {
     display: block !important;
     color: #000000 !important;
