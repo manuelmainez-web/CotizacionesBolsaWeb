@@ -1189,6 +1189,11 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
+  body.print-all #summary-strip-label-checkingaccounts,
+  body.print-all #summary-strip-checkingaccounts {
+    display: none !important;
+  }
+
   body.print-broker-ing .market-panel-watchlist,
   body.print-broker-ing .market-panel-non-cartera,
   body.print-broker-ing #summary-strip-general,
