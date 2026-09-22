@@ -472,11 +472,11 @@ public class IndexModel : PageModel
         _ => "ING"
     };
 
-    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, string broker, decimal capitalInvertido, string? codigoDgsfp, decimal rentabilidad12Meses = 0m, decimal rentabilidadUltimoMes = 0m)
+    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, string broker, decimal capitalInvertido, string? codigoDgsfp, decimal valorLiquidativo = 0m, decimal rentabilidad12Meses = 0m, decimal rentabilidadUltimoMes = 0m)
     {
-        if (string.IsNullOrWhiteSpace(name) || participaciones <= 0 || valorLiquidativo <= 0)
+        if (string.IsNullOrWhiteSpace(name) || participaciones <= 0)
         {
-            PensionPlanError = "Revisa los datos: el nombre, las participaciones y el valor liquidativo son obligatorios.";
+            PensionPlanError = "Revisa los datos: el nombre y las participaciones son obligatorios.";
             return RedirectToPage();
         }
 
