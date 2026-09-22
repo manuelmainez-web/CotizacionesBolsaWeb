@@ -533,7 +533,7 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostEditPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, decimal rentabilidad12Meses, string broker, decimal rentabilidadUltimoMes, decimal capitalInvertido, string? codigoDgsfp)
+    public async Task<IActionResult> OnPostEditPensionPlanAsync(string name, decimal participaciones, string broker, decimal capitalInvertido, string? codigoDgsfp)
     {
         var holdings = await _dataStore.LoadEntriesAsync<PensionPlanHolding>(PensionPlansKey);
         var existing = holdings.FirstOrDefault(h => string.Equals(h.Name, name, StringComparison.OrdinalIgnoreCase));
@@ -543,10 +543,7 @@ public class IndexModel : PageModel
             holdings[index] = existing with
             {
                 Participaciones = participaciones,
-                ValorLiquidativo = valorLiquidativo,
-                Rentabilidad12Meses = rentabilidad12Meses,
                 Broker = ResolvePensionBroker(broker),
-                RentabilidadUltimoMes = rentabilidadUltimoMes,
                 CapitalInvertido = capitalInvertido,
                 CodigoDgsfp = codigoDgsfp?.Trim() ?? string.Empty
             };
