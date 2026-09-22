@@ -20,6 +20,7 @@ public class IndexModel : PageModel
     private const string CommoditiesKey = "custom-commodities";
 
     private readonly YahooFinanceService _service = new();
+    private readonly PensionPlanQuoteService _pensionPlanQuoteService = new();
     private readonly DataStore _dataStore;
 
     public IndexModel(IWebHostEnvironment environment, IConfiguration configuration)
@@ -291,6 +292,18 @@ public class IndexModel : PageModel
             var index = PensionPlans.IndexOf(gcoPlan);
             PensionPlans[index] = gcoPlan with { CodigoDgsfp = "N2408 / N2408" };
             await _dataStore.SaveEntriesAsync(PensionPlansKey, PensionPlans);
+        }
+
+        // El valor liquidativo se calcula dinámicamente consultando la ficha pública
+        // del plan (por código DGSFP) en cada carga de página; si la consulta falla
+        // (web caída, plan no indexado, etc.) se conserva el último valor guardado.
+        for (var i = 0; i < PensionPlans.Count; i++)
+        {
+            var liveValue = await _pensionPlanQuoteService.TryGetValorLiquidativoAsync(PensionPlans[i].CodigoDgsfp);
+            if (liveValue.HasValue)
+            {
+                PensionPlans[i] = PensionPlans[i] with { ValorLiquidativo = liveValue.Value };
+            }
         }
 
         if (!await _dataStore.ExistsAsync(CheckingAccountsKey))
