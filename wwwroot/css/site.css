@@ -1294,6 +1294,14 @@ body.wco-active .topbar-datetime {
     print-color-adjust: exact;
   }
 
+  body.print-broker-ing .market-table thead th,
+  body.print-broker-tr .market-table thead th {
+    background: #d9d9d9 !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   .market-table th.col-cambio,
   .market-table td.col-cambio {
     width: 85px !important;
