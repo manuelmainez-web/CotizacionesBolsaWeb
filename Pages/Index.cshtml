@@ -225,7 +225,7 @@
                         <th class="text-align-right" style="width: 70px;">Cambio</th>
                         <th style="width: 110px;">Actualizado</th>
                         <th style="width: 110px;">Mercado<br />(abierto/cerrado)</th>
-                        <th style="width: 42px;"></th>
+                        <th style="width: 96px;"></th>
                     </tr>
                 </thead>
                 <tbody id="tbody-stocks">
@@ -237,8 +237,9 @@
                     }
                     else
                     {
-                        @foreach (var item in Model.Stocks)
+                        @for (var stockRow = 0; stockRow < Model.Stocks.Count; stockRow++)
                         {
+                            var item = Model.Stocks[stockRow];
                             <tr>
                                 <td class="name-cell">
                                     <span class="name-with-flag">
@@ -256,6 +257,14 @@
                                     <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
                                 </td>
                                 <td class="delete-cell">
+                                    <form method="post" asp-page-handler="MoveStockUp">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                        <button type="submit" class="icon-button-move" title="Subir" @(stockRow == 0 ? "disabled" : "")>▲</button>
+                                    </form>
+                                    <form method="post" asp-page-handler="MoveStockDown">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                        <button type="submit" class="icon-button-move" title="Bajar" @(stockRow == Model.Stocks.Count - 1 ? "disabled" : "")>▼</button>
+                                    </form>
                                     <form method="post" asp-page-handler="DeleteStock" onsubmit="return confirm('¿Eliminar esta acción?');">
                                         <input type="hidden" name="symbol" value="@item.Symbol" />
                                         <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
@@ -322,7 +331,7 @@
                         <th class="text-align-right">Cambio</th>
                         <th>Actualizado</th>
                         <th>Mercado<br />(abierto/cerrado)</th>
-                        <th></th>
+                        <th style="width: 96px;"></th>
                     </tr>
                 </thead>
                 <tbody id="tbody-etfs-control">
@@ -334,8 +343,9 @@
                     }
                     else
                     {
-                        @foreach (var item in Model.EtfsControl)
+                        @for (var etfControlRow = 0; etfControlRow < Model.EtfsControl.Count; etfControlRow++)
                         {
+                            var item = Model.EtfsControl[etfControlRow];
                             <tr>
                                 <td class="name-cell">
                                     <span class="name-with-flag">
@@ -353,6 +363,14 @@
                                     <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
                                 </td>
                                 <td class="delete-cell">
+                                    <form method="post" asp-page-handler="MoveEtfControlUp">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                        <button type="submit" class="icon-button-move" title="Subir" @(etfControlRow == 0 ? "disabled" : "")>▲</button>
+                                    </form>
+                                    <form method="post" asp-page-handler="MoveEtfControlDown">
+                                        <input type="hidden" name="symbol" value="@item.Symbol" />
+                                        <button type="submit" class="icon-button-move" title="Bajar" @(etfControlRow == Model.EtfsControl.Count - 1 ? "disabled" : "")>▼</button>
+                                    </form>
                                     <form method="post" asp-page-handler="DeleteEtfControl" onsubmit="return confirm('¿Eliminar este ETF?');">
                                         <input type="hidden" name="symbol" value="@item.Symbol" />
                                         <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
@@ -432,12 +450,13 @@
                         <th class="text-align-right">% Var.</th>
                         <th class="text-align-right">Var.</th>
                         <th>Fecha/Hora</th>
-                        <th></th>
+                        <th style="width: 96px;"></th>
                     </tr>
                 </thead>
                 <tbody id="tbody-commodities">
-                    @foreach (var item in Model.Commodities)
+                    @for (var commodityRow = 0; commodityRow < Model.Commodities.Count; commodityRow++)
                     {
+                        var item = Model.Commodities[commodityRow];
                         var classification = Model.CommodityHoldings.FirstOrDefault(h => h.Symbol == item.Symbol)?.Classification ?? "—";
 
                         <tr>
@@ -455,6 +474,14 @@
                             <td class="@item.TrendCssClass">@item.DisplayChange $</td>
                             <td class="time-cell">@item.UpdatedText</td>
                             <td class="delete-cell">
+                                <form method="post" asp-page-handler="MoveCommodityUp">
+                                    <input type="hidden" name="symbol" value="@item.Symbol" />
+                                    <button type="submit" class="icon-button-move" title="Subir" @(commodityRow == 0 ? "disabled" : "")>▲</button>
+                                </form>
+                                <form method="post" asp-page-handler="MoveCommodityDown">
+                                    <input type="hidden" name="symbol" value="@item.Symbol" />
+                                    <button type="submit" class="icon-button-move" title="Bajar" @(commodityRow == Model.Commodities.Count - 1 ? "disabled" : "")>▼</button>
+                                </form>
                                 <form method="post" asp-page-handler="DeleteCommodity" onsubmit="return confirm('¿Eliminar esta materia prima?');">
                                     <input type="hidden" name="symbol" value="@item.Symbol" />
                                     <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>

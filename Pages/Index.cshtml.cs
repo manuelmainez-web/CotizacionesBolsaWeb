@@ -487,6 +487,18 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostMoveCommodityUpAsync(string symbol)
+    {
+        await MoveCommodityEntryAsync(symbol, -1);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMoveCommodityDownAsync(string symbol)
+    {
+        await MoveCommodityEntryAsync(symbol, 1);
+        return RedirectToPage();
+    }
+
     private static string ResolvePensionBroker(string? broker) => broker?.Trim().ToUpperInvariant() switch
     {
         "TR" => "TR",
@@ -623,6 +635,18 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostMoveEtfControlUpAsync(string symbol)
+    {
+        await MoveCustomEntryAsync(EtfControlKey, symbol, -1);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMoveEtfControlDownAsync(string symbol)
+    {
+        await MoveCustomEntryAsync(EtfControlKey, symbol, 1);
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnPostAddFundAsync(string isin, decimal positionCount, decimal unitPurchasePrice)
     {
         if (string.IsNullOrWhiteSpace(isin) || positionCount <= 0 || unitPurchasePrice <= 0)
@@ -710,6 +734,18 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnPostDeleteStockAsync(string symbol)
     {
         await RemoveCustomEntryAsync(StocksKey, symbol);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMoveStockUpAsync(string symbol)
+    {
+        await MoveCustomEntryAsync(StocksKey, symbol, -1);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMoveStockDownAsync(string symbol)
+    {
+        await MoveCustomEntryAsync(StocksKey, symbol, 1);
         return RedirectToPage();
     }
 
@@ -930,15 +966,15 @@ public class IndexModel : PageModel
     /// siguiente (delta +1) en la lista persistida, para permitir reordenar
     /// filas manualmente con los botones de subir/bajar.
     /// </summary>
-    private async Task MoveCustomEntryAsync(string key, string symbol, int delta)
+    private async Task MoveEntryAsync<T>(string key, string symbol, int delta, Func<T, string?> getSymbol)
     {
         if (string.IsNullOrWhiteSpace(symbol))
         {
             return;
         }
 
-        var entries = await _dataStore.LoadEntriesAsync<QuoteConfig>(key);
-        var index = entries.FindIndex(e => string.Equals(e.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
+        var entries = await _dataStore.LoadEntriesAsync<T>(key);
+        var index = entries.FindIndex(e => string.Equals(getSymbol(e), symbol, StringComparison.OrdinalIgnoreCase));
         var newIndex = index + delta;
         if (index < 0 || newIndex < 0 || newIndex >= entries.Count)
         {
@@ -948,4 +984,10 @@ public class IndexModel : PageModel
         (entries[index], entries[newIndex]) = (entries[newIndex], entries[index]);
         await _dataStore.SaveEntriesAsync(key, entries);
     }
+
+    private Task MoveCustomEntryAsync(string key, string symbol, int delta) =>
+        MoveEntryAsync<QuoteConfig>(key, symbol, delta, e => e.Symbol);
+
+    private Task MoveCommodityEntryAsync(string symbol, int delta) =>
+        MoveEntryAsync<CommodityHolding>(CommoditiesKey, symbol, delta, e => e.Symbol);
 }
