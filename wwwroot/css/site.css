@@ -1170,6 +1170,10 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
+  body.print-cartera-only .panel-head {
+    color: #94a3b8 !important;
+  }
+
   body.print-cartera-only #summary-strip-label-general,
   body.print-cartera-only #summary-strip-general {
     display: none !important;
