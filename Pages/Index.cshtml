@@ -1375,6 +1375,10 @@
                 <h3>Editar @cashItem.Name</h3>
                 <input type="hidden" name="index" value="@i" />
                 <label>
+                    Nombre
+                    <input type="text" name="name" required maxlength="100" value="@cashItem.Name" />
+                </label>
+                <label>
                     Importe
                     <input type="number" name="importe" required step="0.01" value="@cashItem.Amount" />
                 </label>
@@ -1389,6 +1393,10 @@
     <dialog id="add-cash-dialog" class="add-entry-dialog">
         <form method="post" asp-page-handler="AddCash">
             <h3>Añadir Efectivo</h3>
+            <label>
+                Nombre
+                <input type="text" name="name" required maxlength="100" placeholder="Ej. Manuel Máinez Arrojo" />
+            </label>
             <label>
                 Importe
                 <input type="number" name="importe" required step="0.01" placeholder="Ej. 200.00" />

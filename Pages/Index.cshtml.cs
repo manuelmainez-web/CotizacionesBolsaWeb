@@ -389,21 +389,21 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostAddCashAsync(decimal importe)
+    public async Task<IActionResult> OnPostAddCashAsync(string name, decimal importe)
     {
         var holdings = await _dataStore.LoadEntriesAsync<CashHolding>(CashKey);
-        holdings.Add(new CashHolding("Manuel Máinez Arrojo", importe));
+        holdings.Add(new CashHolding(string.IsNullOrWhiteSpace(name) ? "Manuel Máinez Arrojo" : name.Trim(), importe));
         await _dataStore.SaveEntriesAsync(CashKey, holdings);
 
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostEditCashAsync(int index, decimal importe)
+    public async Task<IActionResult> OnPostEditCashAsync(int index, string name, decimal importe)
     {
         var holdings = await _dataStore.LoadEntriesAsync<CashHolding>(CashKey);
         if (index >= 0 && index < holdings.Count)
         {
-            holdings[index] = holdings[index] with { Amount = importe };
+            holdings[index] = holdings[index] with { Name = string.IsNullOrWhiteSpace(name) ? holdings[index].Name : name.Trim(), Amount = importe };
             await _dataStore.SaveEntriesAsync(CashKey, holdings);
         }
 
