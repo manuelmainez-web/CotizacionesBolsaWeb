@@ -294,16 +294,25 @@ public class IndexModel : PageModel
             await _dataStore.SaveEntriesAsync(PensionPlansKey, PensionPlans);
         }
 
-        // El valor liquidativo se calcula dinámicamente consultando la ficha pública
-        // del plan (por código DGSFP) en cada carga de página; si la consulta falla
-        // (web caída, plan no indexado, etc.) se conserva el último valor guardado.
+        // El valor liquidativo y las rentabilidades a 1 mes/12 meses se calculan
+        // dinámicamente consultando la ficha pública del plan (por código DGSFP)
+        // en cada carga de página; si la consulta falla o algún dato concreto no
+        // se puede extraer (web caída, plan no indexado, etc.) se conserva el
+        // último valor guardado para ese dato.
         for (var i = 0; i < PensionPlans.Count; i++)
         {
-            var liveValue = await _pensionPlanQuoteService.TryGetValorLiquidativoAsync(PensionPlans[i].CodigoDgsfp);
-            if (liveValue.HasValue)
+            var liveData = await _pensionPlanQuoteService.TryGetLiveDataAsync(PensionPlans[i].CodigoDgsfp);
+            if (liveData == null)
             {
-                PensionPlans[i] = PensionPlans[i] with { ValorLiquidativo = liveValue.Value };
+                continue;
             }
+
+            PensionPlans[i] = PensionPlans[i] with
+            {
+                ValorLiquidativo = liveData.ValorLiquidativo ?? PensionPlans[i].ValorLiquidativo,
+                RentabilidadUltimoMes = liveData.RentabilidadUltimoMes ?? PensionPlans[i].RentabilidadUltimoMes,
+                Rentabilidad12Meses = liveData.Rentabilidad12Meses ?? PensionPlans[i].Rentabilidad12Meses
+            };
         }
 
         if (!await _dataStore.ExistsAsync(CheckingAccountsKey))
