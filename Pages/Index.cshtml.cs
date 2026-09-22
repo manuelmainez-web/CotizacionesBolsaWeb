@@ -695,6 +695,18 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostMoveIndexUpAsync(string symbol)
+    {
+        await MoveCustomEntryAsync(IndicesKey, symbol, -1);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMoveIndexDownAsync(string symbol)
+    {
+        await MoveCustomEntryAsync(IndicesKey, symbol, 1);
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnPostDeleteStockAsync(string symbol)
     {
         await RemoveCustomEntryAsync(StocksKey, symbol);
@@ -911,5 +923,29 @@ public class IndexModel : PageModel
             entries.Remove(toRemove);
             await _dataStore.SaveEntriesAsync(key, entries);
         }
+    }
+
+    /// <summary>
+    /// Intercambia de posición una entrada con la anterior (delta -1) o la
+    /// siguiente (delta +1) en la lista persistida, para permitir reordenar
+    /// filas manualmente con los botones de subir/bajar.
+    /// </summary>
+    private async Task MoveCustomEntryAsync(string key, string symbol, int delta)
+    {
+        if (string.IsNullOrWhiteSpace(symbol))
+        {
+            return;
+        }
+
+        var entries = await _dataStore.LoadEntriesAsync<QuoteConfig>(key);
+        var index = entries.FindIndex(e => string.Equals(e.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
+        var newIndex = index + delta;
+        if (index < 0 || newIndex < 0 || newIndex >= entries.Count)
+        {
+            return;
+        }
+
+        (entries[index], entries[newIndex]) = (entries[newIndex], entries[index]);
+        await _dataStore.SaveEntriesAsync(key, entries);
     }
 }

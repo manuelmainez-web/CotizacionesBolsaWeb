@@ -133,7 +133,7 @@
                         <th class="text-align-right" style="width: 70px;">Cambio</th>
                         <th style="width: 110px;">Actualizado</th>
                         <th style="width: 110px;">Mercado<br />(abierto/cerrado)</th>
-                        <th style="width: 42px;"></th>
+                        <th style="width: 96px;"></th>
                     </tr>
                 </thead>
                 <tbody id="tbody-indices">
@@ -159,6 +159,14 @@
                                 <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
                             </td>
                             <td class="delete-cell">
+                                <form method="post" asp-page-handler="MoveIndexUp" class="inline-form">
+                                    <input type="hidden" name="symbol" value="@item.Symbol" />
+                                    <button type="submit" class="icon-button-move" title="Subir" @(indexRow == 0 ? "disabled" : "")>▲</button>
+                                </form>
+                                <form method="post" asp-page-handler="MoveIndexDown" class="inline-form">
+                                    <input type="hidden" name="symbol" value="@item.Symbol" />
+                                    <button type="submit" class="icon-button-move" title="Bajar" @(indexRow == Model.Indices.Count - 1 ? "disabled" : "")>▼</button>
+                                </form>
                                 <form method="post" asp-page-handler="DeleteIndex" onsubmit="return confirm('¿Eliminar este índice?');">
                                     <input type="hidden" name="symbol" value="@item.Symbol" />
                                     <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
