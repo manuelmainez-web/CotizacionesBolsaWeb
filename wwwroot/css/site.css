@@ -622,6 +622,26 @@ body.wco-active .topbar-datetime {
   cursor: not-allowed;
 }
 
+#add-index-dialog {
+  background: #ffffff;
+  color: #1a2330;
+}
+
+#add-index-dialog h3 {
+  color: #1a2330;
+}
+
+#add-index-dialog label {
+  color: #4a5768;
+}
+
+#add-index-dialog input,
+#add-index-dialog select {
+  background: #ffffff;
+  border: 1px solid rgba(26, 35, 48, 0.28);
+  color: #1a2330;
+}
+
 .dialog-mode-switch {
   display: flex;
   gap: 18px;
