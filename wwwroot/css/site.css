@@ -622,21 +622,66 @@ body.wco-active .topbar-datetime {
   cursor: not-allowed;
 }
 
-#add-index-dialog {
+#add-index-dialog,
+#add-stock-dialog,
+#add-etf-control-dialog,
+#add-commodity-dialog,
+#add-etf-dialog,
+#add-fund-dialog,
+#add-stock-holding-dialog,
+#add-pensionplan-dialog,
+#add-checkingaccount-dialog,
+#add-cash-dialog {
   background: #ffffff;
   color: #1a2330;
 }
 
-#add-index-dialog h3 {
+#add-index-dialog h3,
+#add-stock-dialog h3,
+#add-etf-control-dialog h3,
+#add-commodity-dialog h3,
+#add-etf-dialog h3,
+#add-fund-dialog h3,
+#add-stock-holding-dialog h3,
+#add-pensionplan-dialog h3,
+#add-checkingaccount-dialog h3,
+#add-cash-dialog h3 {
   color: #1a2330;
 }
 
-#add-index-dialog label {
+#add-index-dialog label,
+#add-stock-dialog label,
+#add-etf-control-dialog label,
+#add-commodity-dialog label,
+#add-etf-dialog label,
+#add-fund-dialog label,
+#add-stock-holding-dialog label,
+#add-pensionplan-dialog label,
+#add-checkingaccount-dialog label,
+#add-cash-dialog label {
   color: #4a5768;
 }
 
 #add-index-dialog input,
-#add-index-dialog select {
+#add-index-dialog select,
+#add-stock-dialog input,
+#add-stock-dialog select,
+#add-etf-control-dialog input,
+#add-etf-control-dialog select,
+#add-commodity-dialog input,
+#add-commodity-dialog select,
+#add-etf-dialog input,
+#add-etf-dialog select,
+#add-fund-dialog input,
+#add-fund-dialog select,
+#add-stock-holding-dialog input,
+#add-stock-holding-dialog select,
+#add-pensionplan-dialog input,
+#add-pensionplan-dialog select,
+#add-checkingaccount-dialog input,
+#add-checkingaccount-dialog select,
+#add-cash-dialog input,
+#add-cash-dialog select {
   background: #ffffff;
   border: 1px solid rgba(26, 35, 48, 0.28);
   color: #1a2330;
