@@ -472,7 +472,7 @@ public class IndexModel : PageModel
         _ => "ING"
     };
 
-    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, decimal rentabilidad12Meses, string broker, decimal rentabilidadUltimoMes, decimal capitalInvertido, string? codigoDgsfp)
+    public async Task<IActionResult> OnPostAddPensionPlanAsync(string name, decimal participaciones, decimal valorLiquidativo, string broker, decimal capitalInvertido, string? codigoDgsfp, decimal rentabilidad12Meses = 0m, decimal rentabilidadUltimoMes = 0m)
     {
         if (string.IsNullOrWhiteSpace(name) || participaciones <= 0 || valorLiquidativo <= 0)
         {
