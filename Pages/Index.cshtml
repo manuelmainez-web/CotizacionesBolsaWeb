@@ -126,12 +126,12 @@
                 <thead>
                     <tr>
                         <th style="width: 180px;">Nombre</th>
-                        <th style="width: 90px;">Símbolo</th>
+                        <th class="text-align-right" style="width: 70px;">Cambio</th>
+                        <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 90px;">Apertura</th>
                         <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 70px;">Cambio</th>
                         <th style="width: 110px;">Actualizado</th>
+                        <th style="width: 90px;">Símbolo</th>
                         <th style="width: 85px;">Mercado<br />(abierto/cerrado)</th>
                         <th style="width: 96px;"></th>
                     </tr>
@@ -149,12 +149,12 @@
                                     <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
                                 </span>
                             </td>
-                            <td>@item.DisplaySymbol</td>
+                            <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                            <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
                             <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen</td>
                             <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose</td>
-                            <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
-                            <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                             <td class="time-cell">@item.UpdatedText</td>
+                            <td>@item.DisplaySymbol</td>
                             <td class="market-status-cell">
                                 <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
                             </td>
@@ -218,12 +218,12 @@
                 <thead>
                     <tr>
                         <th style="width: 180px;">Nombre</th>
-                        <th style="width: 90px;">Símbolo</th>
+                        <th class="text-align-right" style="width: 70px;">Cambio</th>
+                        <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 90px;">Apertura</th>
                         <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 70px;">Cambio</th>
                         <th style="width: 110px;">Actualizado</th>
+                        <th style="width: 90px;">Símbolo</th>
                         <th style="width: 85px;">Mercado<br />(abierto/cerrado)</th>
                         <th style="width: 96px;"></th>
                     </tr>
@@ -247,12 +247,12 @@
                                         <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
                                     </span>
                                 </td>
-                                <td>@item.Symbol</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="price-cell price-cell-quote">@item.DisplayPrice €</td>
                                 <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen €</td>
                                 <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose €</td>
-                                <td class="price-cell price-cell-quote">@item.DisplayPrice €</td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                                 <td class="time-cell">@item.UpdatedText</td>
+                                <td>@item.Symbol</td>
                                 <td class="market-status-cell">
                                     <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
                                 </td>
@@ -324,12 +324,12 @@
                 <thead>
                     <tr>
                         <th style="width: 180px;">Nombre</th>
-                        <th class="isin-print-hide" style="width: 130px;">ISIN</th>
+                        <th class="text-align-right" style="width: 70px;">Cambio</th>
+                        <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 90px;">Apertura</th>
                         <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 70px;">Cambio</th>
                         <th style="width: 110px;">Actualizado</th>
+                        <th class="isin-print-hide" style="width: 130px;">ISIN</th>
                         <th style="width: 85px;">Mercado<br />(abierto/cerrado)</th>
                         <th style="width: 96px;"></th>
                     </tr>
@@ -353,12 +353,12 @@
                                         <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
                                     </span>
                                 </td>
-                                <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="price-cell price-cell-quote">@item.DisplayPrice @item.CurrencySymbol</td>
                                 <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen @item.CurrencySymbol</td>
                                 <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose @item.CurrencySymbol</td>
-                                <td class="price-cell price-cell-quote">@item.DisplayPrice @item.CurrencySymbol</td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
                                 <td class="time-cell">@item.UpdatedText</td>
+                                <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
                                 <td class="market-status-cell">
                                     <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
                                 </td>
@@ -443,12 +443,12 @@
                 <thead>
                     <tr>
                         <th>Nombre</th>
-                        <th>Clasificación</th>
+                        <th class="text-align-right">% Var.</th>
+                        <th class="text-align-right">Var.</th>
                         <th class="text-align-right">Último</th>
                         <th class="text-align-right">Máximo</th>
                         <th class="text-align-right">Mínimo</th>
-                        <th class="text-align-right">% Var.</th>
-                        <th class="text-align-right">Var.</th>
+                        <th>Clasificación</th>
                         <th>Fecha/Hora</th>
                         <th style="width: 96px;"></th>
                     </tr>
@@ -466,12 +466,12 @@
                                     <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
                                 </span>
                             </td>
-                            <td>@classification</td>
+                            <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                            <td class="@item.TrendCssClass">@item.DisplayChange $</td>
                             <td class="price-cell price-cell-quote">@item.DisplayPrice $</td>
                             <td class="price-cell price-cell-quote">@item.DisplayHigh $</td>
                             <td class="price-cell price-cell-quote">@item.DisplayLow $</td>
-                            <td class="@item.TrendCssClass">@item.DisplayPercent</td>
-                            <td class="@item.TrendCssClass">@item.DisplayChange $</td>
+                            <td>@classification</td>
                             <td class="time-cell">@item.UpdatedText</td>
                             <td class="delete-cell">
                                 <form method="post" asp-page-handler="MoveCommodityUp">
@@ -578,14 +578,14 @@
                 <thead>
                     <tr>
                         <th style="width: 220px;">Nombre</th>
-                        <th class="isin-print-hide" style="width: 90px;">ISIN</th>
-                        <th class="broker-header" style="width: 50px;">Bróker</th>
-                        <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
-                        <th class="text-align-right" style="width: 90px;">Valoración compra</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right col-cambio" style="width: 55px;">Cambio</th>
+                        <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
                         <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
+                        <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
+                        <th class="text-align-right" style="width: 90px;">Valoración compra</th>
+                        <th class="isin-print-hide" style="width: 90px;">ISIN</th>
+                        <th class="broker-header" style="width: 50px;">Bróker</th>
                         <th style="width: 80px;">Fecha/Hora Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
@@ -619,6 +619,15 @@
                                         <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
                                     </span>
                                 </td>
+                                <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="purchase-cell">
+                                    @positionCount.ToString("#,##0.######")<br />
+                                    @purchaseDisplayValue.ToString("#,##0.00 €")
+                                </td>
+                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
                                 <td class="broker-cell">
                                     @if (isIngDirect)
@@ -630,15 +639,6 @@
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
                                 </td>
-                                <td class="purchase-cell">
-                                    @positionCount.ToString("#,##0.######")<br />
-                                    @purchaseDisplayValue.ToString("#,##0.00 €")
-                                </td>
-                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
-                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
-                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedDateText<br />@item.UpdatedTimeText</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-etf-@item.Symbol" title="Editar">✎</button>
@@ -745,14 +745,14 @@
                 <thead>
                     <tr>
                         <th style="width: 220px;">Nombre</th>
-                        <th class="isin-print-hide" style="width: 90px;">ISIN</th>
-                        <th class="broker-header" style="width: 50px;">Bróker</th>
-                        <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
-                        <th class="text-align-right" style="width: 90px;">Valoración compra</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right col-cambio" style="width: 55px;">Cambio</th>
+                        <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
                         <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
+                        <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
+                        <th class="text-align-right" style="width: 90px;">Valoración compra</th>
+                        <th class="isin-print-hide" style="width: 90px;">ISIN</th>
+                        <th class="broker-header" style="width: 50px;">Bróker</th>
                         <th style="width: 80px;">Fecha/Hora Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
@@ -786,6 +786,15 @@
                                         <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
                                     </span>
                                 </td>
+                                <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="purchase-cell">
+                                    @positionCount.ToString("#,##0.######")<br />
+                                    @purchaseDisplayValue.ToString("#,##0.00 €")
+                                </td>
+                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
                                 <td class="broker-cell">
                                     @if (isTradeRepublic)
@@ -797,15 +806,6 @@
                                         <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
                                     }
                                 </td>
-                                <td class="purchase-cell">
-                                    @positionCount.ToString("#,##0.######")<br />
-                                    @purchaseDisplayValue.ToString("#,##0.00 €")
-                                </td>
-                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
-                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
-                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedDateText<br />@item.UpdatedTimeText</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-fund-@item.Symbol" title="Editar">✎</button>
@@ -894,14 +894,14 @@
                 <thead>
                     <tr>
                         <th style="width: 220px;">Nombre</th>
-                        <th class="isin-print-hide" style="width: 90px;">ISIN</th>
-                        <th class="broker-header" style="width: 50px;">Bróker</th>
-                        <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
-                        <th class="text-align-right" style="width: 90px;">Valoración compra</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right col-cambio" style="width: 55px;">Cambio</th>
+                        <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 70px;">Valoración actual</th>
                         <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
+                        <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
+                        <th class="text-align-right" style="width: 90px;">Valoración compra</th>
+                        <th class="isin-print-hide" style="width: 90px;">ISIN</th>
+                        <th class="broker-header" style="width: 50px;">Bróker</th>
                         <th style="width: 80px;">Fecha/Hora Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
@@ -935,6 +935,15 @@
                                         <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name">@item.Name</a>
                                     </span>
                                 </td>
+                                <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
+                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="purchase-cell">
+                                    @positionCount.ToString("#,##0.######")<br />
+                                    @purchaseDisplayValue.ToString("#,##0.00 €")
+                                </td>
+                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
                                 <td class="broker-cell">
                                     @if (isIngDirect)
@@ -946,15 +955,6 @@
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
                                 </td>
-                                <td class="purchase-cell">
-                                    @positionCount.ToString("#,##0.######")<br />
-                                    @purchaseDisplayValue.ToString("#,##0.00 €")
-                                </td>
-                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
-                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
-                                <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@item.UpdatedText</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-stockholding-@item.Symbol" title="Editar">✎</button>
@@ -1062,14 +1062,14 @@
                 <thead>
                     <tr>
                         <th style="width: 285px;">Nombre</th>
-                        <th style="width: 128px; white-space: nowrap;">Código DGSFP</th>
-                        <th class="broker-header" style="width: 68px;">Bróker</th>
                         <th class="text-align-right" style="width: 110px; white-space: nowrap;">Participaciones /<br />Valor liquidativo</th>
                         <th class="text-align-right" style="width: 110px;">Capital invertido</th>
                         <th class="text-align-right" style="width: 90px;">Rentabilidad<br />último mes</th>
                         <th class="text-align-right" style="width: 90px;">Rentabilidad<br />12 meses</th>
                         <th class="text-align-right" style="width: 87px;">Valoración actual</th>
                         <th class="text-align-right" style="width: 115px;">Rentabilidad<br />desde inicio</th>
+                        <th style="width: 128px; white-space: nowrap;">Código DGSFP</th>
+                        <th class="broker-header" style="width: 68px;">Bróker</th>
                         <th style="width: 100px;">Fecha/Hora Actualización</th>
                         <th style="width: 65px;"></th>
                     </tr>
@@ -1099,6 +1099,15 @@
                                         @item.Name
                                     </span>
                                 </td>
+                                <td class="purchase-cell">
+                                    @item.Participaciones.ToString("#,##0.######")<br />
+                                    @item.ValorLiquidativo.ToString("#,##0.00 €")
+                                </td>
+                                <td class="price-cell price-cell-quote">@item.CapitalInvertido.ToString("#,##0.00 €")</td>
+                                <td class="@((item.RentabilidadUltimoMes >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadUltimoMes.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadUltimoMes >= 0 ? "▲" : "▼")</td>
+                                <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
+                                <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
+                                <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")<br />@gananciaDesdeInicio.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="isin-cell" style="white-space: nowrap;">@item.CodigoDgsfp</td>
                                 <td class="broker-cell">
                                     @if (isIngDirect)
@@ -1114,15 +1123,6 @@
                                         <img class="broker-logo" src="/images/brokers/occident.png" alt="Occident" title="Occident" />
                                     }
                                 </td>
-                                <td class="purchase-cell">
-                                    @item.Participaciones.ToString("#,##0.######")<br />
-                                    @item.ValorLiquidativo.ToString("#,##0.00 €")
-                                </td>
-                                <td class="price-cell price-cell-quote">@item.CapitalInvertido.ToString("#,##0.00 €")</td>
-                                <td class="@((item.RentabilidadUltimoMes >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadUltimoMes.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadUltimoMes >= 0 ? "▲" : "▼")</td>
-                                <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
-                                <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
-                                <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")<br />@gananciaDesdeInicio.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")<br />@DateTime.Now.ToString("HH:mm")</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-pensionplan-@Model.PensionPlans.IndexOf(item)" title="Editar">✎</button>
