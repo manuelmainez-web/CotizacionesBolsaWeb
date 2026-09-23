@@ -1374,6 +1374,36 @@ body.wco-active .topbar-datetime {
     table-layout: fixed !important;
   }
 
+  /* Columna "Nombre" un poco más ancha en ETF/Fondos/Acciones/Planes de
+     pensiones (Cartera) al imprimir "Imprimir cartera", "Imprimir" de ING
+     Direct o "Imprimir" de Trade Republic (no afecta a Control de
+     cotizaciones ni a "Imprimir todo", que tiene su propia regla). */
+  body.print-cartera-only .market-table.market-table-cartera th:first-child,
+  body.print-cartera-only .market-table.market-table-cartera td:first-child,
+  body.print-broker-ing .market-table.market-table-cartera th:first-child,
+  body.print-broker-ing .market-table.market-table-cartera td:first-child,
+  body.print-broker-tr .market-table.market-table-cartera th:first-child,
+  body.print-broker-tr .market-table.market-table-cartera td:first-child {
+    width: 240px !important;
+    min-width: 240px !important;
+  }
+
+  .market-table.market-table-compact {
+    table-layout: fixed !important;
+  }
+
+  /* "Imprimir todo": columna "Nombre" un poco más ancha en TODAS las tablas
+     (Índices/Acciones/ETF/Materias primas de Control de cotizaciones,
+     ETF/Fondos/Acciones/Planes de pensiones de Cartera y Cuenta corriente/
+     Efectivo). Solo afecta al botón "Imprimir todo". */
+  body.print-all .market-table.market-table-cartera th:first-child,
+  body.print-all .market-table.market-table-cartera td:first-child,
+  body.print-all .market-table.market-table-compact th:first-child,
+  body.print-all .market-table.market-table-compact td:first-child {
+    width: 240px !important;
+    min-width: 240px !important;
+  }
+
   .market-table.market-table-cuentas {
     table-layout: fixed !important;
   }
@@ -1381,5 +1411,10 @@ body.wco-active .topbar-datetime {
   .market-table.market-table-cuentas th.col-nombre-wide,
   .market-table.market-table-cuentas td.name-cell {
     width: 70% !important;
+  }
+
+  body.print-all .market-table.market-table-cuentas th.col-nombre-wide,
+  body.print-all .market-table.market-table-cuentas td.name-cell {
+    width: 75% !important;
   }
 }
