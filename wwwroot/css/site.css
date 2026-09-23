@@ -452,7 +452,7 @@ body.wco-active .topbar-datetime {
 }
 
 .summary-box.invested strong {
-  color: #0a58ff;
+  color: #ffffff;
 }
 
 .print-only {
@@ -852,6 +852,7 @@ body.wco-active .topbar-datetime {
   color: #c9d5df;
   font-size: 0.8rem;
   letter-spacing: 0.04em;
+  text-align: right;
 }
 
 .broker-cell {
@@ -908,6 +909,7 @@ body.wco-active .topbar-datetime {
 .time-cell {
   color: #cdd9e4;
   font-size: 0.8rem;
+  text-align: right;
 }
 
 .market-status-cell {

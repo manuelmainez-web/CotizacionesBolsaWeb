@@ -130,8 +130,8 @@
                         <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 90px;">Apertura</th>
                         <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
-                        <th style="width: 110px;">Actualizado</th>
-                        <th style="width: 90px;">Símbolo</th>
+                        <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                        <th class="text-align-right" style="width: 90px;">Símbolo</th>
                         <th style="width: 85px;">Mercado<br />(abierto/cerrado)</th>
                         <th style="width: 96px;"></th>
                     </tr>
@@ -154,7 +154,7 @@
                             <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen</td>
                             <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose</td>
                             <td class="time-cell">@item.UpdatedText</td>
-                            <td>@item.DisplaySymbol</td>
+                            <td class="text-align-right">@item.DisplaySymbol</td>
                             <td class="market-status-cell">
                                 <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
                             </td>
@@ -222,8 +222,8 @@
                         <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 90px;">Apertura</th>
                         <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
-                        <th style="width: 110px;">Actualizado</th>
-                        <th style="width: 90px;">Símbolo</th>
+                        <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                        <th class="text-align-right" style="width: 90px;">Símbolo</th>
                         <th style="width: 85px;">Mercado<br />(abierto/cerrado)</th>
                         <th style="width: 96px;"></th>
                     </tr>
@@ -252,7 +252,7 @@
                                 <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen €</td>
                                 <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose €</td>
                                 <td class="time-cell">@item.UpdatedText</td>
-                                <td>@item.Symbol</td>
+                                <td class="text-align-right">@item.Symbol</td>
                                 <td class="market-status-cell">
                                     <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
                                 </td>
@@ -328,8 +328,8 @@
                         <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
                         <th class="text-align-right" style="width: 90px;">Apertura</th>
                         <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
-                        <th style="width: 110px;">Actualizado</th>
-                        <th class="isin-print-hide" style="width: 130px;">ISIN</th>
+                        <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                        <th class="isin-print-hide text-align-right" style="width: 130px;">ISIN</th>
                         <th style="width: 85px;">Mercado<br />(abierto/cerrado)</th>
                         <th style="width: 96px;"></th>
                     </tr>
@@ -449,7 +449,7 @@
                         <th class="text-align-right">Máximo</th>
                         <th class="text-align-right">Mínimo</th>
                         <th>Clasificación</th>
-                        <th>Fecha/Hora</th>
+                        <th class="text-align-right">Fecha/Hora</th>
                         <th style="width: 96px;"></th>
                     </tr>
                 </thead>
@@ -584,9 +584,9 @@
                         <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
                         <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
                         <th class="text-align-right" style="width: 90px;">Valoración compra</th>
-                        <th class="isin-print-hide" style="width: 90px;">ISIN</th>
+                        <th class="isin-print-hide text-align-right" style="width: 90px;">ISIN</th>
                         <th class="broker-header" style="width: 50px;">Bróker</th>
-                        <th style="width: 80px;">Fecha/Hora Actualización</th>
+                        <th class="text-align-right" style="width: 80px;">Fecha/Hora Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
                 </thead>
@@ -751,9 +751,9 @@
                         <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
                         <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
                         <th class="text-align-right" style="width: 90px;">Valoración compra</th>
-                        <th class="isin-print-hide" style="width: 90px;">ISIN</th>
+                        <th class="isin-print-hide text-align-right" style="width: 90px;">ISIN</th>
                         <th class="broker-header" style="width: 50px;">Bróker</th>
-                        <th style="width: 80px;">Fecha/Hora Actualización</th>
+                        <th class="text-align-right" style="width: 80px;">Fecha/Hora Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
                 </thead>
@@ -900,9 +900,9 @@
                         <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
                         <th class="text-align-right" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
                         <th class="text-align-right" style="width: 90px;">Valoración compra</th>
-                        <th class="isin-print-hide" style="width: 90px;">ISIN</th>
+                        <th class="isin-print-hide text-align-right" style="width: 90px;">ISIN</th>
                         <th class="broker-header" style="width: 50px;">Bróker</th>
-                        <th style="width: 80px;">Fecha/Hora Actualización</th>
+                        <th class="text-align-right" style="width: 80px;">Fecha/Hora Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
                 </thead>
@@ -1070,7 +1070,7 @@
                         <th class="text-align-right" style="width: 115px;">Rentabilidad<br />desde inicio</th>
                         <th style="width: 128px; white-space: nowrap;">Código DGSFP</th>
                         <th class="broker-header" style="width: 68px;">Bróker</th>
-                        <th style="width: 100px;">Fecha/Hora Actualización</th>
+                        <th class="text-align-right" style="width: 100px;">Fecha/Hora Actualización</th>
                         <th style="width: 65px;"></th>
                     </tr>
                 </thead>
@@ -1253,7 +1253,7 @@
                     <tr>
                         <th class="col-nombre-wide" style="width: 965px;">Nombre</th>
                         <th class="text-align-right" style="width: 122px;">Saldo cuenta corriente</th>
-                        <th style="width: 99px;">Fecha/Hora<br />Actualización</th>
+                        <th class="text-align-right" style="width: 99px;">Fecha/Hora<br />Actualización</th>
                         <th style="width: 66px;"></th>
                     </tr>
                 </thead>
@@ -1365,7 +1365,7 @@
                     <tr>
                         <th class="col-nombre-wide" style="width: 965px;">Nombre</th>
                         <th class="text-align-right" style="width: 122px;">Importe</th>
-                        <th style="width: 99px;">Fecha/Hora<br />Actualización</th>
+                        <th class="text-align-right" style="width: 99px;">Fecha/Hora<br />Actualización</th>
                         <th style="width: 66px;"></th>
                     </tr>
                 </thead>
