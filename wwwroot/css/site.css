@@ -1197,8 +1197,37 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
-  body.print-cartera-only .panel-head {
-    color: #94a3b8 !important;
+  body.print-cartera-only .panel-head,
+  body.print-all .panel-head,
+  body.print-broker-ing .panel-head,
+  body.print-broker-tr .panel-head {
+    color: #ffffff !important;
+  }
+
+  /* El recuadro del panel (.market-panel) y las casillas de resumen
+     (.summary-box) mantienen su fondo oscuro/negro original al imprimir
+     (cartera, todo, ING Direct o Trade Republic); se fuerza el texto a
+     blanco para que sigan siendo legibles. Incluye también las cifras de
+     importe/rentabilidad (<strong>), que en pantalla usan colores
+     verde/rojo/azul (gain/loss/invested) y que en estas impresiones pasan
+     a blanco igual que el resto del texto. */
+  body.print-cartera-only .market-panel,
+  body.print-cartera-only .summary-box,
+  body.print-cartera-only .summary-box span,
+  body.print-cartera-only .summary-box strong,
+  body.print-all .market-panel,
+  body.print-all .summary-box,
+  body.print-all .summary-box span,
+  body.print-all .summary-box strong,
+  body.print-broker-ing .market-panel,
+  body.print-broker-ing .summary-box,
+  body.print-broker-ing .summary-box span,
+  body.print-broker-ing .summary-box strong,
+  body.print-broker-tr .market-panel,
+  body.print-broker-tr .summary-box,
+  body.print-broker-tr .summary-box span,
+  body.print-broker-tr .summary-box strong {
+    color: #ffffff !important;
   }
 
   body.print-cartera-only #summary-strip-label-general,
