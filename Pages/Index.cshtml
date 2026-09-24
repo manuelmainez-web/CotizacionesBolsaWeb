@@ -133,7 +133,6 @@
                         <th class="text-align-right" style="width: 100px;">Volumen</th>
                         <th class="text-align-right" style="width: 110px;">Actualizado</th>
                         <th class="text-align-right" style="width: 90px;">Símbolo</th>
-                        <th style="width: 85px;">Mercado<br />(abierto/cerrado)</th>
                         <th style="width: 96px;"></th>
                     </tr>
                 </thead>
@@ -155,11 +154,16 @@
                             <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen</td>
                             <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose</td>
                             <td class="text-align-right">@item.DisplayVolume</td>
-                            <td class="time-cell">@item.UpdatedText</td>
-                            <td class="text-align-right">@item.DisplaySymbol</td>
-                            <td class="market-status-cell">
-                                <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
+                            <td class="time-cell">
+                                @item.UpdatedText
+                                <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                    <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                        <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                        <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
                             </td>
+                            <td class="text-align-right">@item.DisplaySymbol</td>
                             <td class="delete-cell">
                                 <form method="post" asp-page-handler="MoveIndexUp" class="inline-form">
                                     <input type="hidden" name="symbol" value="@item.Symbol" />
@@ -227,7 +231,6 @@
                         <th class="text-align-right" style="width: 100px;">Volumen</th>
                         <th class="text-align-right" style="width: 110px;">Actualizado</th>
                         <th class="text-align-right" style="width: 90px;">Símbolo</th>
-                        <th style="width: 85px;">Mercado<br />(abierto/cerrado)</th>
                         <th style="width: 96px;"></th>
                     </tr>
                 </thead>
@@ -235,7 +238,7 @@
                     @if (Model.Stocks.Count == 0)
                     {
                         <tr>
-                            <td colspan="10" class="empty-state-cell">No hay acciones añadidas. Usa "+ Añadir acción" para empezar.</td>
+                            <td colspan="9" class="empty-state-cell">No hay acciones añadidas. Usa "+ Añadir acción" para empezar.</td>
                         </tr>
                     }
                     else
@@ -255,11 +258,16 @@
                                 <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen €</td>
                                 <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose €</td>
                                 <td class="text-align-right">@item.DisplayVolume</td>
-                                <td class="time-cell">@item.UpdatedText</td>
-                                <td class="text-align-right">@item.Symbol</td>
-                                <td class="market-status-cell">
-                                    <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
+                                <td class="time-cell">
+                                    @item.UpdatedText
+                                    <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                            <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
                                 </td>
+                                <td class="text-align-right">@item.Symbol</td>
                                 <td class="delete-cell">
                                     <form method="post" asp-page-handler="MoveStockUp">
                                         <input type="hidden" name="symbol" value="@item.Symbol" />
@@ -335,7 +343,6 @@
                         <th class="text-align-right" style="width: 100px;">Volumen</th>
                         <th class="text-align-right" style="width: 110px;">Actualizado</th>
                         <th class="isin-print-hide text-align-right" style="width: 130px;">ISIN</th>
-                        <th style="width: 115px;">Mercado<br />(abierto/cerrado)</th>
                         <th style="width: 96px;"></th>
                     </tr>
                 </thead>
@@ -343,7 +350,7 @@
                     @if (Model.EtfsControl.Count == 0)
                     {
                         <tr>
-                            <td colspan="10" class="empty-state-cell">No hay ETF añadidos. Usa "+ Añadir ETF" para empezar.</td>
+                            <td colspan="9" class="empty-state-cell">No hay ETF añadidos. Usa "+ Añadir ETF" para empezar.</td>
                         </tr>
                     }
                     else
@@ -363,11 +370,16 @@
                                 <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen @item.CurrencySymbol</td>
                                 <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose @item.CurrencySymbol</td>
                                 <td class="text-align-right">@item.DisplayVolume</td>
-                                <td class="time-cell">@item.UpdatedText</td>
-                                <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
-                                <td class="market-status-cell">
-                                    <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>
+                                <td class="time-cell">
+                                    @item.UpdatedText
+                                    <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                            <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
                                 </td>
+                                <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
                                 <td class="delete-cell">
                                     <form method="post" asp-page-handler="MoveEtfControlUp">
                                         <input type="hidden" name="symbol" value="@item.Symbol" />

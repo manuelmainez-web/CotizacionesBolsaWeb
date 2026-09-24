@@ -262,7 +262,8 @@ document.addEventListener('click', function (event) {
         JP: { etiqueta: 'Japón', indices: [{ symbol: '^N225', name: 'Nikkei 225' }] },
         IT: { etiqueta: 'Italia', indices: [{ symbol: 'FTSEMIB.MI', name: 'FTSE MIB' }] },
         CH: { etiqueta: 'Suiza', indices: [{ symbol: '^SSMI', name: 'SMI' }] },
-        GB: { etiqueta: 'Reino Unido', indices: [{ symbol: '^FTSE', name: 'FTSE 100' }] }
+        GB: { etiqueta: 'Reino Unido', indices: [{ symbol: '^FTSE', name: 'FTSE 100' }] },
+        HK: { etiqueta: 'Asia', indices: [{ symbol: '^HSI', name: 'Hang Seng Index' }] }
     };
 
     var dialogo = document.getElementById('add-index-dialog');
