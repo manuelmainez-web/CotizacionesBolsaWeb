@@ -218,6 +218,87 @@ public sealed class YahooFinanceService
         }
     }
 
+    private static readonly (string Suffix, string Country)[] YahooSuffixCountryMap =
+    {
+        (".MC", "ES"), (".PA", "FR"), (".DE", "DE"), (".F", "DE"), (".MI", "IT"),
+        (".AS", "NL"), (".L", "GB"), (".SW", "CH"), (".HK", "HK"), (".T", "JP"),
+        (".BR", "BE"), (".LS", "PT")
+    };
+
+    /// <summary>
+    /// Búsqueda de respaldo cuando <see cref="SearchSymbolAsync"/> (buscador difuso de Yahoo Finance)
+    /// no encuentra un ISIN: consulta la ficha del ETF en justETF (indexa prácticamente cualquier ETF
+    /// UCITS por ISIN, a diferencia del buscador de Yahoo) y extrae los tickers "Reuters RIC" de su
+    /// tabla de mercados cotizados, que casi siempre coinciden con el formato de símbolo de Yahoo
+    /// Finance (TICKER.SUFIJO). Cada candidato se verifica de verdad contra la API de Yahoo Finance
+    /// (chart) antes de aceptarlo, para no devolver nunca un símbolo que no cotice.
+    /// </summary>
+    public async Task<(string Symbol, string Name, string? CountryCode, string? Market)?> SearchIsinViaJustEtfAsync(string isin, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(isin))
+        {
+            return null;
+        }
+
+        var normalizedIsin = isin.Trim().ToUpperInvariant();
+        var url = $"https://www.justetf.com/en/etf-profile.html?isin={Uri.EscapeDataString(normalizedIsin)}";
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.ParseAdd("text/html");
+
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var html = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (!html.Contains(normalizedIsin, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            var titleMatch = Regex.Match(html, @"<meta property=""og:title"" content=""([^""|]+)");
+            var name = titleMatch.Success ? System.Net.WebUtility.HtmlDecode(titleMatch.Groups[1].Value.Trim()) : null;
+
+            var listingMatches = Regex.Matches(html, @"data-testid=""etf-trade-data-panel_row-([a-z0-9]+)_reuters"">([A-Z0-9]+\.[A-Z]{1,4})<");
+            if (listingMatches.Count == 0)
+            {
+                return null;
+            }
+
+            var candidates = listingMatches
+                .Select(m => (ExchangeCode: m.Groups[1].Value, Symbol: m.Groups[2].Value))
+                .Distinct()
+                .OrderByDescending(c => c.Symbol.EndsWith(".MC", StringComparison.OrdinalIgnoreCase) || string.Equals(c.ExchangeCode, "xmad", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var candidate in candidates)
+            {
+                var config = new QuoteConfig(name ?? normalizedIsin, candidate.Symbol, normalizedIsin);
+                var quote = await GetQuoteAsync(config, candidate.Symbol, cancellationToken);
+                if (quote?.Price.HasValue == true)
+                {
+                    var countryCode = YahooSuffixCountryMap
+                        .FirstOrDefault(m => candidate.Symbol.EndsWith(m.Suffix, StringComparison.OrdinalIgnoreCase))
+                        .Country;
+
+                    return (candidate.Symbol, name ?? quote.Name, countryCode, null);
+                }
+            }
+
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     /// <summary>
     /// Busca el código ISIN de una empresa cotizada consultando Wikidata (propiedad P946 "ISIN"),
     /// ya que las APIs gratuitas de Yahoo Finance / OpenFIGI no exponen este dato.

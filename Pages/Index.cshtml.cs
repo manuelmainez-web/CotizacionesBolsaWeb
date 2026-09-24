@@ -614,7 +614,10 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostAddEtfControlAsync(string isin)
     {
-        var match = await _service.SearchSymbolAsync(isin);
+        // Búsqueda difusa habitual de Yahoo Finance; si no encuentra el ISIN (frecuente en ETF
+        // apalancados/inversos o de nicho, ver notas de sesiones anteriores), se intenta un segundo
+        // origen (justETF, que indexa prácticamente cualquier ETF UCITS por ISIN) antes de rendirse.
+        var match = await _service.SearchSymbolAsync(isin) ?? await _service.SearchIsinViaJustEtfAsync(isin);
         if (match.HasValue)
         {
             var entries = await _dataStore.LoadEntriesAsync<QuoteConfig>(EtfControlKey);
