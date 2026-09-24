@@ -481,6 +481,7 @@ public sealed class YahooFinanceService
             var open = GetFirstArrayValue(first, "open");
             var high = GetFirstArrayValue(first, "high");
             var low = GetFirstArrayValue(first, "low");
+            var volume = GetLong(meta, "regularMarketVolume");
 
             return new Quote
             {
@@ -494,6 +495,7 @@ public sealed class YahooFinanceService
                 PreviousClose = previousClose,
                 High = high,
                 Low = low,
+                Volume = volume,
                 LastUpdated = updated
             };
         }
@@ -623,6 +625,16 @@ public sealed class YahooFinanceService
             return null;
 
         if (value.TryGetInt64(out var unix)) return DateTimeOffset.FromUnixTimeSeconds(unix);
+        return null;
+    }
+
+    private static long? GetLong(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var value) || value.ValueKind == JsonValueKind.Null)
+            return null;
+
+        if (value.TryGetInt64(out var longValue)) return longValue;
+        if (value.TryGetDouble(out var doubleValue)) return Convert.ToInt64(doubleValue);
         return null;
     }
 }

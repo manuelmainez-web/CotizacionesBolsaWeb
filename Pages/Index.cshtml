@@ -131,6 +131,7 @@
                         <th class="text-align-right" style="width: 90px;">Apertura</th>
                         <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
                         <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                        <th class="text-align-right" style="width: 100px;">Volumen</th>
                         <th class="text-align-right" style="width: 90px;">Símbolo</th>
                         <th style="width: 85px;">Mercado<br />(abierto/cerrado)</th>
                         <th style="width: 96px;"></th>
@@ -154,6 +155,7 @@
                             <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen</td>
                             <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose</td>
                             <td class="time-cell">@item.UpdatedText</td>
+                            <td class="text-align-right">@item.DisplayVolume</td>
                             <td class="text-align-right">@item.DisplaySymbol</td>
                             <td class="market-status-cell">
                                 <span class="market-status-dot @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel"></span>

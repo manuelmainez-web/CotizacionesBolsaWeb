@@ -15,6 +15,7 @@ public sealed class Quote
     public decimal? PreviousClose { get; set; }
     public decimal? High { get; set; }
     public decimal? Low { get; set; }
+    public long? Volume { get; set; }
     public DateTimeOffset? LastUpdated { get; set; }
 
     public string CurrencySymbol => CountryCode switch
@@ -33,6 +34,7 @@ public sealed class Quote
     public string DisplayPreviousClose => PreviousClose.HasValue ? PreviousClose.Value.ToString("#,##0.00") : "N/A";
     public string DisplayHigh => High.HasValue ? High.Value.ToString("#,##0.00") : "N/A";
     public string DisplayLow => Low.HasValue ? Low.Value.ToString("#,##0.00") : "N/A";
+    public string DisplayVolume => Volume.HasValue ? Volume.Value.ToString("#,##0") : "N/A";
     public decimal? Change => Price.HasValue && PreviousClose.HasValue ? Price.Value - PreviousClose.Value : null;
     public string DisplayChange => Change.HasValue ? Change.Value.ToString("+#,##0.00;-#,##0.00;0.00") : "N/A";
     public string DisplaySymbol => Symbol.TrimStart('^');
