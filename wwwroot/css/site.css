@@ -1342,6 +1342,10 @@ body.wco-active .topbar-datetime {
     print-color-adjust: exact;
   }
 
+  body.print-all .market-clock {
+    display: none !important;
+  }
+
   body.print-broker-ing .market-table thead th,
   body.print-broker-tr .market-table thead th {
     background: #d9d9d9 !important;
