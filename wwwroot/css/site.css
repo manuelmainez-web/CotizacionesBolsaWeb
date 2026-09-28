@@ -910,6 +910,7 @@ body.wco-active .topbar-datetime {
   color: #cdd9e4;
   font-size: 0.8rem;
   text-align: right;
+  white-space: nowrap;
 }
 
 .market-clock {
