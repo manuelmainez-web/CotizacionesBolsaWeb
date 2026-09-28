@@ -44,7 +44,7 @@ public sealed class Quote
     public string UpdatedDateText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("dd/MM/yyyy") : "N/A";
     public string UpdatedTimeText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("HH:mm") : string.Empty;
     public string TrendCssClass => PercentChange.HasValue && PercentChange.Value >= 0 ? "text-success" : "text-danger";
-    public bool IsMarketOpen => ComputeMarketOpen(CountryCode);
+    public bool IsMarketOpen => ComputeMarketOpen(CountryCode, Symbol);
     public string MarketStatusLabel => IsMarketOpen ? "Mercado abierto" : "Mercado cerrado";
     public string FlagUrl => string.IsNullOrWhiteSpace(CountryCode) ? "https://flagcdn.com/w40/gb.png" : CountryCode switch
     {
@@ -82,8 +82,15 @@ public sealed class Quote
         }
     }
 
-    private static bool ComputeMarketOpen(string countryCode)
+    private static bool ComputeMarketOpen(string countryCode, string symbol)
     {
+        // Los futuros de materias primas (oro, plata, petróleo...) cotizan en CME/NYMEX/ICE
+        // casi 24h/día de domingo a viernes, no en el horario bursátil estándar de acciones.
+        if (!string.IsNullOrEmpty(symbol) && symbol.EndsWith("=F", StringComparison.Ordinal))
+        {
+            return ComputeCommodityFuturesMarketOpen();
+        }
+
         var (windowsId, ianaId, openTime, closeTime) = countryCode switch
         {
             "ES" or "FR" => ("Romance Standard Time", "Europe/Madrid", new TimeSpan(9, 0, 0), new TimeSpan(17, 30, 0)),
@@ -113,5 +120,24 @@ public sealed class Quote
 
         var timeOfDay = localNow.TimeOfDay;
         return timeOfDay >= openTime && timeOfDay <= closeTime;
+    }
+
+    private static bool ComputeCommodityFuturesMarketOpen()
+    {
+        // Horario CME Globex/NYMEX/ICE (hora de Nueva York): abre domingo 18:00 y cierra
+        // viernes 17:00, con una pausa diaria de mantenimiento de 17:00 a 18:00 (lunes-jueves).
+        var timeZone = ResolveTimeZone("Eastern Standard Time", "America/New_York");
+        var localNow = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, timeZone);
+        var dailyBreakStart = new TimeSpan(17, 0, 0);
+        var dailyBreakEnd = new TimeSpan(18, 0, 0);
+        var timeOfDay = localNow.TimeOfDay;
+
+        return localNow.DayOfWeek switch
+        {
+            DayOfWeek.Saturday => false,
+            DayOfWeek.Sunday => timeOfDay >= dailyBreakEnd,
+            DayOfWeek.Friday => timeOfDay < dailyBreakStart,
+            _ => timeOfDay < dailyBreakStart || timeOfDay >= dailyBreakEnd
+        };
     }
 }
