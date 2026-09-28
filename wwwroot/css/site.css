@@ -916,7 +916,7 @@ body.wco-active .topbar-datetime {
 /* Mayor especificidad que ".market-table td" (que fija font-size: 0.9rem)
    para que la reducción de fuente se aplique de verdad en estas celdas. */
 .market-table td.time-cell-compact {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
 }
 
 .market-clock {
