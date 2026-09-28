@@ -467,7 +467,7 @@
                         <th class="text-align-right">Máximo</th>
                         <th class="text-align-right">Mínimo</th>
                         <th class="text-align-right">Clasificación</th>
-                        <th class="text-align-right">Fecha/Hora</th>
+                        <th class="text-align-right" style="width: 110px;">Actualizado</th>
                         <th style="width: 96px;"></th>
                     </tr>
                 </thead>
@@ -490,7 +490,15 @@
                             <td class="price-cell price-cell-quote">@item.DisplayHigh $</td>
                             <td class="price-cell price-cell-quote">@item.DisplayLow $</td>
                             <td class="text-align-right">@classification</td>
-                            <td class="time-cell">@item.UpdatedText</td>
+                            <td class="time-cell">
+                                @item.UpdatedText
+                                <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                    <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                        <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                        <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                            </td>
                             <td class="delete-cell">
                                 <form method="post" asp-page-handler="MoveCommodityUp">
                                     <input type="hidden" name="symbol" value="@item.Symbol" />
