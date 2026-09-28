@@ -612,7 +612,7 @@
                         <th class="text-align-right" style="width: 90px;">Valoración compra</th>
                         <th class="isin-print-hide text-align-right" style="width: 90px;">ISIN</th>
                         <th class="broker-header" style="width: 50px;">Bróker</th>
-                        <th class="text-align-right" style="width: 80px;">Fecha/Hora Actualización</th>
+                        <th class="text-align-right" style="width: 96px;">Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
                 </thead>
@@ -665,7 +665,16 @@
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
                                 </td>
-                                <td class="time-cell">@item.UpdatedDateText<br />@item.UpdatedTimeText</td>
+                                <td class="time-cell">
+                                    @item.UpdatedDateText<br />
+                                    @item.UpdatedTimeText
+                                    <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                            <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                </td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-etf-@item.Symbol" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteEtf" onsubmit="return confirm('¿Eliminar este ETF?');">
@@ -779,7 +788,7 @@
                         <th class="text-align-right" style="width: 90px;">Valoración compra</th>
                         <th class="isin-print-hide text-align-right" style="width: 90px;">ISIN</th>
                         <th class="broker-header" style="width: 50px;">Bróker</th>
-                        <th class="text-align-right" style="width: 80px;">Fecha/Hora Actualización</th>
+                        <th class="text-align-right" style="width: 96px;">Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
                 </thead>
@@ -832,7 +841,16 @@
                                         <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
                                     }
                                 </td>
-                                <td class="time-cell">@item.UpdatedDateText<br />@item.UpdatedTimeText</td>
+                                <td class="time-cell">
+                                    @item.UpdatedDateText<br />
+                                    @item.UpdatedTimeText
+                                    <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                            <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                </td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-fund-@item.Symbol" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteFund" onsubmit="return confirm('¿Eliminar este fondo?');">
@@ -928,7 +946,7 @@
                         <th class="text-align-right" style="width: 90px;">Valoración compra</th>
                         <th class="isin-print-hide text-align-right" style="width: 90px;">ISIN</th>
                         <th class="broker-header" style="width: 50px;">Bróker</th>
-                        <th class="text-align-right" style="width: 80px;">Fecha/Hora Actualización</th>
+                        <th class="text-align-right" style="width: 96px;">Actualización</th>
                         <th style="width: 52px;"></th>
                     </tr>
                 </thead>
@@ -981,7 +999,15 @@
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
                                 </td>
-                                <td class="time-cell">@item.UpdatedText</td>
+                                <td class="time-cell">
+                                    @item.UpdatedText
+                                    <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                            <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                </td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-stockholding-@item.Symbol" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteStockHolding" onsubmit="return confirm('¿Eliminar esta acción?');">
