@@ -1298,12 +1298,12 @@
             <div class="form-error-banner">@Model.CheckingAccountError</div>
         }
         <div class="table-wrap">
-            <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1252px;">
+            <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1268px;">
                 <thead>
                     <tr>
                         <th class="col-nombre-wide" style="width: 965px;">Nombre</th>
                         <th class="text-align-right" style="width: 122px;">Saldo cuenta corriente</th>
-                        <th class="text-align-right" style="width: 99px;">Fecha/Hora<br />Actualización</th>
+                        <th class="text-align-right" style="width: 115px;">Actualización</th>
                         <th style="width: 66px;"></th>
                     </tr>
                 </thead>
@@ -1333,7 +1333,7 @@
                                     </span>
                                 </td>
                                 <td class="price-cell price-cell-quote">@item.Balance.ToString("#,##0.00 €")</td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")<br />@DateTime.Now.ToString("HH:mm")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-checkingaccount-@Model.CheckingAccounts.IndexOf(item)" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteCheckingAccount" onsubmit="return confirm('¿Eliminar esta cuenta corriente?');">
@@ -1410,12 +1410,12 @@
             <div class="form-error-banner">@Model.CashError</div>
         }
         <div class="table-wrap">
-            <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1252px;">
+            <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1268px;">
                 <thead>
                     <tr>
                         <th class="col-nombre-wide" style="width: 965px;">Nombre</th>
                         <th class="text-align-right" style="width: 122px;">Importe</th>
-                        <th class="text-align-right" style="width: 99px;">Fecha/Hora<br />Actualización</th>
+                        <th class="text-align-right" style="width: 115px;">Actualización</th>
                         <th style="width: 66px;"></th>
                     </tr>
                 </thead>
@@ -1435,7 +1435,7 @@
                             <tr>
                                 <td class="name-cell">@item.Name</td>
                                 <td class="price-cell price-cell-quote">@item.Amount.ToString("#,##0.00 €")</td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")<br />@DateTime.Now.ToString("HH:mm")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-cash-@i" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeleteCash" onsubmit="return confirm('¿Eliminar este efectivo?');">
