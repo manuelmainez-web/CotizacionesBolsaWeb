@@ -255,7 +255,8 @@ document.addEventListener('click', function (event) {
             indices: [
                 { symbol: '^GSPC', name: 'S&P 500' },
                 { symbol: '^DJI', name: 'Dow Jones Industrial Average' },
-                { symbol: '^IXIC', name: 'Nasdaq Composite' }
+                { symbol: '^IXIC', name: 'Nasdaq Composite' },
+                { symbol: '^VIX', name: 'CBOE Volatility Index (VIX)' }
             ]
         },
         FR: { etiqueta: 'Francia', indices: [{ symbol: '^FCHI', name: 'CAC 40' }] },
