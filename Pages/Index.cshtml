@@ -665,9 +665,8 @@
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
                                 </td>
-                                <td class="time-cell">
-                                    @item.UpdatedDateText<br />
-                                    @item.UpdatedTimeText
+                                <td class="time-cell time-cell-compact">
+                                    @item.UpdatedText
                                     <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
                                         <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
                                             <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
@@ -841,9 +840,8 @@
                                         <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
                                     }
                                 </td>
-                                <td class="time-cell">
-                                    @item.UpdatedDateText<br />
-                                    @item.UpdatedTimeText
+                                <td class="time-cell time-cell-compact">
+                                    @item.UpdatedText
                                     <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
                                         <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
                                             <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
@@ -999,7 +997,7 @@
                                         <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                                     }
                                 </td>
-                                <td class="time-cell">
+                                <td class="time-cell time-cell-compact">
                                     @item.UpdatedText
                                     <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
                                         <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
