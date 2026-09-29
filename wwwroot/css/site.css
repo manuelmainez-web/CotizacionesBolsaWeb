@@ -590,7 +590,7 @@ body.wco-active .topbar-datetime {
 }
 
 .tech-recommendation {
-  margin: 18px 18px 0;
+  margin: 18px;
   padding: 16px 20px;
   border-radius: 12px;
   text-align: center;
@@ -598,8 +598,8 @@ body.wco-active .topbar-datetime {
   border: 1px solid rgba(148, 163, 184, 0.16);
 }
 
-.tech-recommendation-inline {
-  margin: 0 12px 12px;
+.recomendacion-panel {
+  margin-bottom: 18px;
 }
 
 .tech-recommendation-label {
