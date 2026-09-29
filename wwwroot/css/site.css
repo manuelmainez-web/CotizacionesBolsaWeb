@@ -589,6 +589,31 @@ body.wco-active .topbar-datetime {
   line-height: 1.35;
 }
 
+.tech-recommendation {
+  margin: 18px 18px 0;
+  padding: 16px 20px;
+  border-radius: 12px;
+  text-align: center;
+  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.tech-recommendation-label {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a9bacd;
+  margin-bottom: 6px;
+}
+
+.tech-recommendation strong {
+  font-size: 1.25rem;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
 .mini-select {
   border: 1px solid rgba(148, 163, 184, 0.24);
   background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);

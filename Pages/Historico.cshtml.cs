@@ -55,6 +55,14 @@ public class HistoricoModel : PageModel
     public decimal? VariacionPeriodoPct { get; private set; }
     public long? VolumenMedio { get; private set; }
 
+    // Señales de compra/venta agregadas (estilo "resumen técnico" de Investing.com)
+    public string SenalMediasMovilesTexto { get; private set; } = "N/D";
+    public string SenalMediasMovilesCss { get; private set; } = "text-muted";
+    public string SenalOsciladoresTexto { get; private set; } = "N/D";
+    public string SenalOsciladoresCss { get; private set; } = "text-muted";
+    public string RecomendacionGlobalTexto { get; private set; } = "N/D";
+    public string RecomendacionGlobalCss { get; private set; } = "text-muted";
+
     // Datos de análisis fundamental. Rango 52 semanas / mercado / divisa vía Yahoo Finance (siempre disponibles);
     // el resto (PER, capitalización, dividendo, etc.) vía StockAnalysisService cuando el instrumento es una acción.
     public decimal? FiftyTwoWeekHigh { get; private set; }
@@ -183,6 +191,10 @@ public class HistoricoModel : PageModel
 
     private void ComputeResumenTecnico(List<decimal> closes, List<decimal> highs, List<decimal> lows, List<long> volumes, List<decimal?> sma20, List<decimal?> sma50, List<decimal?> rsi)
     {
+        // Contadores de señales para el resumen técnico global (estilo "medias móviles" / "osciladores" de Investing.com)
+        var senalesMediasMoviles = new List<int>(); // 1 = compra, -1 = venta, 0 = neutral
+        var senalesOsciladores = new List<int>();
+
         LastPrice = closes.Count > 0 ? closes[^1] : null;
         LastSma20 = sma20.LastOrDefault(v => v.HasValue);
         LastSma50 = sma50.LastOrDefault(v => v.HasValue);
@@ -191,35 +203,47 @@ public class HistoricoModel : PageModel
         LastSma200 = sma200.LastOrDefault(v => v.HasValue);
         LastRsi = rsi.LastOrDefault(v => v.HasValue);
 
+        if (LastPrice.HasValue && LastSma20.HasValue)
+        {
+            senalesMediasMoviles.Add(LastPrice.Value > LastSma20.Value ? 1 : -1);
+        }
+
+        if (LastPrice.HasValue && LastSma50.HasValue)
+        {
+            senalesMediasMoviles.Add(LastPrice.Value > LastSma50.Value ? 1 : -1);
+        }
+
         if (LastPrice.HasValue && LastSma20.HasValue && LastSma50.HasValue)
         {
             if (LastPrice.Value > LastSma20.Value && LastSma20.Value >= LastSma50.Value)
             {
-                TendenciaTexto = "Alcista";
+                TendenciaTexto = "Compra (cruce alcista SMA 20/50)";
                 TendenciaCss = "text-success";
             }
             else if (LastPrice.Value < LastSma20.Value && LastSma20.Value <= LastSma50.Value)
             {
-                TendenciaTexto = "Bajista";
+                TendenciaTexto = "Venta (cruce bajista SMA 20/50)";
                 TendenciaCss = "text-danger";
             }
             else
             {
-                TendenciaTexto = "Lateral / mixta";
+                TendenciaTexto = "Neutral (señales mixtas)";
                 TendenciaCss = "text-muted";
             }
         }
 
         if (LastPrice.HasValue && LastSma200.HasValue)
         {
+            senalesMediasMoviles.Add(LastPrice.Value > LastSma200.Value ? 1 : -1);
+
             if (LastPrice.Value > LastSma200.Value)
             {
-                TendenciaLargoPlazoTexto = $"Alcista (precio sobre SMA 200: {LastSma200.Value:#,##0.00})";
+                TendenciaLargoPlazoTexto = $"Compra (precio sobre SMA 200: {LastSma200.Value:#,##0.00})";
                 TendenciaLargoPlazoCss = "text-success";
             }
             else
             {
-                TendenciaLargoPlazoTexto = $"Bajista (precio bajo SMA 200: {LastSma200.Value:#,##0.00})";
+                TendenciaLargoPlazoTexto = $"Venta (precio bajo SMA 200: {LastSma200.Value:#,##0.00})";
                 TendenciaLargoPlazoCss = "text-danger";
             }
         }
@@ -232,18 +256,21 @@ public class HistoricoModel : PageModel
         {
             if (LastRsi.Value >= 70)
             {
-                RsiTexto = $"{LastRsi.Value:0.0} · Sobrecompra";
+                RsiTexto = $"{LastRsi.Value:0.0} · Venta (sobrecompra)";
                 RsiCss = "text-danger";
+                senalesOsciladores.Add(-1);
             }
             else if (LastRsi.Value <= 30)
             {
-                RsiTexto = $"{LastRsi.Value:0.0} · Sobreventa";
+                RsiTexto = $"{LastRsi.Value:0.0} · Compra (sobreventa)";
                 RsiCss = "text-success";
+                senalesOsciladores.Add(1);
             }
             else
             {
                 RsiTexto = $"{LastRsi.Value:0.0} · Neutral";
                 RsiCss = "text-muted";
+                senalesOsciladores.Add(0);
             }
         }
 
@@ -289,8 +316,9 @@ public class HistoricoModel : PageModel
         {
             var histograma = lastMacd.Value - lastSignal.Value;
             var esAlcista = histograma > 0;
-            MacdTexto = $"{lastMacd.Value:0.00} vs señal {lastSignal.Value:0.00} · {(esAlcista ? "Cruce alcista" : "Cruce bajista")}";
+            MacdTexto = $"{lastMacd.Value:0.00} vs señal {lastSignal.Value:0.00} · {(esAlcista ? "Compra (cruce alcista)" : "Venta (cruce bajista)")}";
             MacdCss = esAlcista ? "text-success" : "text-danger";
+            senalesOsciladores.Add(esAlcista ? 1 : -1);
         }
 
         // Bandas de Bollinger (20, 2 desviaciones típicas)
@@ -305,9 +333,9 @@ public class HistoricoModel : PageModel
             var bandaInferior = media - (2 * desviacion);
 
             var posicion = LastPrice.HasValue
-                ? (LastPrice.Value >= bandaSuperior ? "Sobre banda superior (posible sobrecompra)"
-                    : LastPrice.Value <= bandaInferior ? "Bajo banda inferior (posible sobreventa)"
-                    : "Dentro de las bandas")
+                ? (LastPrice.Value >= bandaSuperior ? "Venta (sobre banda superior)"
+                    : LastPrice.Value <= bandaInferior ? "Compra (bajo banda inferior)"
+                    : "Neutral (dentro de las bandas)")
                 : "N/D";
 
             BollingerTexto = $"{bandaInferior:#,##0.00} - {bandaSuperior:#,##0.00} · {posicion}";
@@ -326,18 +354,21 @@ public class HistoricoModel : PageModel
                 var dTexto = lastD.HasValue ? $" / %D {lastD.Value:0.0}" : string.Empty;
                 if (lastK.Value >= 80)
                 {
-                    EstocasticoTexto = $"%K {lastK.Value:0.0}{dTexto} · Sobrecompra";
+                    EstocasticoTexto = $"%K {lastK.Value:0.0}{dTexto} · Venta (sobrecompra)";
                     EstocasticoCss = "text-danger";
+                    senalesOsciladores.Add(-1);
                 }
                 else if (lastK.Value <= 20)
                 {
-                    EstocasticoTexto = $"%K {lastK.Value:0.0}{dTexto} · Sobreventa";
+                    EstocasticoTexto = $"%K {lastK.Value:0.0}{dTexto} · Compra (sobreventa)";
                     EstocasticoCss = "text-success";
+                    senalesOsciladores.Add(1);
                 }
                 else
                 {
                     EstocasticoTexto = $"%K {lastK.Value:0.0}{dTexto} · Neutral";
                     EstocasticoCss = "text-muted";
+                    senalesOsciladores.Add(0);
                 }
             }
 
@@ -348,18 +379,21 @@ public class HistoricoModel : PageModel
             {
                 if (lastWilliams.Value >= -20)
                 {
-                    WilliamsRTexto = $"{lastWilliams.Value:0.0} · Sobrecompra";
+                    WilliamsRTexto = $"{lastWilliams.Value:0.0} · Venta (sobrecompra)";
                     WilliamsRCss = "text-danger";
+                    senalesOsciladores.Add(-1);
                 }
                 else if (lastWilliams.Value <= -80)
                 {
-                    WilliamsRTexto = $"{lastWilliams.Value:0.0} · Sobreventa";
+                    WilliamsRTexto = $"{lastWilliams.Value:0.0} · Compra (sobreventa)";
                     WilliamsRCss = "text-success";
+                    senalesOsciladores.Add(1);
                 }
                 else
                 {
                     WilliamsRTexto = $"{lastWilliams.Value:0.0} · Neutral";
                     WilliamsRCss = "text-muted";
+                    senalesOsciladores.Add(0);
                 }
             }
 
@@ -379,8 +413,10 @@ public class HistoricoModel : PageModel
         {
             var referencia = closes[^(periodoMomentum + 1)];
             var roc = (closes[^1] - referencia) / referencia * 100m;
-            MomentumTexto = $"{roc:+0.00;-0.00}%";
-            MomentumCss = roc >= 0 ? "text-success" : "text-danger";
+            var esPositivo = roc >= 0;
+            MomentumTexto = $"{roc:+0.00;-0.00}% · {(esPositivo ? "Compra" : "Venta")}";
+            MomentumCss = esPositivo ? "text-success" : "text-danger";
+            senalesOsciladores.Add(esPositivo ? 1 : -1);
         }
 
         // Soporte / resistencia recientes (mínimo y máximo de las últimas 20 sesiones)
@@ -391,6 +427,87 @@ public class HistoricoModel : PageModel
             var resistencia = highs.Skip(highs.Count - n).Max();
             var soporte = lows.Skip(lows.Count - n).Min();
             SoporteResistenciaTexto = $"Soporte {soporte:#,##0.00} · Resistencia {resistencia:#,##0.00}";
+        }
+
+        // Resumen de señales de medias móviles (SMA 20 / SMA 50 / SMA 200 vs. precio)
+        AsignarResumenSenal(senalesMediasMoviles, valor =>
+        {
+            SenalMediasMovilesTexto = valor.Texto;
+            SenalMediasMovilesCss = valor.Css;
+        });
+
+        // Resumen de señales de osciladores (RSI, MACD, Estocástico, Williams %R, Momentum)
+        AsignarResumenSenal(senalesOsciladores, valor =>
+        {
+            SenalOsciladoresTexto = valor.Texto;
+            SenalOsciladoresCss = valor.Css;
+        });
+
+        // Recomendación técnica global: combina medias móviles + osciladores (estilo "resumen técnico" de Investing.com)
+        var todasLasSenales = senalesMediasMoviles.Concat(senalesOsciladores).ToList();
+        if (todasLasSenales.Count > 0)
+        {
+            var compras = todasLasSenales.Count(s => s > 0);
+            var ventas = todasLasSenales.Count(s => s < 0);
+            var neutrales = todasLasSenales.Count(s => s == 0);
+            var total = todasLasSenales.Count;
+
+            string etiqueta;
+            string css;
+            if (compras >= total * 0.7m)
+            {
+                etiqueta = "COMPRA FUERTE";
+                css = "text-success";
+            }
+            else if (compras > ventas)
+            {
+                etiqueta = "COMPRA";
+                css = "text-success";
+            }
+            else if (ventas >= total * 0.7m)
+            {
+                etiqueta = "VENTA FUERTE";
+                css = "text-danger";
+            }
+            else if (ventas > compras)
+            {
+                etiqueta = "VENTA";
+                css = "text-danger";
+            }
+            else
+            {
+                etiqueta = "NEUTRAL";
+                css = "text-muted";
+            }
+
+            RecomendacionGlobalTexto = $"{etiqueta} · {compras} compra(s), {ventas} venta(s), {neutrales} neutral(es) de {total} señales";
+            RecomendacionGlobalCss = css;
+        }
+    }
+
+    private static void AsignarResumenSenal(List<int> senales, Action<(string Texto, string Css)> asignar)
+    {
+        if (senales.Count == 0)
+        {
+            asignar(("N/D", "text-muted"));
+            return;
+        }
+
+        var compras = senales.Count(s => s > 0);
+        var ventas = senales.Count(s => s < 0);
+        var total = senales.Count;
+
+        if (compras > ventas)
+        {
+            asignar(($"Compra ({compras}/{total} señales)", "text-success"));
+        }
+        else if (ventas > compras)
+        {
+            asignar(($"Venta ({ventas}/{total} señales)", "text-danger"));
+        }
+        else
+        {
+            asignar(($"Neutral ({compras} compra / {ventas} venta de {total})", "text-muted"));
         }
     }
 
