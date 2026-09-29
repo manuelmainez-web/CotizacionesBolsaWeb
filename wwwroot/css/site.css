@@ -599,6 +599,27 @@ body.wco-active .topbar-datetime {
   display: none;
 }
 
+@media print {
+  .no-print,
+  .historico-tabs,
+  .chart-controls {
+    display: none !important;
+  }
+
+  .historico-tab-panel[hidden] {
+    display: block !important;
+  }
+
+  .historico-tab-panel {
+    break-inside: avoid;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
 .summary-strip-wide {
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
 }

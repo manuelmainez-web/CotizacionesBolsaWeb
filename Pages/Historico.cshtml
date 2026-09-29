@@ -15,6 +15,9 @@
             </h1>
             <p class="portfolio-subtitle">@Model.DisplaySymbol · Progresión de la cotización en el tiempo</p>
         </div>
+        <button type="button" id="btn-print-historico" class="btn-refresh no-print" title="Imprimir">
+            🖨️ Imprimir
+        </button>
     </div>
 
     @if (Model.HasData && Model.RentabilidadPeriodos.Count > 0)
@@ -348,6 +351,19 @@
         </div>
     }
 </div>
+
+<script>
+    (function () {
+        var boton = document.getElementById('btn-print-historico');
+        if (!boton) {
+            return;
+        }
+
+        boton.addEventListener('click', function () {
+            window.print();
+        });
+    })();
+</script>
 
 @if (Model.HasData)
 {
