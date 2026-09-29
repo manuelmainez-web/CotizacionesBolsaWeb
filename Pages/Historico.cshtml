@@ -22,7 +22,8 @@
             <div class="rentabilidad-strip">
                 @foreach (var periodo in Model.RentabilidadPeriodos)
                 {
-                    <div class="rentabilidad-box">
+                    var esPeriodoActual = periodo.Etiqueta == Model.RangeEtiquetaEquivalente;
+                    <div class="rentabilidad-box @(esPeriodoActual ? "rentabilidad-box-current" : "")">
                         <span>@periodo.Etiqueta</span>
                         <strong class="@(periodo.Porcentaje is null ? "text-muted" : periodo.Porcentaje >= 0 ? "text-success" : "text-danger")">
                             @(periodo.Porcentaje.HasValue ? $"{periodo.Porcentaje.Value:+0.00;-0.00}%" : "N/D")

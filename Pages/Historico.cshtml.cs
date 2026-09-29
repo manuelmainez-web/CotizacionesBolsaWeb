@@ -14,6 +14,19 @@ public class HistoricoModel : PageModel
     public string Name { get; private set; } = string.Empty;
     public string Range { get; private set; } = "1mo";
     public bool HasData { get; private set; }
+
+    // Etiqueta de "Rentabilidad por periodo" que corresponde al periodo seleccionado en el desplegable
+    // de "Cotización histórica" (Día/Semana/Mes/Año/Desde el principio), para resaltar la casilla a juego.
+    public string? RangeEtiquetaEquivalente => Range switch
+    {
+        "1d" => "1 día",
+        "5d" => "1 semana",
+        "1mo" => "1 mes",
+        "1y" => "1 año",
+        "max" => "Desde el principio",
+        _ => null
+    };
+
     public string LabelsJson { get; private set; } = "[]";
     public string ValuesJson { get; private set; } = "[]";
     public string OpenJson { get; private set; } = "[]";

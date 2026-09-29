@@ -649,6 +649,16 @@ body.wco-active .topbar-datetime {
   white-space: nowrap;
 }
 
+.rentabilidad-box-current {
+  background: rgba(37, 99, 235, 0.16);
+  border-color: rgba(96, 165, 250, 0.7);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35);
+}
+
+.rentabilidad-box-current span {
+  color: #bfdbfe;
+}
+
 .mini-select {
   border: 1px solid rgba(148, 163, 184, 0.24);
   background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);
