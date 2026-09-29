@@ -341,6 +341,11 @@ body.wco-active .topbar-datetime {
   padding: 2px 2px 0;
 }
 
+.market-panel .summary-strip {
+  padding: 18px;
+  margin-bottom: 0;
+}
+
 .summary-strip-label {
   display: flex;
   align-items: center;
@@ -457,6 +462,17 @@ body.wco-active .topbar-datetime {
 
 .print-only {
   display: none;
+}
+
+.fundamental-note {
+  padding: 0 18px 16px;
+  margin: 0;
+  font-size: 0.78rem;
+  color: #8a9bb0;
+}
+
+.text-muted {
+  color: #a9bacd !important;
 }
 
 .print-all-title {

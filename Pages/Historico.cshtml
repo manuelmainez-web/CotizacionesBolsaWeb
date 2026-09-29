@@ -10,7 +10,6 @@
             <h1 class="mb-1">@Model.Name</h1>
             <p class="portfolio-subtitle">@Model.Symbol · Progresión de la cotización en el tiempo</p>
         </div>
-        <a class="btn-refresh" href="javascript:history.back()">← Volver</a>
     </div>
 
     <div class="charts-row">
@@ -92,6 +91,77 @@
             </div>
         }
     </div>
+
+    @if (Model.HasData)
+    {
+        <div class="market-panel mt-4">
+            <div class="panel-head">
+                <span>ANÁLISIS TÉCNICO</span>
+            </div>
+            <div class="summary-strip">
+                <div class="summary-box">
+                    <span>Tendencia</span>
+                    <strong class="@Model.TendenciaCss">@Model.TendenciaTexto</strong>
+                </div>
+                <div class="summary-box">
+                    <span>RSI (14)</span>
+                    <strong class="@Model.RsiCss">@Model.RsiTexto</strong>
+                </div>
+                <div class="summary-box">
+                    <span>Variación del periodo</span>
+                    <strong class="@(Model.VariacionPeriodoPct is >= 0 ? "text-success" : "text-danger")">@(Model.VariacionPeriodoPct.HasValue ? $"{Model.VariacionPeriodoPct.Value:+0.00;-0.00}%" : "N/D")</strong>
+                </div>
+                <div class="summary-box">
+                    <span>Máximo del periodo</span>
+                    <strong>@(Model.PeriodoMax.HasValue ? Model.PeriodoMax.Value.ToString("#,##0.00") : "N/D")</strong>
+                </div>
+                <div class="summary-box">
+                    <span>Mínimo del periodo</span>
+                    <strong>@(Model.PeriodoMin.HasValue ? Model.PeriodoMin.Value.ToString("#,##0.00") : "N/D")</strong>
+                </div>
+                <div class="summary-box">
+                    <span>Volumen medio</span>
+                    <strong>@(Model.VolumenMedio.HasValue ? Model.VolumenMedio.Value.ToString("#,##0") : "N/D")</strong>
+                </div>
+                <div class="summary-box">
+                    <span>SMA 20 / SMA 50</span>
+                    <strong>@(Model.LastSma20.HasValue ? Model.LastSma20.Value.ToString("#,##0.00") : "N/D") / @(Model.LastSma50.HasValue ? Model.LastSma50.Value.ToString("#,##0.00") : "N/D")</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="market-panel mt-4">
+            <div class="panel-head">
+                <span>ANÁLISIS FUNDAMENTAL</span>
+            </div>
+            @if (Model.HasFundamentalData)
+            {
+                <div class="summary-strip">
+                    <div class="summary-box">
+                        <span>Rango 52 semanas</span>
+                        <strong>@(Model.FiftyTwoWeekLow.HasValue ? Model.FiftyTwoWeekLow.Value.ToString("#,##0.00") : "N/D") - @(Model.FiftyTwoWeekHigh.HasValue ? Model.FiftyTwoWeekHigh.Value.ToString("#,##0.00") : "N/D")</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Mercado / Bolsa</span>
+                        <strong>@(string.IsNullOrWhiteSpace(Model.Exchange) ? "N/D" : Model.Exchange)</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Divisa</span>
+                        <strong>@(string.IsNullOrWhiteSpace(Model.Currency) ? "N/D" : Model.Currency)</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Tipo de instrumento</span>
+                        <strong>@(string.IsNullOrWhiteSpace(Model.InstrumentTypeTexto) ? "N/D" : Model.InstrumentTypeTexto)</strong>
+                    </div>
+                </div>
+                <p class="fundamental-note">Datos de referencia obtenidos de fuentes públicas. Métricas como PER, capitalización o dividendo no están disponibles sin autenticación en la fuente de datos actual.</p>
+            }
+            else
+            {
+                <p class="empty-state-cell">No hay datos fundamentales disponibles para este valor.</p>
+            }
+        </div>
+    }
 </div>
 
 @if (Model.HasData)

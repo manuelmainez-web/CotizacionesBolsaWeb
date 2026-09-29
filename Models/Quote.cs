@@ -2,6 +2,15 @@ namespace CotizacionesBolsaWeb.Models;
 
 public sealed record QuoteConfig(string Name, string Symbol, string? Isin = null, string? CountryCode = null, string? Market = null);
 
+public sealed class QuoteMeta
+{
+    public decimal? FiftyTwoWeekHigh { get; set; }
+    public decimal? FiftyTwoWeekLow { get; set; }
+    public string? Exchange { get; set; }
+    public string? Currency { get; set; }
+    public string? InstrumentType { get; set; }
+}
+
 public sealed class Quote
 {
     public string Name { get; set; } = string.Empty;

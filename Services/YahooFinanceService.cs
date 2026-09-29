@@ -586,6 +586,54 @@ public sealed class YahooFinanceService
         }
     }
 
+    public async Task<QuoteMeta?> GetQuoteMetaAsync(string symbol, CancellationToken cancellationToken = default)
+    {
+        var resolvedSymbol = ResolveSymbol(symbol);
+        var url = $"https://query1.finance.yahoo.com/v8/finance/chart/{Uri.EscapeDataString(resolvedSymbol)}?range=1d&interval=1d";
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
+            request.Headers.Accept.ParseAdd("application/json");
+
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var payload = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var json = JsonDocument.Parse(payload);
+            if (!json.RootElement.TryGetProperty("chart", out var chart) ||
+                !chart.TryGetProperty("result", out var resultArray) ||
+                resultArray.ValueKind != JsonValueKind.Array ||
+                resultArray.GetArrayLength() == 0)
+            {
+                return null;
+            }
+
+            var first = resultArray[0];
+            if (!first.TryGetProperty("meta", out var meta))
+            {
+                return null;
+            }
+
+            return new QuoteMeta
+            {
+                FiftyTwoWeekHigh = GetDecimal(meta, "fiftyTwoWeekHigh"),
+                FiftyTwoWeekLow = GetDecimal(meta, "fiftyTwoWeekLow"),
+                Exchange = meta.TryGetProperty("fullExchangeName", out var exchangeEl) ? exchangeEl.GetString() : null,
+                Currency = meta.TryGetProperty("currency", out var currencyEl) ? currencyEl.GetString() : null,
+                InstrumentType = meta.TryGetProperty("instrumentType", out var typeEl) ? typeEl.GetString() : null
+            };
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private static string ResolveSymbol(string symbol)
     {
         return symbol switch
