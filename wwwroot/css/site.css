@@ -614,33 +614,37 @@ body.wco-active .topbar-datetime {
   overflow-wrap: break-word;
 }
 
+.rentabilidad-panel {
+  margin-bottom: 18px;
+}
+
 .rentabilidad-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 12px;
-  padding: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: 8px;
+  padding: 12px;
 }
 
 .rentabilidad-box {
   background: rgba(148, 163, 184, 0.06);
   border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: 10px;
-  padding: 12px 10px;
+  border-radius: 8px;
+  padding: 8px 6px;
   text-align: center;
 }
 
 .rentabilidad-box span {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: #a9bacd;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .rentabilidad-box strong {
-  font-size: 1.1rem;
+  font-size: 0.92rem;
   font-weight: 700;
   white-space: nowrap;
 }
