@@ -15,6 +15,30 @@ document.addEventListener('click', function (event) {
     }
 });
 
+// Abrir el histórico de cotización (gráficas) en una ventana emergente en vez de navegar en la misma pestaña
+document.addEventListener('click', function (event) {
+    var enlace = event.target.closest('a.name-link');
+    if (!enlace) {
+        return;
+    }
+
+    // Respetar Ctrl/Cmd/clic central/Shift (el usuario quiere abrir en pestaña nueva o similar)
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1) {
+        return;
+    }
+
+    event.preventDefault();
+
+    var ancho = Math.min(1300, window.screen.availWidth - 80);
+    var alto = Math.min(900, window.screen.availHeight - 80);
+    var left = Math.max(0, (window.screen.availWidth - ancho) / 2);
+    var top = Math.max(0, (window.screen.availHeight - alto) / 2);
+    var caracteristicas = 'width=' + ancho + ',height=' + alto + ',left=' + left + ',top=' + top +
+        ',resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no';
+
+    window.open(enlace.href, 'HistoricoCotizacion', caracteristicas);
+});
+
 // Botones de mostrar/ocultar las cajas de resumen por bróker
 document.addEventListener('click', function (event) {
     var button = event.target.closest('[data-toggle-target]');
