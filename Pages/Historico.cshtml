@@ -40,8 +40,14 @@
         @if (Model.HasData)
         {
             <div class="market-panel chart-panel-half">
-                <div class="panel-head">
+                <div class="panel-head panel-head-row">
                     <span>Análisis técnico</span>
+                    <div class="chart-type-buttons" role="group" aria-label="Tipo de gráfico">
+                        <button type="button" class="mini-button chart-type-active" data-chart-type="candlestick">Velas</button>
+                        <button type="button" class="mini-button" data-chart-type="ohlc">Barras</button>
+                        <button type="button" class="mini-button" data-chart-type="line">Línea</button>
+                        <button type="button" class="mini-button" data-chart-type="area">Área</button>
+                    </div>
                 </div>
                 <div class="chart-wrap">
                     <canvas id="candlestickChart"></canvas>
@@ -117,53 +123,103 @@
             grid: { color: 'rgba(148,163,184,0.08)' }
         };
 
-        // Velas japonesas + medias móviles (SMA 20 / SMA 50)
+        // Gráfico técnico: velas / barras OHLC / línea / área (seleccionable)
         const candleData = closes.map(function (c, i) {
             return { x: i, o: opens[i], h: highs[i], l: lows[i], c: c };
         });
+        const smaData20 = sma20.map(function (v, i) { return { x: i, y: v }; });
+        const smaData50 = sma50.map(function (v, i) { return { x: i, y: v }; });
 
-        new Chart(document.getElementById('candlestickChart'), {
-            type: 'candlestick',
-            data: {
-                datasets: [
-                    {
-                        label: 'Precio',
-                        data: candleData,
-                        color: { up: '#22c55e', down: '#ef4444', unchanged: '#a9bacd' }
-                    },
-                    {
-                        type: 'line',
-                        label: 'SMA 20',
-                        data: sma20.map(function (v, i) { return { x: i, y: v }; }),
-                        borderColor: '#facc15',
-                        borderWidth: 1.5,
-                        pointRadius: 0,
-                        spanGaps: true
-                    },
-                    {
-                        type: 'line',
-                        label: 'SMA 50',
-                        data: sma50.map(function (v, i) { return { x: i, y: v }; }),
-                        borderColor: '#a78bfa',
-                        borderWidth: 1.5,
-                        pointRadius: 0,
-                        spanGaps: true
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: { color: '#a9bacd', filter: function (item) { return item.text !== 'Precio'; } }
-                    }
-                },
-                scales: {
-                    x: ejeXComun,
-                    y: { ticks: { color: '#a9bacd' }, grid: { color: 'rgba(148,163,184,0.08)' } }
-                }
+        let graficoTecnico = null;
+
+        function crearGraficoTecnico(tipo) {
+            if (graficoTecnico) {
+                graficoTecnico.destroy();
             }
+
+            const smaDatasets = [
+                {
+                    type: 'line',
+                    label: 'SMA 20',
+                    data: smaData20,
+                    borderColor: '#facc15',
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    spanGaps: true
+                },
+                {
+                    type: 'line',
+                    label: 'SMA 50',
+                    data: smaData50,
+                    borderColor: '#a78bfa',
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    spanGaps: true
+                }
+            ];
+
+            let datasetPrecio;
+            let tipoGrafico;
+
+            if (tipo === 'ohlc') {
+                tipoGrafico = 'ohlc';
+                datasetPrecio = {
+                    label: 'Precio',
+                    data: candleData,
+                    color: { up: '#22c55e', down: '#ef4444', unchanged: '#a9bacd' }
+                };
+            } else if (tipo === 'line' || tipo === 'area') {
+                tipoGrafico = 'line';
+                datasetPrecio = {
+                    label: 'Precio',
+                    data: closes.map(function (c, i) { return { x: i, y: c }; }),
+                    borderColor: '#60a5fa',
+                    backgroundColor: 'rgba(96, 165, 250, 0.15)',
+                    fill: tipo === 'area',
+                    tension: 0.15,
+                    pointRadius: 0,
+                    borderWidth: 2
+                };
+            } else {
+                tipoGrafico = 'candlestick';
+                datasetPrecio = {
+                    label: 'Precio',
+                    data: candleData,
+                    color: { up: '#22c55e', down: '#ef4444', unchanged: '#a9bacd' }
+                };
+            }
+
+            graficoTecnico = new Chart(document.getElementById('candlestickChart'), {
+                type: tipoGrafico,
+                data: {
+                    datasets: [datasetPrecio].concat(smaDatasets)
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#a9bacd', filter: function (item) { return item.text !== 'Precio'; } }
+                        }
+                    },
+                    scales: {
+                        x: ejeXComun,
+                        y: { ticks: { color: '#a9bacd' }, grid: { color: 'rgba(148,163,184,0.08)' } }
+                    }
+                }
+            });
+        }
+
+        crearGraficoTecnico('candlestick');
+
+        document.querySelectorAll('.chart-type-buttons [data-chart-type]').forEach(function (boton) {
+            boton.addEventListener('click', function () {
+                document.querySelectorAll('.chart-type-buttons [data-chart-type]').forEach(function (b) {
+                    b.classList.remove('chart-type-active');
+                });
+                boton.classList.add('chart-type-active');
+                crearGraficoTecnico(boton.getAttribute('data-chart-type'));
+            });
         });
 
         // Volumen (barras verdes/rojas según si la sesión cerró en subida o bajada)

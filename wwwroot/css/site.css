@@ -523,6 +523,22 @@ body.wco-active .topbar-datetime {
   color: #fff;
 }
 
+.chart-type-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chart-type-buttons .mini-button {
+  font-family: inherit;
+}
+
+.chart-type-buttons .mini-button.chart-type-active {
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: rgba(96, 165, 250, 0.7);
+  color: #fff;
+}
+
 .chart-wrap {
   padding: 20px;
   min-height: 320px;
