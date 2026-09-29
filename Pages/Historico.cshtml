@@ -144,10 +144,6 @@
     {
         <div class="historico-tab-panel" id="tab-tecnico" hidden>
             <div class="market-panel">
-                <div class="tech-recommendation">
-                    <span class="tech-recommendation-label">Recomendación técnica</span>
-                    <strong class="@Model.RecomendacionGlobalCss">@Model.RecomendacionGlobalTexto</strong>
-                </div>
                 <div class="summary-strip summary-strip-wide">
                     <div class="summary-box">
                         <span>Señal medias móviles</span>
@@ -382,7 +378,7 @@
         const rsi = @Html.Raw(Model.RsiJson);
 
         const ctx = document.getElementById('historyChart');
-        new Chart(ctx, {
+        const graficoHistorico = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
@@ -675,6 +671,25 @@
                 if (destino) {
                     destino.hidden = false;
                     destino.classList.add('is-active');
+                }
+            });
+        });
+
+        // Al imprimir, todas las pestañas se muestran a la vez (ver CSS @@media print), pero Chart.js
+        // solo dibuja los canvas con el tamaño correcto si se les fuerza un resize() justo antes de
+        // imprimir (si no, algunos navegadores los dejan colapsados a 0px de alto en el papel).
+        window.addEventListener('beforeprint', function () {
+            [graficoHistorico, graficoTecnico, graficoVolumen, graficoRsi].forEach(function (grafico) {
+                if (grafico) {
+                    grafico.resize();
+                }
+            });
+        });
+
+        window.addEventListener('afterprint', function () {
+            [graficoHistorico, graficoTecnico, graficoVolumen, graficoRsi].forEach(function (grafico) {
+                if (grafico) {
+                    grafico.resize();
                 }
             });
         });
