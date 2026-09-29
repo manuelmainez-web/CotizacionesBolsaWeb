@@ -533,6 +533,28 @@ body.wco-active .topbar-datetime {
   padding-top: 0;
 }
 
+.chart-sub {
+  padding: 0 20px 18px;
+}
+
+.chart-sub-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8ec5ff;
+  margin-bottom: 6px;
+}
+
+.chart-sub-canvas-wrap {
+  height: 90px;
+  position: relative;
+}
+
+.chart-sub-canvas-wrap.chart-sub-canvas-wrap-rsi {
+  height: 110px;
+}
+
 .charts-row {
   display: flex;
   align-items: stretch;
