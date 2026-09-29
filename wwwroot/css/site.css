@@ -617,7 +617,15 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
-  .historico-tab-panel[hidden] {
+  /* Al imprimir solo se muestra la pestaña "Gráfica" (título, rentabilidad, recomendación y las 2
+     gráficas), independientemente de cuál esté activa en pantalla. Análisis técnico y fundamental
+     quedan fuera del informe impreso. */
+  #tab-tecnico,
+  #tab-fundamental {
+    display: none !important;
+  }
+
+  #tab-grafica {
     display: block !important;
   }
 
