@@ -228,8 +228,12 @@ body.wco-active .topbar-datetime {
   right: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: stretch;
   gap: 8px;
+}
+
+.print-actions .quick-link-button {
+  justify-content: center;
 }
 
 .quick-link-button.mini-button {
@@ -617,7 +621,7 @@ body.wco-active .topbar-datetime {
     display: block !important;
   }
 
-  .historico-tab-panel .market-panel,
+  .historico-tab-panel .market-panel:not(.chart-panel-half),
   .historico-tab-panel .summary-box,
   .historico-tab-panel .rentabilidad-box,
   .historico-tab-panel .tech-recommendation {
@@ -630,12 +634,13 @@ body.wco-active .topbar-datetime {
   }
 
   .charts-row {
-    flex-direction: column;
+    flex-direction: row !important;
+    gap: 10px;
   }
 
-  .charts-row .chart-panel-half {
-    flex: none !important;
-    width: 100% !important;
+  .chart-wrap {
+    min-height: 160px !important;
+    padding: 8px !important;
   }
 
   body {
