@@ -11,6 +11,7 @@ public class HistoricoModel : PageModel
     private readonly YahooFinanceService _service = new();
 
     public string Symbol { get; private set; } = string.Empty;
+    public string DisplaySymbol => Symbol.TrimStart('^');
     public string Name { get; private set; } = string.Empty;
     public string Range { get; private set; } = "1mo";
     public bool HasData { get; private set; }
