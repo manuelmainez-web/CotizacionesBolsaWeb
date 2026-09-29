@@ -598,6 +598,10 @@ body.wco-active .topbar-datetime {
   border: 1px solid rgba(148, 163, 184, 0.16);
 }
 
+.tech-recommendation-inline {
+  margin: 0 12px 12px;
+}
+
 .tech-recommendation-label {
   display: block;
   font-size: 0.74rem;
