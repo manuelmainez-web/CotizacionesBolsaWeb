@@ -15,16 +15,17 @@ public class HistoricoModel : PageModel
     public string Range { get; private set; } = "1mo";
     public bool HasData { get; private set; }
 
-    // Etiqueta de "Rentabilidad por periodo" que corresponde al periodo seleccionado en el desplegable
-    // de "Cotización histórica" (Día/Semana/Mes/Año/Desde el principio), para resaltar la casilla a juego.
-    public string? RangeEtiquetaEquivalente => Range switch
+    // Etiquetas de "Rentabilidad por periodo" que corresponden al periodo seleccionado en el desplegable
+    // de "Cotización histórica" (Día/Semana/Mes/Año/Desde el principio), para resaltar las casillas a juego.
+    // Mes resalta también 3/6 meses, y Año resalta también 5 años (periodos "contenidos" en la selección).
+    public HashSet<string> RangeEtiquetasEquivalentes => Range switch
     {
-        "1d" => "1 día",
-        "5d" => "1 semana",
-        "1mo" => "1 mes",
-        "1y" => "1 año",
-        "max" => "Desde el principio",
-        _ => null
+        "1d" => new HashSet<string> { "1 día" },
+        "5d" => new HashSet<string> { "1 semana" },
+        "1mo" => new HashSet<string> { "1 mes", "3 meses", "6 meses" },
+        "1y" => new HashSet<string> { "1 año", "5 años" },
+        "max" => new HashSet<string> { "Desde el principio" },
+        _ => new HashSet<string>()
     };
 
     public string LabelsJson { get; private set; } = "[]";
