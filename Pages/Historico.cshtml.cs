@@ -75,7 +75,7 @@ public class HistoricoModel : PageModel
     public string SenalOsciladoresTexto { get; private set; } = "N/D";
     public string SenalOsciladoresCss { get; private set; } = "text-muted";
     public string RecomendacionGlobalTexto { get; private set; } = "N/D";
-    public string RecomendacionGlobalCss { get; private set; } = "text-muted";
+    public string RecomendacionGlobalCss { get; private set; } = "text-amber";
 
     // Datos de análisis fundamental. Rango 52 semanas / mercado / divisa vía Yahoo Finance (siempre disponibles);
     // el resto (PER, capitalización, dividendo, etc.) vía StockAnalysisService cuando el instrumento es una acción.
@@ -507,7 +507,7 @@ public class HistoricoModel : PageModel
             else
             {
                 etiqueta = "NEUTRAL";
-                css = "text-muted";
+                css = "text-amber";
             }
 
             RecomendacionGlobalTexto = $"{etiqueta} · {compras} compra(s), {ventas} venta(s), {neutrales} neutral(es) de {total} señales";

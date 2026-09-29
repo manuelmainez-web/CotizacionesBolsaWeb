@@ -475,6 +475,11 @@ body.wco-active .topbar-datetime {
   color: #a9bacd !important;
 }
 
+.text-amber {
+  color: #f59e0b !important;
+  font-weight: 700;
+}
+
 .print-all-title {
   display: none;
 }
