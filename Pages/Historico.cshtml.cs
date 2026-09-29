@@ -29,23 +29,57 @@ public class HistoricoModel : PageModel
     public decimal? LastPrice { get; private set; }
     public decimal? LastSma20 { get; private set; }
     public decimal? LastSma50 { get; private set; }
+    public decimal? LastSma200 { get; private set; }
     public decimal? LastRsi { get; private set; }
     public string TendenciaTexto { get; private set; } = "N/D";
     public string TendenciaCss { get; private set; } = "text-muted";
+    public string TendenciaLargoPlazoTexto { get; private set; } = "N/D";
+    public string TendenciaLargoPlazoCss { get; private set; } = "text-muted";
     public string RsiTexto { get; private set; } = "N/D";
     public string RsiCss { get; private set; } = "text-muted";
+    public string MacdTexto { get; private set; } = "N/D";
+    public string MacdCss { get; private set; } = "text-muted";
+    public string EstocasticoTexto { get; private set; } = "N/D";
+    public string EstocasticoCss { get; private set; } = "text-muted";
+    public string WilliamsRTexto { get; private set; } = "N/D";
+    public string WilliamsRCss { get; private set; } = "text-muted";
+    public string BollingerTexto { get; private set; } = "N/D";
+    public string MomentumTexto { get; private set; } = "N/D";
+    public string MomentumCss { get; private set; } = "text-muted";
+    public string AtrTexto { get; private set; } = "N/D";
+    public string VolumenRelativoTexto { get; private set; } = "N/D";
+    public string VolumenRelativoCss { get; private set; } = "text-muted";
+    public string SoporteResistenciaTexto { get; private set; } = "N/D";
     public decimal? PeriodoMax { get; private set; }
     public decimal? PeriodoMin { get; private set; }
     public decimal? VariacionPeriodoPct { get; private set; }
     public long? VolumenMedio { get; private set; }
 
-    // Datos de análisis fundamental disponibles públicamente (sin autenticación) vía Yahoo Finance
+    // Datos de análisis fundamental. Rango 52 semanas / mercado / divisa vía Yahoo Finance (siempre disponibles);
+    // el resto (PER, capitalización, dividendo, etc.) vía StockAnalysisService cuando el instrumento es una acción.
     public decimal? FiftyTwoWeekHigh { get; private set; }
     public decimal? FiftyTwoWeekLow { get; private set; }
     public string? Exchange { get; private set; }
     public string? Currency { get; private set; }
     public string? InstrumentTypeTexto { get; private set; }
     public bool HasFundamentalData { get; private set; }
+    public string? MarketCap { get; private set; }
+    public string? PeRatio { get; private set; }
+    public string? ForwardPe { get; private set; }
+    public string? Eps { get; private set; }
+    public string? DividendInfo { get; private set; }
+    public string? ExDividendDate { get; private set; }
+    public string? Revenue { get; private set; }
+    public string? NetIncome { get; private set; }
+    public string? SharesOutstanding { get; private set; }
+    public string? Beta { get; private set; }
+    public string? PriceTarget { get; private set; }
+    public string? Sector { get; private set; }
+    public string? Employees { get; private set; }
+    public string? IpoDate { get; private set; }
+    public string? FundamentalSourceNote { get; private set; }
+
+    private readonly StockAnalysisService _fundamentalService = new();
 
     public async Task OnGetAsync(string symbol, string? name, string? range)
     {
@@ -79,14 +113,17 @@ public class HistoricoModel : PageModel
         HasData = true;
         var labels = points.Select(p => TimeZoneInfo.ConvertTime(p.Date, Quote.SpainTimeZone).ToString(dateFormat, CultureInfo.InvariantCulture)).ToList();
         var closes = points.Select(p => p.Close).ToList();
+        var highs = points.Select(p => p.High).ToList();
+        var lows = points.Select(p => p.Low).ToList();
+        var volumes = points.Select(p => p.Volume).ToList();
 
         LabelsJson = JsonSerializer.Serialize(labels);
         ValuesJson = JsonSerializer.Serialize(closes);
         OpenJson = JsonSerializer.Serialize(points.Select(p => p.Open).ToList());
-        HighJson = JsonSerializer.Serialize(points.Select(p => p.High).ToList());
-        LowJson = JsonSerializer.Serialize(points.Select(p => p.Low).ToList());
+        HighJson = JsonSerializer.Serialize(highs);
+        LowJson = JsonSerializer.Serialize(lows);
         CloseJson = JsonSerializer.Serialize(closes);
-        VolumeJson = JsonSerializer.Serialize(points.Select(p => p.Volume).ToList());
+        VolumeJson = JsonSerializer.Serialize(volumes);
         var sma20 = ComputeSma(closes, 20);
         var sma50 = ComputeSma(closes, 50);
         var rsi = ComputeRsi(closes, 14);
@@ -94,8 +131,10 @@ public class HistoricoModel : PageModel
         Sma50Json = JsonSerializer.Serialize(sma50);
         RsiJson = JsonSerializer.Serialize(rsi);
 
-        ComputeResumenTecnico(closes, points.Select(p => p.Volume).ToList(), sma20, sma50, rsi);
+        ComputeResumenTecnico(closes, highs, lows, volumes, sma20, sma50, rsi);
 
+        // Fundamentales: Yahoo Finance (rango 52 semanas / mercado / divisa) siempre que se pueda,
+        // ampliados con StockAnalysisService (PER, capitalización, dividendo, etc.) para acciones.
         var meta = await _service.GetQuoteMetaAsync(Symbol);
         if (meta != null)
         {
@@ -115,13 +154,41 @@ public class HistoricoModel : PageModel
                 _ => meta.InstrumentType
             };
         }
+
+        var fundamentals = await _fundamentalService.GetFundamentalsAsync(Symbol);
+        if (fundamentals != null)
+        {
+            HasFundamentalData = true;
+            MarketCap = fundamentals.MarketCap;
+            PeRatio = fundamentals.PeRatio;
+            ForwardPe = fundamentals.ForwardPe;
+            Eps = fundamentals.Eps;
+            DividendInfo = fundamentals.DividendInfo;
+            ExDividendDate = fundamentals.ExDividendDate;
+            Revenue = fundamentals.Revenue;
+            NetIncome = fundamentals.NetIncome;
+            SharesOutstanding = fundamentals.SharesOutstanding;
+            Beta = fundamentals.Beta;
+            PriceTarget = fundamentals.PriceTarget;
+            Sector = fundamentals.Sector;
+            Employees = fundamentals.Employees;
+            IpoDate = fundamentals.IpoDate;
+            FundamentalSourceNote = "Datos de mercado/cotización vía Yahoo Finance. Datos fundamentales (PER, capitalización, dividendo, etc.) vía StockAnalysis.com — fuente pública de referencia, no oficial.";
+        }
+        else if (HasFundamentalData)
+        {
+            FundamentalSourceNote = "Solo hay disponibles datos básicos de mercado (rango 52 semanas, bolsa, divisa). Los datos fundamentales detallados (PER, capitalización, dividendo...) no están disponibles públicamente para este tipo de instrumento o símbolo.";
+        }
     }
 
-    private void ComputeResumenTecnico(List<decimal> closes, List<long> volumes, List<decimal?> sma20, List<decimal?> sma50, List<decimal?> rsi)
+    private void ComputeResumenTecnico(List<decimal> closes, List<decimal> highs, List<decimal> lows, List<long> volumes, List<decimal?> sma20, List<decimal?> sma50, List<decimal?> rsi)
     {
         LastPrice = closes.Count > 0 ? closes[^1] : null;
         LastSma20 = sma20.LastOrDefault(v => v.HasValue);
         LastSma50 = sma50.LastOrDefault(v => v.HasValue);
+
+        var sma200 = ComputeSma(closes, 200);
+        LastSma200 = sma200.LastOrDefault(v => v.HasValue);
         LastRsi = rsi.LastOrDefault(v => v.HasValue);
 
         if (LastPrice.HasValue && LastSma20.HasValue && LastSma50.HasValue)
@@ -141,6 +208,24 @@ public class HistoricoModel : PageModel
                 TendenciaTexto = "Lateral / mixta";
                 TendenciaCss = "text-muted";
             }
+        }
+
+        if (LastPrice.HasValue && LastSma200.HasValue)
+        {
+            if (LastPrice.Value > LastSma200.Value)
+            {
+                TendenciaLargoPlazoTexto = $"Alcista (precio sobre SMA 200: {LastSma200.Value:#,##0.00})";
+                TendenciaLargoPlazoCss = "text-success";
+            }
+            else
+            {
+                TendenciaLargoPlazoTexto = $"Bajista (precio bajo SMA 200: {LastSma200.Value:#,##0.00})";
+                TendenciaLargoPlazoCss = "text-danger";
+            }
+        }
+        else
+        {
+            TendenciaLargoPlazoTexto = "Requiere más histórico (usa Año o Desde el principio)";
         }
 
         if (LastRsi.HasValue)
@@ -176,6 +261,136 @@ public class HistoricoModel : PageModel
         if (volumes.Count > 0)
         {
             VolumenMedio = (long)volumes.Average();
+
+            if (VolumenMedio.Value > 0)
+            {
+                var ultimoVolumen = volumes[^1];
+                var ratio = (decimal)ultimoVolumen / VolumenMedio.Value * 100m;
+                VolumenRelativoTexto = $"{ratio:0}% del medio ({ultimoVolumen:#,##0})";
+                VolumenRelativoCss = ratio >= 150 ? "text-success" : ratio <= 50 ? "text-danger" : "text-muted";
+            }
+        }
+
+        // MACD (12, 26, 9)
+        var ema12 = ComputeEma(closes, 12);
+        var ema26 = ComputeEma(closes, 26);
+        var macdLine = new List<decimal?>(closes.Count);
+        for (var i = 0; i < closes.Count; i++)
+        {
+            macdLine.Add(ema12[i].HasValue && ema26[i].HasValue ? ema12[i]!.Value - ema26[i]!.Value : null);
+        }
+
+        var macdValues = macdLine.Where(v => v.HasValue).Select(v => v!.Value).ToList();
+        var signalLine = ComputeEma(macdValues, 9);
+        var lastMacd = macdLine.LastOrDefault(v => v.HasValue);
+        var lastSignal = signalLine.Count > 0 ? signalLine.LastOrDefault(v => v.HasValue) : null;
+
+        if (lastMacd.HasValue && lastSignal.HasValue)
+        {
+            var histograma = lastMacd.Value - lastSignal.Value;
+            var esAlcista = histograma > 0;
+            MacdTexto = $"{lastMacd.Value:0.00} vs señal {lastSignal.Value:0.00} · {(esAlcista ? "Cruce alcista" : "Cruce bajista")}";
+            MacdCss = esAlcista ? "text-success" : "text-danger";
+        }
+
+        // Bandas de Bollinger (20, 2 desviaciones típicas)
+        var bollingerMedia = sma20.LastOrDefault(v => v.HasValue);
+        if (bollingerMedia.HasValue && closes.Count >= 20)
+        {
+            var ultimos20 = closes.Skip(closes.Count - 20).ToList();
+            var media = ultimos20.Average();
+            var varianza = ultimos20.Select(c => (c - media) * (c - media)).Sum() / ultimos20.Count;
+            var desviacion = (decimal)Math.Sqrt((double)varianza);
+            var bandaSuperior = media + (2 * desviacion);
+            var bandaInferior = media - (2 * desviacion);
+
+            var posicion = LastPrice.HasValue
+                ? (LastPrice.Value >= bandaSuperior ? "Sobre banda superior (posible sobrecompra)"
+                    : LastPrice.Value <= bandaInferior ? "Bajo banda inferior (posible sobreventa)"
+                    : "Dentro de las bandas")
+                : "N/D";
+
+            BollingerTexto = $"{bandaInferior:#,##0.00} - {bandaSuperior:#,##0.00} · {posicion}";
+        }
+
+        // Estocástico (14, 3)
+        if (closes.Count >= 14 && highs.Count == closes.Count && lows.Count == closes.Count)
+        {
+            var estocasticoK = ComputeStochasticK(highs, lows, closes, 14);
+            var kSuavizado = ComputeSma(estocasticoK.Where(v => v.HasValue).Select(v => v!.Value).ToList(), 3);
+            var lastK = estocasticoK.LastOrDefault(v => v.HasValue);
+            var lastD = kSuavizado.Count > 0 ? kSuavizado.LastOrDefault(v => v.HasValue) : null;
+
+            if (lastK.HasValue)
+            {
+                var dTexto = lastD.HasValue ? $" / %D {lastD.Value:0.0}" : string.Empty;
+                if (lastK.Value >= 80)
+                {
+                    EstocasticoTexto = $"%K {lastK.Value:0.0}{dTexto} · Sobrecompra";
+                    EstocasticoCss = "text-danger";
+                }
+                else if (lastK.Value <= 20)
+                {
+                    EstocasticoTexto = $"%K {lastK.Value:0.0}{dTexto} · Sobreventa";
+                    EstocasticoCss = "text-success";
+                }
+                else
+                {
+                    EstocasticoTexto = $"%K {lastK.Value:0.0}{dTexto} · Neutral";
+                    EstocasticoCss = "text-muted";
+                }
+            }
+
+            // Williams %R (14)
+            var williamsR = ComputeWilliamsR(highs, lows, closes, 14);
+            var lastWilliams = williamsR.LastOrDefault(v => v.HasValue);
+            if (lastWilliams.HasValue)
+            {
+                if (lastWilliams.Value >= -20)
+                {
+                    WilliamsRTexto = $"{lastWilliams.Value:0.0} · Sobrecompra";
+                    WilliamsRCss = "text-danger";
+                }
+                else if (lastWilliams.Value <= -80)
+                {
+                    WilliamsRTexto = $"{lastWilliams.Value:0.0} · Sobreventa";
+                    WilliamsRCss = "text-success";
+                }
+                else
+                {
+                    WilliamsRTexto = $"{lastWilliams.Value:0.0} · Neutral";
+                    WilliamsRCss = "text-muted";
+                }
+            }
+
+            // ATR (14) - volatilidad media
+            var atr = ComputeAtr(highs, lows, closes, 14);
+            var lastAtr = atr.LastOrDefault(v => v.HasValue);
+            if (lastAtr.HasValue)
+            {
+                var atrPct = LastPrice.HasValue && LastPrice.Value != 0 ? lastAtr.Value / LastPrice.Value * 100m : (decimal?)null;
+                AtrTexto = atrPct.HasValue ? $"{lastAtr.Value:0.00} ({atrPct.Value:0.0}% del precio)" : $"{lastAtr.Value:0.00}";
+            }
+        }
+
+        // Momentum / Rate of Change (10 periodos)
+        const int periodoMomentum = 10;
+        if (closes.Count > periodoMomentum && closes[^(periodoMomentum + 1)] != 0)
+        {
+            var referencia = closes[^(periodoMomentum + 1)];
+            var roc = (closes[^1] - referencia) / referencia * 100m;
+            MomentumTexto = $"{roc:+0.00;-0.00}%";
+            MomentumCss = roc >= 0 ? "text-success" : "text-danger";
+        }
+
+        // Soporte / resistencia recientes (mínimo y máximo de las últimas 20 sesiones)
+        const int periodoSoporte = 20;
+        if (highs.Count > 0 && lows.Count > 0)
+        {
+            var n = Math.Min(periodoSoporte, closes.Count);
+            var resistencia = highs.Skip(highs.Count - n).Max();
+            var soporte = lows.Skip(lows.Count - n).Min();
+            SoporteResistenciaTexto = $"Soporte {soporte:#,##0.00} · Resistencia {resistencia:#,##0.00}";
         }
     }
 
@@ -251,6 +466,121 @@ public class HistoricoModel : PageModel
                 var rs = avgGain / avgLoss;
                 result.Add(100m - (100m / (1m + rs)));
             }
+        }
+
+        return result;
+    }
+
+    private static List<decimal?> ComputeEma(List<decimal> values, int period)
+    {
+        var result = new List<decimal?>(values.Count);
+        if (values.Count == 0)
+        {
+            return result;
+        }
+
+        var multiplicador = 2m / (period + 1);
+        decimal? emaAnterior = null;
+
+        for (var i = 0; i < values.Count; i++)
+        {
+            if (i < period - 1)
+            {
+                result.Add(null);
+                continue;
+            }
+
+            if (i == period - 1)
+            {
+                emaAnterior = values.Take(period).Average();
+                result.Add(emaAnterior);
+                continue;
+            }
+
+            emaAnterior = ((values[i] - emaAnterior!.Value) * multiplicador) + emaAnterior.Value;
+            result.Add(emaAnterior);
+        }
+
+        return result;
+    }
+
+    private static List<decimal?> ComputeStochasticK(List<decimal> highs, List<decimal> lows, List<decimal> closes, int period)
+    {
+        var result = new List<decimal?>(closes.Count);
+        for (var i = 0; i < closes.Count; i++)
+        {
+            if (i < period - 1)
+            {
+                result.Add(null);
+                continue;
+            }
+
+            var maxHigh = highs.Skip(i - period + 1).Take(period).Max();
+            var minLow = lows.Skip(i - period + 1).Take(period).Min();
+            var rango = maxHigh - minLow;
+            result.Add(rango == 0 ? 50m : (closes[i] - minLow) / rango * 100m);
+        }
+
+        return result;
+    }
+
+    private static List<decimal?> ComputeWilliamsR(List<decimal> highs, List<decimal> lows, List<decimal> closes, int period)
+    {
+        var result = new List<decimal?>(closes.Count);
+        for (var i = 0; i < closes.Count; i++)
+        {
+            if (i < period - 1)
+            {
+                result.Add(null);
+                continue;
+            }
+
+            var maxHigh = highs.Skip(i - period + 1).Take(period).Max();
+            var minLow = lows.Skip(i - period + 1).Take(period).Min();
+            var rango = maxHigh - minLow;
+            result.Add(rango == 0 ? -50m : (maxHigh - closes[i]) / rango * -100m);
+        }
+
+        return result;
+    }
+
+    private static List<decimal?> ComputeAtr(List<decimal> highs, List<decimal> lows, List<decimal> closes, int period)
+    {
+        var trueRanges = new List<decimal>(closes.Count);
+        for (var i = 0; i < closes.Count; i++)
+        {
+            if (i == 0)
+            {
+                trueRanges.Add(highs[i] - lows[i]);
+                continue;
+            }
+
+            var rangoActual = highs[i] - lows[i];
+            var altoVsCierrePrevio = Math.Abs(highs[i] - closes[i - 1]);
+            var bajoVsCierrePrevio = Math.Abs(lows[i] - closes[i - 1]);
+            trueRanges.Add(Math.Max(rangoActual, Math.Max(altoVsCierrePrevio, bajoVsCierrePrevio)));
+        }
+
+        var result = new List<decimal?>(closes.Count);
+        decimal? atrAnterior = null;
+
+        for (var i = 0; i < trueRanges.Count; i++)
+        {
+            if (i < period - 1)
+            {
+                result.Add(null);
+                continue;
+            }
+
+            if (i == period - 1)
+            {
+                atrAnterior = trueRanges.Take(period).Average();
+                result.Add(atrAnterior);
+                continue;
+            }
+
+            atrAnterior = ((atrAnterior!.Value * (period - 1)) + trueRanges[i]) / period;
+            result.Add(atrAnterior);
         }
 
         return result;

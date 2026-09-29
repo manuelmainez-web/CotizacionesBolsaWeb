@@ -24,9 +24,12 @@
                 </div>
                 <div class="topbar-right">
                     <div id="current-datetime" class="topbar-datetime"></div>
-                    <button type="button" id="btn-refresh-page" class="btn-refresh-page" title="Actualizar">
-                        <span class="btn-refresh-page-icon">&#8635;</span> Actualizar
-                    </button>
+                    @if (ViewData["HideRefreshButton"] is not true)
+                    {
+                        <button type="button" id="btn-refresh-page" class="btn-refresh-page" title="Actualizar">
+                            <span class="btn-refresh-page-icon">&#8635;</span> Actualizar
+                        </button>
+                    }
                 </div>
             </div>
         </div>

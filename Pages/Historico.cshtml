@@ -2,6 +2,7 @@
 @model CotizacionesBolsaWeb.Pages.HistoricoModel
 @{
     ViewData["Title"] = "Histórico de cotización";
+    ViewData["HideRefreshButton"] = true;
 }
 
 <div class="market-shell">
@@ -12,154 +13,293 @@
         </div>
     </div>
 
-    <div class="charts-row">
-        <div class="market-panel chart-panel-half">
-            <div class="panel-head panel-head-row">
-                <span>Cotización histórica</span>
-                <div class="range-buttons">
-                    <a class="mini-button @(Model.Range == "1d" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=1d">Día</a>
-                    <a class="mini-button @(Model.Range == "5d" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=5d">Semana</a>
-                    <a class="mini-button @(Model.Range == "1mo" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=1mo">Mes</a>
-                    <a class="mini-button @(Model.Range == "1y" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=1y">Año</a>
-                    <a class="mini-button @(Model.Range == "max" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=max">Desde el principio</a>
-                </div>
-            </div>
-            <div class="chart-wrap">
-                @if (Model.HasData)
-                {
-                    <canvas id="historyChart"></canvas>
-                }
-                else
-                {
-                    <p class="empty-state-cell">No hay datos históricos disponibles para este valor y periodo.</p>
-                }
-            </div>
+    @if (Model.HasData)
+    {
+        <div class="historico-tabs" role="tablist">
+            <button type="button" class="historico-tab is-active" data-tab-target="tab-grafica" role="tab" aria-selected="true">Gráfica</button>
+            <button type="button" class="historico-tab" data-tab-target="tab-tecnico" role="tab" aria-selected="false">Análisis técnico</button>
+            <button type="button" class="historico-tab" data-tab-target="tab-fundamental" role="tab" aria-selected="false">Análisis fundamental</button>
         </div>
+    }
 
-        @if (Model.HasData)
-        {
+    <div class="historico-tab-panel is-active" id="tab-grafica">
+        <div class="charts-row">
             <div class="market-panel chart-panel-half">
                 <div class="panel-head panel-head-row">
-                    <span>Análisis técnico</span>
-                    <div class="chart-controls">
-                        <select id="chart-type-select" class="mini-select" aria-label="Tipo de gráfico">
-                            <option value="candlestick">Velas</option>
-                            <option value="ohlc">Barras</option>
-                            <option value="line">Línea</option>
-                            <option value="area">Área</option>
-                        </select>
-                        <div class="indicator-dropdown">
-                            <button type="button" class="mini-button" id="indicator-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
-                                Indicadores <span class="indicator-dropdown-arrow">▾</span>
-                            </button>
-                            <div class="indicator-dropdown-menu" id="indicator-dropdown-menu" hidden>
-                                <label class="indicator-option">
-                                    <input type="checkbox" data-indicator="sma20" checked>
-                                    <span>SMA 20</span>
-                                </label>
-                                <label class="indicator-option">
-                                    <input type="checkbox" data-indicator="sma50" checked>
-                                    <span>SMA 50</span>
-                                </label>
-                                <label class="indicator-option">
-                                    <input type="checkbox" data-indicator="volumen">
-                                    <span>Volumen</span>
-                                </label>
-                                <label class="indicator-option">
-                                    <input type="checkbox" data-indicator="rsi">
-                                    <span>RSI (14)</span>
-                                </label>
-                            </div>
-                        </div>
+                    <span>Cotización histórica</span>
+                    <div class="range-buttons">
+                        <a class="mini-button @(Model.Range == "1d" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=1d">Día</a>
+                        <a class="mini-button @(Model.Range == "5d" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=5d">Semana</a>
+                        <a class="mini-button @(Model.Range == "1mo" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=1mo">Mes</a>
+                        <a class="mini-button @(Model.Range == "1y" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=1y">Año</a>
+                        <a class="mini-button @(Model.Range == "max" ? "range-active" : "")" href="/Historico?symbol=@Model.Symbol&name=@Model.Name&range=max">Desde el principio</a>
                     </div>
                 </div>
                 <div class="chart-wrap">
-                    <canvas id="candlestickChart"></canvas>
-                </div>
-                <div class="chart-sub" id="volume-chart-wrap" hidden>
-                    <div class="chart-sub-label">Volumen</div>
-                    <div class="chart-sub-canvas-wrap">
-                        <canvas id="volumeChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-sub" id="rsi-chart-wrap" hidden>
-                    <div class="chart-sub-label">RSI (14)</div>
-                    <div class="chart-sub-canvas-wrap chart-sub-canvas-wrap-rsi">
-                        <canvas id="rsiChart"></canvas>
-                    </div>
+                    @if (Model.HasData)
+                    {
+                        <canvas id="historyChart"></canvas>
+                    }
+                    else
+                    {
+                        <p class="empty-state-cell">No hay datos históricos disponibles para este valor y periodo.</p>
+                    }
                 </div>
             </div>
-        }
+
+            @if (Model.HasData)
+            {
+                <div class="market-panel chart-panel-half">
+                    <div class="panel-head panel-head-row">
+                        <span>Análisis técnico</span>
+                        <div class="chart-controls">
+                            <select id="chart-type-select" class="mini-select" aria-label="Tipo de gráfico">
+                                <option value="candlestick">Velas</option>
+                                <option value="ohlc">Barras</option>
+                                <option value="line">Línea</option>
+                                <option value="area">Área</option>
+                            </select>
+                            <div class="indicator-dropdown">
+                                <button type="button" class="mini-button" id="indicator-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                                    Indicadores <span class="indicator-dropdown-arrow">▾</span>
+                                </button>
+                                <div class="indicator-dropdown-menu" id="indicator-dropdown-menu" hidden>
+                                    <label class="indicator-option">
+                                        <input type="checkbox" data-indicator="sma20" checked>
+                                        <span>SMA 20</span>
+                                    </label>
+                                    <label class="indicator-option">
+                                        <input type="checkbox" data-indicator="sma50" checked>
+                                        <span>SMA 50</span>
+                                    </label>
+                                    <label class="indicator-option">
+                                        <input type="checkbox" data-indicator="volumen">
+                                        <span>Volumen</span>
+                                    </label>
+                                    <label class="indicator-option">
+                                        <input type="checkbox" data-indicator="rsi">
+                                        <span>RSI (14)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="candlestickChart"></canvas>
+                    </div>
+                    <div class="chart-sub" id="volume-chart-wrap" hidden>
+                        <div class="chart-sub-label">Volumen</div>
+                        <div class="chart-sub-canvas-wrap">
+                            <canvas id="volumeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-sub" id="rsi-chart-wrap" hidden>
+                        <div class="chart-sub-label">RSI (14)</div>
+                        <div class="chart-sub-canvas-wrap chart-sub-canvas-wrap-rsi">
+                            <canvas id="rsiChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
 
     @if (Model.HasData)
     {
-        <div class="market-panel mt-4">
-            <div class="panel-head">
-                <span>ANÁLISIS TÉCNICO</span>
-            </div>
-            <div class="summary-strip">
-                <div class="summary-box">
-                    <span>Tendencia</span>
-                    <strong class="@Model.TendenciaCss">@Model.TendenciaTexto</strong>
+        <div class="historico-tab-panel" id="tab-tecnico" hidden>
+            <div class="market-panel">
+                <div class="summary-strip summary-strip-wide">
+                    <div class="summary-box">
+                        <span>Tendencia (SMA 20/50)</span>
+                        <strong class="@Model.TendenciaCss">@Model.TendenciaTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Tendencia largo plazo (SMA 200)</span>
+                        <strong class="@Model.TendenciaLargoPlazoCss">@Model.TendenciaLargoPlazoTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>RSI (14)</span>
+                        <strong class="@Model.RsiCss">@Model.RsiTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>MACD (12,26,9)</span>
+                        <strong class="@Model.MacdCss">@Model.MacdTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Estocástico (14,3)</span>
+                        <strong class="@Model.EstocasticoCss">@Model.EstocasticoTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Williams %R (14)</span>
+                        <strong class="@Model.WilliamsRCss">@Model.WilliamsRTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Bandas de Bollinger (20,2)</span>
+                        <strong>@Model.BollingerTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Momentum / ROC (10)</span>
+                        <strong class="@Model.MomentumCss">@Model.MomentumTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>ATR (14) · Volatilidad</span>
+                        <strong>@Model.AtrTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Volumen actual vs. medio</span>
+                        <strong class="@Model.VolumenRelativoCss">@Model.VolumenRelativoTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Soporte / Resistencia recientes</span>
+                        <strong>@Model.SoporteResistenciaTexto</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Variación del periodo</span>
+                        <strong class="@(Model.VariacionPeriodoPct is >= 0 ? "text-success" : "text-danger")">@(Model.VariacionPeriodoPct.HasValue ? $"{Model.VariacionPeriodoPct.Value:+0.00;-0.00}%" : "N/D")</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>Máximo / Mínimo del periodo</span>
+                        <strong>@(Model.PeriodoMax.HasValue ? Model.PeriodoMax.Value.ToString("#,##0.00") : "N/D") / @(Model.PeriodoMin.HasValue ? Model.PeriodoMin.Value.ToString("#,##0.00") : "N/D")</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span>SMA 20 / SMA 50 / SMA 200</span>
+                        <strong>@(Model.LastSma20.HasValue ? Model.LastSma20.Value.ToString("#,##0.00") : "N/D") / @(Model.LastSma50.HasValue ? Model.LastSma50.Value.ToString("#,##0.00") : "N/D") / @(Model.LastSma200.HasValue ? Model.LastSma200.Value.ToString("#,##0.00") : "N/D")</strong>
+                    </div>
                 </div>
-                <div class="summary-box">
-                    <span>RSI (14)</span>
-                    <strong class="@Model.RsiCss">@Model.RsiTexto</strong>
-                </div>
-                <div class="summary-box">
-                    <span>Variación del periodo</span>
-                    <strong class="@(Model.VariacionPeriodoPct is >= 0 ? "text-success" : "text-danger")">@(Model.VariacionPeriodoPct.HasValue ? $"{Model.VariacionPeriodoPct.Value:+0.00;-0.00}%" : "N/D")</strong>
-                </div>
-                <div class="summary-box">
-                    <span>Máximo del periodo</span>
-                    <strong>@(Model.PeriodoMax.HasValue ? Model.PeriodoMax.Value.ToString("#,##0.00") : "N/D")</strong>
-                </div>
-                <div class="summary-box">
-                    <span>Mínimo del periodo</span>
-                    <strong>@(Model.PeriodoMin.HasValue ? Model.PeriodoMin.Value.ToString("#,##0.00") : "N/D")</strong>
-                </div>
-                <div class="summary-box">
-                    <span>Volumen medio</span>
-                    <strong>@(Model.VolumenMedio.HasValue ? Model.VolumenMedio.Value.ToString("#,##0") : "N/D")</strong>
-                </div>
-                <div class="summary-box">
-                    <span>SMA 20 / SMA 50</span>
-                    <strong>@(Model.LastSma20.HasValue ? Model.LastSma20.Value.ToString("#,##0.00") : "N/D") / @(Model.LastSma50.HasValue ? Model.LastSma50.Value.ToString("#,##0.00") : "N/D")</strong>
-                </div>
+                <p class="fundamental-note">Indicadores calculados a partir de los propios datos históricos del periodo seleccionado (@Model.Range). Amplía el rango (Año / Desde el principio) para obtener SMA 200, MACD y Bollinger más fiables.</p>
             </div>
         </div>
 
-        <div class="market-panel mt-4">
-            <div class="panel-head">
-                <span>ANÁLISIS FUNDAMENTAL</span>
+        <div class="historico-tab-panel" id="tab-fundamental" hidden>
+            <div class="market-panel">
+                @if (Model.HasFundamentalData)
+                {
+                    <div class="summary-strip summary-strip-wide">
+                        @if (!string.IsNullOrWhiteSpace(Model.MarketCap))
+                        {
+                            <div class="summary-box">
+                                <span>Capitalización</span>
+                                <strong>@Model.MarketCap</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.PeRatio))
+                        {
+                            <div class="summary-box">
+                                <span>PER (histórico)</span>
+                                <strong>@Model.PeRatio</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.ForwardPe))
+                        {
+                            <div class="summary-box">
+                                <span>PER (futuro)</span>
+                                <strong>@Model.ForwardPe</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.Eps))
+                        {
+                            <div class="summary-box">
+                                <span>BPA (EPS)</span>
+                                <strong>@Model.Eps</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.DividendInfo))
+                        {
+                            <div class="summary-box">
+                                <span>Dividendo / Rentabilidad</span>
+                                <strong>@Model.DividendInfo</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.ExDividendDate))
+                        {
+                            <div class="summary-box">
+                                <span>Fecha ex-dividendo</span>
+                                <strong>@Model.ExDividendDate</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.Revenue))
+                        {
+                            <div class="summary-box">
+                                <span>Ingresos (ttm)</span>
+                                <strong>@Model.Revenue</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.NetIncome))
+                        {
+                            <div class="summary-box">
+                                <span>Beneficio neto (ttm)</span>
+                                <strong>@Model.NetIncome</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.SharesOutstanding))
+                        {
+                            <div class="summary-box">
+                                <span>Acciones en circulación</span>
+                                <strong>@Model.SharesOutstanding</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.Beta))
+                        {
+                            <div class="summary-box">
+                                <span>Beta</span>
+                                <strong>@Model.Beta</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.PriceTarget))
+                        {
+                            <div class="summary-box">
+                                <span>Precio objetivo (analistas)</span>
+                                <strong>@Model.PriceTarget</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.Sector))
+                        {
+                            <div class="summary-box">
+                                <span>Sector</span>
+                                <strong>@Model.Sector</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.Employees))
+                        {
+                            <div class="summary-box">
+                                <span>Empleados</span>
+                                <strong>@Model.Employees</strong>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.IpoDate))
+                        {
+                            <div class="summary-box">
+                                <span>Fecha de salida a bolsa</span>
+                                <strong>@Model.IpoDate</strong>
+                            </div>
+                        }
+                        <div class="summary-box">
+                            <span>Rango 52 semanas</span>
+                            <strong>@(Model.FiftyTwoWeekLow.HasValue ? Model.FiftyTwoWeekLow.Value.ToString("#,##0.00") : "N/D") - @(Model.FiftyTwoWeekHigh.HasValue ? Model.FiftyTwoWeekHigh.Value.ToString("#,##0.00") : "N/D")</strong>
+                        </div>
+                        <div class="summary-box">
+                            <span>Mercado / Bolsa</span>
+                            <strong>@(string.IsNullOrWhiteSpace(Model.Exchange) ? "N/D" : Model.Exchange)</strong>
+                        </div>
+                        <div class="summary-box">
+                            <span>Divisa</span>
+                            <strong>@(string.IsNullOrWhiteSpace(Model.Currency) ? "N/D" : Model.Currency)</strong>
+                        </div>
+                        <div class="summary-box">
+                            <span>Tipo de instrumento</span>
+                            <strong>@(string.IsNullOrWhiteSpace(Model.InstrumentTypeTexto) ? "N/D" : Model.InstrumentTypeTexto)</strong>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.FundamentalSourceNote))
+                    {
+                        <p class="fundamental-note">@Model.FundamentalSourceNote</p>
+                    }
+                }
+                else
+                {
+                    <p class="empty-state-cell">No hay datos fundamentales disponibles para este valor.</p>
+                }
             </div>
-            @if (Model.HasFundamentalData)
-            {
-                <div class="summary-strip">
-                    <div class="summary-box">
-                        <span>Rango 52 semanas</span>
-                        <strong>@(Model.FiftyTwoWeekLow.HasValue ? Model.FiftyTwoWeekLow.Value.ToString("#,##0.00") : "N/D") - @(Model.FiftyTwoWeekHigh.HasValue ? Model.FiftyTwoWeekHigh.Value.ToString("#,##0.00") : "N/D")</strong>
-                    </div>
-                    <div class="summary-box">
-                        <span>Mercado / Bolsa</span>
-                        <strong>@(string.IsNullOrWhiteSpace(Model.Exchange) ? "N/D" : Model.Exchange)</strong>
-                    </div>
-                    <div class="summary-box">
-                        <span>Divisa</span>
-                        <strong>@(string.IsNullOrWhiteSpace(Model.Currency) ? "N/D" : Model.Currency)</strong>
-                    </div>
-                    <div class="summary-box">
-                        <span>Tipo de instrumento</span>
-                        <strong>@(string.IsNullOrWhiteSpace(Model.InstrumentTypeTexto) ? "N/D" : Model.InstrumentTypeTexto)</strong>
-                    </div>
-                </div>
-                <p class="fundamental-note">Datos de referencia obtenidos de fuentes públicas. Métricas como PER, capitalización o dividendo no están disponibles sin autenticación en la fuente de datos actual.</p>
-            }
-            else
-            {
-                <p class="empty-state-cell">No hay datos fundamentales disponibles para este valor.</p>
-            }
         </div>
     }
 </div>
@@ -453,6 +593,29 @@
         document.addEventListener('click', function () {
             menuIndicadores.hidden = true;
             toggleIndicadores.setAttribute('aria-expanded', 'false');
+        });
+
+        // Pestañas Gráfica / Análisis técnico / Análisis fundamental
+        document.querySelectorAll('.historico-tab').forEach(function (boton) {
+            boton.addEventListener('click', function () {
+                document.querySelectorAll('.historico-tab').forEach(function (b) {
+                    b.classList.remove('is-active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                document.querySelectorAll('.historico-tab-panel').forEach(function (panel) {
+                    panel.hidden = true;
+                    panel.classList.remove('is-active');
+                });
+
+                boton.classList.add('is-active');
+                boton.setAttribute('aria-selected', 'true');
+
+                const destino = document.getElementById(boton.getAttribute('data-tab-target'));
+                if (destino) {
+                    destino.hidden = false;
+                    destino.classList.add('is-active');
+                }
+            });
         });
     </script>
 }
