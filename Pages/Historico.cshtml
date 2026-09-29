@@ -9,7 +9,10 @@
 <div class="market-shell">
     <div class="portfolio-header">
         <div class="title-block">
-            <h1 class="mb-1">@Model.Name</h1>
+            <h1 class="mb-1 name-with-flag">
+                <img class="flag-badge flag-badge-title" src="@Model.FlagUrl" alt="@Model.CountryCode" title="@Model.CountryCode" />
+                @Model.Name
+            </h1>
             <p class="portfolio-subtitle">@Model.Symbol · Progresión de la cotización en el tiempo</p>
         </div>
     </div>

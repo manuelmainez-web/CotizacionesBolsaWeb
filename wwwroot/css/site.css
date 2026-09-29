@@ -1090,6 +1090,12 @@ body.wco-active .topbar-datetime {
   flex-shrink: 0;
 }
 
+.flag-badge-title {
+  width: 40px;
+  height: 29px;
+  border-radius: 4px;
+}
+
 .price-cell {
   font-weight: 700;
   color: #f8fafc;

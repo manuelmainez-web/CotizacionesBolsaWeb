@@ -14,6 +14,8 @@ public class HistoricoModel : PageModel
     public string Name { get; private set; } = string.Empty;
     public string Range { get; private set; } = "1mo";
     public bool HasData { get; private set; }
+    public string? CountryCode { get; private set; }
+    public string FlagUrl => Quote.GetFlagUrl(CountryCode);
 
     // Etiquetas de "Rentabilidad por periodo" que corresponden al periodo seleccionado en el desplegable
     // de "Cotización histórica" (Día/Semana/Mes/Año/Desde el principio), para resaltar las casillas a juego.
@@ -106,11 +108,12 @@ public class HistoricoModel : PageModel
 
     private readonly StockAnalysisService _fundamentalService = new();
 
-    public async Task OnGetAsync(string symbol, string? name, string? range)
+    public async Task OnGetAsync(string symbol, string? name, string? range, string? countryCode)
     {
         Symbol = symbol ?? string.Empty;
         Name = string.IsNullOrWhiteSpace(name) ? Symbol : name;
         Range = string.IsNullOrWhiteSpace(range) ? "1mo" : range;
+        CountryCode = countryCode;
 
         var (yahooRange, yahooInterval, dateFormat) = Range switch
         {

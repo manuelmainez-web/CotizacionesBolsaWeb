@@ -55,7 +55,9 @@ public sealed class Quote
     public string TrendCssClass => PercentChange.HasValue && PercentChange.Value >= 0 ? "text-success" : "text-danger";
     public bool IsMarketOpen => ComputeMarketOpen(CountryCode, Symbol);
     public string MarketStatusLabel => IsMarketOpen ? "Mercado abierto" : "Mercado cerrado";
-    public string FlagUrl => string.IsNullOrWhiteSpace(CountryCode) ? "https://flagcdn.com/w40/gb.png" : CountryCode switch
+    public string FlagUrl => GetFlagUrl(CountryCode);
+
+    public static string GetFlagUrl(string? countryCode) => string.IsNullOrWhiteSpace(countryCode) ? "https://flagcdn.com/w40/gb.png" : countryCode switch
     {
         "ES" => "https://flagcdn.com/w40/es.png",
         "DE" => "https://flagcdn.com/w40/de.png",
