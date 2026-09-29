@@ -614,6 +614,37 @@ body.wco-active .topbar-datetime {
   overflow-wrap: break-word;
 }
 
+.rentabilidad-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+  padding: 18px;
+}
+
+.rentabilidad-box {
+  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.rentabilidad-box span {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #a9bacd;
+  margin-bottom: 6px;
+}
+
+.rentabilidad-box strong {
+  font-size: 1.1rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .mini-select {
   border: 1px solid rgba(148, 163, 184, 0.24);
   background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);

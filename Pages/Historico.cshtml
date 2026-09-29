@@ -102,6 +102,26 @@
                 </div>
             }
         </div>
+
+        @if (Model.HasData && Model.RentabilidadPeriodos.Count > 0)
+        {
+            <div class="market-panel mt-4">
+                <div class="panel-head">
+                    <span>Rentabilidad por periodo</span>
+                </div>
+                <div class="rentabilidad-strip">
+                    @foreach (var periodo in Model.RentabilidadPeriodos)
+                    {
+                        <div class="rentabilidad-box">
+                            <span>@periodo.Etiqueta</span>
+                            <strong class="@(periodo.Porcentaje is null ? "text-muted" : periodo.Porcentaje >= 0 ? "text-success" : "text-danger")">
+                                @(periodo.Porcentaje.HasValue ? $"{periodo.Porcentaje.Value:+0.00;-0.00}%" : "N/D")
+                            </strong>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     </div>
 
     @if (Model.HasData)

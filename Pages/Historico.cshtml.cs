@@ -87,6 +87,9 @@ public class HistoricoModel : PageModel
     public string? IpoDate { get; private set; }
     public string? FundamentalSourceNote { get; private set; }
 
+    // Rentabilidad desglosada por periodo (independiente del rango seleccionado para la gráfica)
+    public List<RentabilidadPeriodo> RentabilidadPeriodos { get; private set; } = new();
+
     private readonly StockAnalysisService _fundamentalService = new();
 
     public async Task OnGetAsync(string symbol, string? name, string? range)
@@ -140,6 +143,19 @@ public class HistoricoModel : PageModel
         RsiJson = JsonSerializer.Serialize(rsi);
 
         ComputeResumenTecnico(closes, highs, lows, volumes, sma20, sma50, rsi);
+
+        // Rentabilidad desglosada por periodo (1d/1sem/1mes/3m/6m/1a/5a/desde el principio): se calcula
+        // sobre históricos propios, independientes del rango elegido para la gráfica, para que sean fiables
+        // aunque el usuario esté viendo "Día". Yahoo Finance downsamplea a velas MENSUALES cuando se pide
+        // range=max en símbolos con histórico muy largo (ej. acciones desde los 80), lo que hacía que
+        // "1 semana"/"1 mes"/"3 meses" salieran mal (todos "enganchaban" al mismo punto mensual más cercano).
+        // Por eso se piden dos históricos: uno de 10 años en diario (fiable hasta 5 años) y el "max" en
+        // mensual solo para el primer punto disponible (inicio real de cotización).
+        var historialDiario10y = await _service.GetHistoryAsync(Symbol, "10y", "1d");
+        var historialMensualCompleto = await _service.GetHistoryAsync(Symbol, "max", "1mo");
+        RentabilidadPeriodos = ComputeRentabilidadPeriodos(
+            historialDiario10y.Count > 0 ? historialDiario10y : points,
+            historialMensualCompleto);
 
         // Fundamentales: Yahoo Finance (rango 52 semanas / mercado / divisa) siempre que se pueda,
         // ampliados con StockAnalysisService (PER, capitalización, dividendo, etc.) para acciones.
@@ -702,4 +718,48 @@ public class HistoricoModel : PageModel
 
         return result;
     }
+
+    private static List<RentabilidadPeriodo> ComputeRentabilidadPeriodos(
+        List<(DateTimeOffset Date, decimal Open, decimal High, decimal Low, decimal Close, long Volume)> historialReciente,
+        List<(DateTimeOffset Date, decimal Open, decimal High, decimal Low, decimal Close, long Volume)> historialCompleto)
+    {
+        var resultado = new List<RentabilidadPeriodo>();
+        if (historialReciente.Count == 0)
+        {
+            return resultado;
+        }
+
+        var ultimo = historialReciente[^1];
+        var ahora = ultimo.Date;
+
+        decimal? PctDesde(DateTimeOffset limite)
+        {
+            var referencia = historialReciente.LastOrDefault(p => p.Date <= limite);
+            if (referencia.Date == default || referencia.Close == 0)
+            {
+                return null;
+            }
+
+            return (ultimo.Close - referencia.Close) / referencia.Close * 100m;
+        }
+
+        decimal? rentabilidad1Dia = historialReciente.Count >= 2 && historialReciente[^2].Close != 0
+            ? (ultimo.Close - historialReciente[^2].Close) / historialReciente[^2].Close * 100m
+            : null;
+
+        resultado.Add(new RentabilidadPeriodo("1 día", rentabilidad1Dia));
+        resultado.Add(new RentabilidadPeriodo("1 semana", PctDesde(ahora.AddDays(-7))));
+        resultado.Add(new RentabilidadPeriodo("1 mes", PctDesde(ahora.AddMonths(-1))));
+        resultado.Add(new RentabilidadPeriodo("3 meses", PctDesde(ahora.AddMonths(-3))));
+        resultado.Add(new RentabilidadPeriodo("6 meses", PctDesde(ahora.AddMonths(-6))));
+        resultado.Add(new RentabilidadPeriodo("1 año", PctDesde(ahora.AddYears(-1))));
+        resultado.Add(new RentabilidadPeriodo("5 años", PctDesde(ahora.AddYears(-5))));
+
+        var primero = historialCompleto.Count > 0 ? historialCompleto[0] : historialReciente[0];
+        resultado.Add(new RentabilidadPeriodo("Desde el principio", primero.Close != 0 ? (ultimo.Close - primero.Close) / primero.Close * 100m : null));
+
+        return resultado;
+    }
 }
+
+public sealed record RentabilidadPeriodo(string Etiqueta, decimal? Porcentaje);
