@@ -29,8 +29,8 @@ document.addEventListener('click', function (event) {
 
     event.preventDefault();
 
-    var ancho = Math.min(1300, window.screen.availWidth - 80);
-    var alto = Math.min(900, window.screen.availHeight - 80);
+    var ancho = Math.min(1100, window.screen.availWidth - 80);
+    var alto = Math.min(760, window.screen.availHeight - 80);
     var left = Math.max(0, (window.screen.availWidth - ancho) / 2);
     var top = Math.max(0, (window.screen.availHeight - alto) / 2);
     var caracteristicas = 'width=' + ancho + ',height=' + alto + ',left=' + left + ',top=' + top +
