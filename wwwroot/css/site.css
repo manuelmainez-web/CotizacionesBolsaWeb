@@ -1096,6 +1096,10 @@ body.wco-active .topbar-datetime {
   border-radius: 4px;
 }
 
+.title-icon {
+  flex-shrink: 0;
+}
+
 .price-cell {
   font-weight: 700;
   color: #f8fafc;
