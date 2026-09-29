@@ -1023,6 +1023,18 @@ body.wco-active .topbar-datetime {
   background: rgba(31, 46, 59, 0.94);
 }
 
+.market-table tbody tr.row-highlight-vix {
+  background: rgba(250, 204, 21, 0.16);
+}
+
+.market-table tbody tr.row-highlight-vix:hover {
+  background: rgba(250, 204, 21, 0.24);
+}
+
+.row-highlight-vix td {
+  border-color: rgba(250, 204, 21, 0.45);
+}
+
 .name-cell {
   font-weight: 400;
   color: #f8fafc;

@@ -142,7 +142,8 @@
                         var item = Model.Indices[indexRow];
                         var isLastOfRegion = indexRow < Model.Indices.Count - 1
                             && Model.GetIndexRegionOrder(item.CountryCode) != Model.GetIndexRegionOrder(Model.Indices[indexRow + 1].CountryCode);
-                        <tr class="@(isLastOfRegion ? "row-divider-bottom" : "")">
+                        var esVix = string.Equals(item.Symbol, "^VIX", StringComparison.OrdinalIgnoreCase);
+                        <tr class="@(isLastOfRegion ? "row-divider-bottom" : "") @(esVix ? "row-highlight-vix" : "")">
                             <td class="name-cell">
                                 <span class="name-with-flag">
                                     <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
