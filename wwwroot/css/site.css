@@ -603,7 +603,8 @@ body.wco-active .topbar-datetime {
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3e%3cpath fill='%23a9bacd' d='M1 1l5 5 5-5'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right 0.6rem center;
+  background-position: right 0.55rem center;
+  background-size: 9px 6px;
 }
 
 .mini-select option {
