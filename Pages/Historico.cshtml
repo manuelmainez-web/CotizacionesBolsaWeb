@@ -60,7 +60,7 @@
                 <div class="panel-head panel-head-row">
                     <span>Cotización histórica</span>
                     <select id="range-select" class="mini-select" aria-label="Periodo"
-                            onchange="window.location.href = '/Historico?symbol=@Uri.EscapeDataString(Model.Symbol)&name=@Uri.EscapeDataString(Model.Name)&range=' + this.value;">
+                            onchange="window.location.href = '/Historico?symbol=@Uri.EscapeDataString(Model.Symbol)&name=@Uri.EscapeDataString(Model.Name)&countryCode=@Uri.EscapeDataString(Model.CountryCode ?? string.Empty)&range=' + this.value;">
                         <option value="1d" selected="@(Model.Range == "1d")">Día</option>
                         <option value="5d" selected="@(Model.Range == "5d")">Semana</option>
                         <option value="1mo" selected="@(Model.Range == "1mo")">Mes</option>
