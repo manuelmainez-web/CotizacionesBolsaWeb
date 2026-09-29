@@ -20,10 +20,16 @@
         <div class="container py-3">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2 class="mb-0">Cartera de valores y Cotizaciones</h2>
+                    @if (ViewData["HideTopbarBranding"] is not true)
+                    {
+                        <h2 class="mb-0">Cartera de valores y Cotizaciones</h2>
+                    }
                 </div>
                 <div class="topbar-right">
-                    <div id="current-datetime" class="topbar-datetime"></div>
+                    @if (ViewData["HideTopbarBranding"] is not true)
+                    {
+                        <div id="current-datetime" class="topbar-datetime"></div>
+                    }
                     @if (ViewData["HideRefreshButton"] is not true)
                     {
                         <button type="button" id="btn-refresh-page" class="btn-refresh-page" title="Actualizar">
