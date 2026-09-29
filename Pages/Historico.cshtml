@@ -42,15 +42,52 @@
             <div class="market-panel chart-panel-half">
                 <div class="panel-head panel-head-row">
                     <span>Análisis técnico</span>
-                    <div class="chart-type-buttons" role="group" aria-label="Tipo de gráfico">
-                        <button type="button" class="mini-button chart-type-active" data-chart-type="candlestick">Velas</button>
-                        <button type="button" class="mini-button" data-chart-type="ohlc">Barras</button>
-                        <button type="button" class="mini-button" data-chart-type="line">Línea</button>
-                        <button type="button" class="mini-button" data-chart-type="area">Área</button>
+                    <div class="chart-controls">
+                        <select id="chart-type-select" class="mini-select" aria-label="Tipo de gráfico">
+                            <option value="candlestick">Velas</option>
+                            <option value="ohlc">Barras</option>
+                            <option value="line">Línea</option>
+                            <option value="area">Área</option>
+                        </select>
+                        <div class="indicator-dropdown">
+                            <button type="button" class="mini-button" id="indicator-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                                Indicadores <span class="indicator-dropdown-arrow">▾</span>
+                            </button>
+                            <div class="indicator-dropdown-menu" id="indicator-dropdown-menu" hidden>
+                                <label class="indicator-option">
+                                    <input type="checkbox" data-indicator="sma20" checked>
+                                    <span>SMA 20</span>
+                                </label>
+                                <label class="indicator-option">
+                                    <input type="checkbox" data-indicator="sma50" checked>
+                                    <span>SMA 50</span>
+                                </label>
+                                <label class="indicator-option">
+                                    <input type="checkbox" data-indicator="volumen">
+                                    <span>Volumen</span>
+                                </label>
+                                <label class="indicator-option">
+                                    <input type="checkbox" data-indicator="rsi">
+                                    <span>RSI (14)</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="chart-wrap">
                     <canvas id="candlestickChart"></canvas>
+                </div>
+                <div class="chart-sub" id="volume-chart-wrap" hidden>
+                    <div class="chart-sub-label">Volumen</div>
+                    <div class="chart-sub-canvas-wrap">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-sub" id="rsi-chart-wrap" hidden>
+                    <div class="chart-sub-label">RSI (14)</div>
+                    <div class="chart-sub-canvas-wrap chart-sub-canvas-wrap-rsi">
+                        <canvas id="rsiChart"></canvas>
+                    </div>
                 </div>
             </div>
         }
@@ -111,41 +148,29 @@
             grid: { color: 'rgba(148,163,184,0.08)' }
         };
 
-        // Gráfico técnico: velas / barras OHLC / línea / área (seleccionable)
+        // Gráfico técnico: velas / barras OHLC / línea / área (seleccionable desde un desplegable)
         const candleData = closes.map(function (c, i) {
             return { x: i, o: opens[i], h: highs[i], l: lows[i], c: c };
         });
         const smaData20 = sma20.map(function (v, i) { return { x: i, y: v }; });
         const smaData50 = sma50.map(function (v, i) { return { x: i, y: v }; });
 
+        const selectorTipo = document.getElementById('chart-type-select');
+        const checkboxSma20 = document.querySelector('[data-indicator="sma20"]');
+        const checkboxSma50 = document.querySelector('[data-indicator="sma50"]');
+        const checkboxVolumen = document.querySelector('[data-indicator="volumen"]');
+        const checkboxRsi = document.querySelector('[data-indicator="rsi"]');
+
         let graficoTecnico = null;
+        let graficoVolumen = null;
+        let graficoRsi = null;
 
         function crearGraficoTecnico(tipo) {
             if (graficoTecnico) {
                 graficoTecnico.destroy();
             }
 
-            const smaDatasets = [
-                {
-                    type: 'line',
-                    label: 'SMA 20',
-                    data: smaData20,
-                    borderColor: '#facc15',
-                    borderWidth: 1.5,
-                    pointRadius: 0,
-                    spanGaps: true
-                },
-                {
-                    type: 'line',
-                    label: 'SMA 50',
-                    data: smaData50,
-                    borderColor: '#a78bfa',
-                    borderWidth: 1.5,
-                    pointRadius: 0,
-                    spanGaps: true
-                }
-            ];
-
+            const datasets = [];
             let datasetPrecio;
             let tipoGrafico;
 
@@ -177,11 +202,35 @@
                 };
             }
 
+            datasets.push(datasetPrecio);
+
+            if (checkboxSma20.checked) {
+                datasets.push({
+                    type: 'line',
+                    label: 'SMA 20',
+                    data: smaData20,
+                    borderColor: '#facc15',
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    spanGaps: true
+                });
+            }
+
+            if (checkboxSma50.checked) {
+                datasets.push({
+                    type: 'line',
+                    label: 'SMA 50',
+                    data: smaData50,
+                    borderColor: '#a78bfa',
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    spanGaps: true
+                });
+            }
+
             graficoTecnico = new Chart(document.getElementById('candlestickChart'), {
                 type: tipoGrafico,
-                data: {
-                    datasets: [datasetPrecio].concat(smaDatasets)
-                },
+                data: { datasets: datasets },
                 options: {
                     responsive: true,
                     plugins: {
@@ -198,16 +247,142 @@
             });
         }
 
-        crearGraficoTecnico('candlestick');
+        function actualizarGraficoTecnico() {
+            crearGraficoTecnico(selectorTipo.value);
+        }
 
-        document.querySelectorAll('.chart-type-buttons [data-chart-type]').forEach(function (boton) {
-            boton.addEventListener('click', function () {
-                document.querySelectorAll('.chart-type-buttons [data-chart-type]').forEach(function (b) {
-                    b.classList.remove('chart-type-active');
-                });
-                boton.classList.add('chart-type-active');
-                crearGraficoTecnico(boton.getAttribute('data-chart-type'));
+        actualizarGraficoTecnico();
+        selectorTipo.addEventListener('change', actualizarGraficoTecnico);
+        checkboxSma20.addEventListener('change', actualizarGraficoTecnico);
+        checkboxSma50.addEventListener('change', actualizarGraficoTecnico);
+
+        // Volumen (barras verdes/rojas según si la sesión cerró en subida o bajada) - solo si se marca en Indicadores
+        function crearGraficoVolumen() {
+            const volumeColors = closes.map(function (c, i) {
+                const previo = i > 0 ? closes[i - 1] : opens[i];
+                return c >= previo ? 'rgba(34, 197, 94, 0.55)' : 'rgba(239, 68, 68, 0.55)';
             });
+
+            graficoVolumen = new Chart(document.getElementById('volumeChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Volumen',
+                        data: volumes,
+                        backgroundColor: volumeColors,
+                        barPercentage: 1,
+                        categoryPercentage: 0.9
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#a9bacd', maxTicksLimit: 8, callback: etiquetaEnIndice }, grid: { display: false } },
+                        y: { ticks: { color: '#a9bacd', maxTicksLimit: 4 }, grid: { color: 'rgba(148,163,184,0.08)' } }
+                    }
+                }
+            });
+        }
+
+        // RSI (14) con zonas de sobrecompra (70) / sobreventa (30) - solo si se marca en Indicadores
+        function crearGraficoRsi() {
+            graficoRsi = new Chart(document.getElementById('rsiChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'RSI (14)',
+                            data: rsi,
+                            borderColor: '#38bdf8',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            spanGaps: true
+                        },
+                        {
+                            label: 'Sobrecompra (70)',
+                            data: labels.map(function () { return 70; }),
+                            borderColor: 'rgba(239, 68, 68, 0.55)',
+                            borderWidth: 1,
+                            borderDash: [4, 4],
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Sobreventa (30)',
+                            data: labels.map(function () { return 30; }),
+                            borderColor: 'rgba(34, 197, 94, 0.55)',
+                            borderWidth: 1,
+                            borderDash: [4, 4],
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#a9bacd', boxWidth: 12, filter: function (item) { return item.text === 'RSI (14)'; } }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#a9bacd', maxTicksLimit: 8, callback: etiquetaEnIndice }, grid: { display: false } },
+                        y: { min: 0, max: 100, ticks: { color: '#a9bacd', stepSize: 25 }, grid: { color: 'rgba(148,163,184,0.08)' } }
+                    }
+                }
+            });
+        }
+
+        checkboxVolumen.addEventListener('change', function () {
+            const contenedor = document.getElementById('volume-chart-wrap');
+            if (checkboxVolumen.checked) {
+                contenedor.hidden = false;
+                crearGraficoVolumen();
+            } else {
+                contenedor.hidden = true;
+                if (graficoVolumen) {
+                    graficoVolumen.destroy();
+                    graficoVolumen = null;
+                }
+            }
+        });
+
+        checkboxRsi.addEventListener('change', function () {
+            const contenedor = document.getElementById('rsi-chart-wrap');
+            if (checkboxRsi.checked) {
+                contenedor.hidden = false;
+                crearGraficoRsi();
+            } else {
+                contenedor.hidden = true;
+                if (graficoRsi) {
+                    graficoRsi.destroy();
+                    graficoRsi = null;
+                }
+            }
+        });
+
+        // Desplegable "Indicadores" (abrir/cerrar y cierre al pulsar fuera)
+        const toggleIndicadores = document.getElementById('indicator-dropdown-toggle');
+        const menuIndicadores = document.getElementById('indicator-dropdown-menu');
+
+        toggleIndicadores.addEventListener('click', function (event) {
+            event.stopPropagation();
+            const estaAbierto = !menuIndicadores.hidden;
+            menuIndicadores.hidden = estaAbierto;
+            toggleIndicadores.setAttribute('aria-expanded', String(!estaAbierto));
+        });
+
+        menuIndicadores.addEventListener('click', function (event) {
+            event.stopPropagation();
+        });
+
+        document.addEventListener('click', function () {
+            menuIndicadores.hidden = true;
+            toggleIndicadores.setAttribute('aria-expanded', 'false');
         });
     </script>
 }

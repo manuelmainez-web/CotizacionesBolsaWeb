@@ -523,20 +523,81 @@ body.wco-active .topbar-datetime {
   color: #fff;
 }
 
-.chart-type-buttons {
+.chart-controls {
   display: flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.chart-type-buttons .mini-button {
+.mini-select {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);
+  color: #eff9ff;
+  border-radius: 10px;
+  padding: 0.4rem 1.8rem 0.4rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.82rem;
   font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3e%3cpath fill='%23a9bacd' d='M1 1l5 5 5-5'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
 }
 
-.chart-type-buttons .mini-button.chart-type-active {
-  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
-  border-color: rgba(96, 165, 250, 0.7);
-  color: #fff;
+.mini-select option {
+  background: #172b3e;
+  color: #eff9ff;
+}
+
+.indicator-dropdown {
+  position: relative;
+}
+
+.indicator-dropdown-arrow {
+  font-size: 0.7rem;
+  margin-left: 2px;
+}
+
+.indicator-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  min-width: 160px;
+  background: linear-gradient(180deg, #1b2b3c 0%, #131f2c 100%);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.indicator-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #eff9ff;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.indicator-option:hover {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.indicator-option input[type="checkbox"] {
+  accent-color: #2563eb;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
 }
 
 .chart-wrap {
