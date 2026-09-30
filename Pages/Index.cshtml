@@ -604,13 +604,13 @@
             <table class="market-table market-table-grid market-table-cartera market-table-etf-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
-                        <th style="width: 220px;">Nombre</th>
+                        <th class="col-nombre-cartera" style="width: 220px;">Nombre</th>
                         <th class="text-align-right col-cambio" style="width: 55px;">Cambio</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 70px;">Valoración actual</th>
+                        <th class="text-align-right notranslate col-cotizacion" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
+                        <th class="text-align-right col-valoracion-actual" style="width: 70px;">Valoración actual</th>
                         <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
                         <th class="text-align-right col-titulos-compra" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
-                        <th class="text-align-right" style="width: 90px;">Valoración compra</th>
+                        <th class="text-align-right col-valoracion-compra" style="width: 90px;">Valoración compra</th>
                         <th class="isin-print-hide text-align-right" style="width: 90px;">ISIN</th>
                         <th class="broker-header" style="width: 50px;">Bróker</th>
                         <th class="text-align-right col-actualizacion" style="width: 96px;">Actualización</th>
@@ -640,21 +640,21 @@
                             var isTradeRepublic = holding?.Broker == "TR";
 
                             <tr class="@(item.Symbol == "UST.PA" ? "row-divider-bottom" : "")" data-broker="@(holding?.Broker ?? "")">
-                                <td class="name-cell name-cell-regular">
+                                <td class="name-cell name-cell-regular col-nombre-cartera">
                                     <span class="name-with-flag">
                                         <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
                                         <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name&countryCode=@item.CountryCode">@item.Name</a>
                                     </span>
                                 </td>
                                 <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote col-cotizacion">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote col-valoracion-actual">@currentValue.ToString("#,##0.00 €")</td>
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="purchase-cell">
                                     @positionCount.ToString("#,##0.######")<br />
                                     @purchaseDisplayValue.ToString("#,##0.00 €")
                                 </td>
-                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote col-valoracion-compra">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
                                 <td class="broker-cell">
                                     @if (isIngDirect)
@@ -779,13 +779,13 @@
             <table class="market-table market-table-grid market-table-cartera market-table-fondos-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
-                        <th style="width: 220px;">Nombre</th>
+                        <th class="col-nombre-cartera" style="width: 220px;">Nombre</th>
                         <th class="text-align-right col-cambio" style="width: 55px;">Cambio</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 70px;">Valoración actual</th>
+                        <th class="text-align-right notranslate col-cotizacion" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
+                        <th class="text-align-right col-valoracion-actual" style="width: 70px;">Valoración actual</th>
                         <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
                         <th class="text-align-right col-titulos-compra" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
-                        <th class="text-align-right" style="width: 90px;">Valoración compra</th>
+                        <th class="text-align-right col-valoracion-compra" style="width: 90px;">Valoración compra</th>
                         <th class="isin-print-hide text-align-right" style="width: 90px;">ISIN</th>
                         <th class="broker-header" style="width: 50px;">Bróker</th>
                         <th class="text-align-right col-actualizacion" style="width: 96px;">Actualización</th>
@@ -815,21 +815,21 @@
                             var isIngDirect = holding?.Broker == "ING";
 
                             <tr data-broker="@(holding?.Broker ?? "")">
-                                <td class="name-cell">
+                                <td class="name-cell col-nombre-cartera">
                                     <span class="name-with-flag">
                                         <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
                                         <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name&countryCode=@item.CountryCode">@item.Name</a>
                                     </span>
                                 </td>
                                 <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote col-cotizacion">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote col-valoracion-actual">@currentValue.ToString("#,##0.00 €")</td>
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% @(gainPercent >= 0 ? "▲" : "▼")<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="purchase-cell">
                                     @positionCount.ToString("#,##0.######")<br />
                                     @purchaseDisplayValue.ToString("#,##0.00 €")
                                 </td>
-                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote col-valoracion-compra">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
                                 <td class="broker-cell">
                                     @if (isTradeRepublic)
@@ -936,13 +936,13 @@
             <table class="market-table market-table-grid market-table-cartera market-table-acciones-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
-                        <th style="width: 220px;">Nombre</th>
+                        <th class="col-nombre-cartera" style="width: 220px;">Nombre</th>
                         <th class="text-align-right col-cambio" style="width: 55px;">Cambio</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 70px;">Valoración actual</th>
+                        <th class="text-align-right notranslate col-cotizacion" translate="no" style="width: 65px;">COTIZACIÓN ACTUAL</th>
+                        <th class="text-align-right col-valoracion-actual" style="width: 70px;">Valoración actual</th>
                         <th class="text-align-right col-rent-importe" style="width: 75px;">Rentabilidad /<br />Importe</th>
                         <th class="text-align-right col-titulos-compra" style="width: 80px;">TITULOS /PRECIO COMPRA</th>
-                        <th class="text-align-right" style="width: 90px;">Valoración compra</th>
+                        <th class="text-align-right col-valoracion-compra" style="width: 90px;">Valoración compra</th>
                         <th class="isin-print-hide text-align-right" style="width: 90px;">ISIN</th>
                         <th class="broker-header" style="width: 50px;">Bróker</th>
                         <th class="text-align-right col-actualizacion" style="width: 96px;">Actualización</th>
@@ -972,21 +972,21 @@
                             var isTradeRepublic = holding?.Broker == "TR";
 
                             <tr data-broker="@(holding?.Broker ?? "")">
-                                <td class="name-cell">
+                                <td class="name-cell col-nombre-cartera">
                                     <span class="name-with-flag">
                                         <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
                                         <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name&countryCode=@item.CountryCode">@item.Name</a>
                                     </span>
                                 </td>
                                 <td class="@item.TrendCssClass col-cambio">@item.DisplayPercent</td>
-                                <td class="price-cell price-cell-quote">@currentPrice.ToString("#,##0.00 €")</td>
-                                <td class="price-cell price-cell-quote">@currentValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote col-cotizacion">@currentPrice.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote col-valoracion-actual">@currentValue.ToString("#,##0.00 €")</td>
                                 <td class="@((gainPercent >= 0 ? "text-success" : "text-danger")) col-rent-importe">@gainPercent.ToString("+#,##0.00;-#,##0.00;0.00")%<br />@gainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
                                 <td class="purchase-cell">
                                     @positionCount.ToString("#,##0.######")<br />
                                     @purchaseDisplayValue.ToString("#,##0.00 €")
                                 </td>
-                                <td class="price-cell price-cell-quote">@purchaseValue.ToString("#,##0.00 €")</td>
+                                <td class="price-cell price-cell-quote col-valoracion-compra">@purchaseValue.ToString("#,##0.00 €")</td>
                                 <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
                                 <td class="broker-cell">
                                     @if (isIngDirect)
@@ -1109,19 +1109,19 @@
             <div class="form-error-banner">@Model.PensionPlanError</div>
         }
         <div class="table-wrap">
-            <table class="market-table market-table-grid market-table-cartera" style="table-layout: fixed;">
+            <table class="market-table market-table-grid market-table-cartera market-table-planes-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
-                        <th style="width: 285px;">Nombre</th>
-                        <th class="text-align-right" style="width: 110px; white-space: nowrap;">Participaciones /<br />Valor liquidativo</th>
-                        <th class="text-align-right" style="width: 110px;">Capital invertido</th>
-                        <th class="text-align-right" style="width: 90px;">Rentabilidad<br />último mes</th>
-                        <th class="text-align-right" style="width: 90px;">Rentabilidad<br />12 meses</th>
-                        <th class="text-align-right" style="width: 87px;">Valoración actual</th>
-                        <th class="text-align-right" style="width: 115px;">Rentabilidad<br />desde inicio</th>
-                        <th style="width: 128px; white-space: nowrap;">Código DGSFP</th>
+                        <th class="col-nombre-cartera" style="width: 285px;">Nombre</th>
+                        <th class="text-align-right col-participaciones" style="width: 110px; white-space: nowrap;">Participaciones /<br />Valor liquidativo</th>
+                        <th class="text-align-right col-capital-invertido" style="width: 110px;">Capital invertido</th>
+                        <th class="text-align-right col-rent-mes" style="width: 90px;">Rentabilidad<br />último mes</th>
+                        <th class="text-align-right col-rent-12m" style="width: 90px;">Rentabilidad<br />12 meses</th>
+                        <th class="text-align-right col-valoracion-actual" style="width: 87px;">Valoración actual</th>
+                        <th class="text-align-right col-rent-inicio" style="width: 115px;">Rentabilidad<br />desde inicio</th>
+                        <th class="col-codigo-dgsfp" style="width: 128px; white-space: nowrap;">Código DGSFP</th>
                         <th class="broker-header" style="width: 68px;">Bróker</th>
-                        <th class="text-align-right" style="width: 100px;">Actualización</th>
+                        <th class="text-align-right col-actualizacion" style="width: 100px;">Actualización</th>
                         <th style="width: 65px;"></th>
                     </tr>
                 </thead>
@@ -1144,22 +1144,22 @@
                             var isOccident = item.Broker == "OCCIDENT";
 
                             <tr data-broker="@(item.Broker ?? "")">
-                                <td class="name-cell">
+                                <td class="name-cell col-nombre-cartera">
                                     <span class="name-with-flag">
                                         <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
                                         @item.Name
                                     </span>
                                 </td>
-                                <td class="purchase-cell">
+                                <td class="purchase-cell col-participaciones">
                                     @item.Participaciones.ToString("#,##0.######")<br />
                                     @item.ValorLiquidativo.ToString("#,##0.00 €")
                                 </td>
-                                <td class="price-cell price-cell-quote">@item.CapitalInvertido.ToString("#,##0.00 €")</td>
-                                <td class="@((item.RentabilidadUltimoMes >= 0 ? "text-success" : "text-danger"))">@item.RentabilidadUltimoMes.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadUltimoMes >= 0 ? "▲" : "▼")</td>
-                                <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger"))">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
-                                <td class="price-cell price-cell-quote">@saldoTotal.ToString("#,##0.00 €")</td>
-                                <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger"))">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")<br />@gananciaDesdeInicio.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
-                                <td class="isin-cell" style="white-space: nowrap;">@item.CodigoDgsfp</td>
+                                <td class="price-cell price-cell-quote col-capital-invertido">@item.CapitalInvertido.ToString("#,##0.00 €")</td>
+                                <td class="@((item.RentabilidadUltimoMes >= 0 ? "text-success" : "text-danger")) col-rent-mes">@item.RentabilidadUltimoMes.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.RentabilidadUltimoMes >= 0 ? "▲" : "▼")</td>
+                                <td class="@((item.Rentabilidad12Meses >= 0 ? "text-success" : "text-danger")) col-rent-12m">@item.Rentabilidad12Meses.ToString("+#,##0.00;-#,##0.00;0.00")% @(item.Rentabilidad12Meses >= 0 ? "▲" : "▼")</td>
+                                <td class="price-cell price-cell-quote col-valoracion-actual">@saldoTotal.ToString("#,##0.00 €")</td>
+                                <td class="@((rentabilidadDesdeInicio >= 0 ? "text-success" : "text-danger")) col-rent-inicio">@rentabilidadDesdeInicio.ToString("+#,##0.00;-#,##0.00;0.00")% @(rentabilidadDesdeInicio >= 0 ? "▲" : "▼")<br />@gananciaDesdeInicio.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €")</td>
+                                <td class="isin-cell col-codigo-dgsfp" style="white-space: nowrap;">@item.CodigoDgsfp</td>
                                 <td class="broker-cell">
                                     @if (isIngDirect)
                                     {
@@ -1174,7 +1174,7 @@
                                         <img class="broker-logo" src="/images/brokers/occident.png" alt="Occident" title="Occident" />
                                     }
                                 </td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy")<br />@DateTime.Now.ToString("HH:mm")</td>
+                                <td class="time-cell col-actualizacion">@DateTime.Now.ToString("dd/MM/yyyy")<br />@DateTime.Now.ToString("HH:mm")</td>
                                 <td class="delete-cell">
                                     <button type="button" class="icon-button-edit" data-dialog-target="edit-pensionplan-@Model.PensionPlans.IndexOf(item)" title="Editar">✎</button>
                                     <form method="post" asp-page-handler="DeletePensionPlan" onsubmit="return confirm('¿Eliminar este plan de pensiones?');">
