@@ -1827,152 +1827,155 @@ body.wco-active .topbar-datetime {
     width: 75% !important;
   }
 
-  /* "Imprimir cartera": anchos de columna fijos en ETF/Fondos/Acciones
-     (Cartera) para que los títulos de cabecera quepan como mucho en 2
-     líneas (nunca 3). Se fija el ancho de TODAS las columnas visibles
-     (antes solo algunas tenían ancho fijo y el resto quedaba en "auto",
-     lo que las dejaba comprimidas a unos pocos píxeles y sus títulos
-     partidos en 3+ líneas). Suman ~710px, por debajo del ancho real de la
-     tabla en A4 (~717px). */
-  body.print-cartera-only .market-table.market-table-etf-cartera th.col-nombre-cartera,
-  body.print-cartera-only .market-table.market-table-etf-cartera td.col-nombre-cartera,
-  body.print-cartera-only .market-table.market-table-fondos-cartera th.col-nombre-cartera,
-  body.print-cartera-only .market-table.market-table-fondos-cartera td.col-nombre-cartera,
-  body.print-cartera-only .market-table.market-table-acciones-cartera th.col-nombre-cartera,
-  body.print-cartera-only .market-table.market-table-acciones-cartera td.col-nombre-cartera {
+  /* "Imprimir cartera" / "Imprimir" de ING Direct / "Imprimir" de Trade
+     Republic: anchos de columna fijos en ETF/Fondos/Acciones (Cartera) para
+     que los títulos de cabecera quepan como mucho en 2 líneas (nunca 3). Se
+     fija el ancho de TODAS las columnas visibles (antes solo algunas tenían
+     ancho fijo y el resto quedaba en "auto", lo que las dejaba comprimidas
+     a unos pocos píxeles y sus títulos partidos en 3+ líneas). Suman
+     ~710px, por debajo del ancho real de la tabla en A4 (~717px). Los 3
+     modos de impresión de cartera comparten exactamente los mismos anchos
+     (agrupados con :is() para no triplicar cada regla). */
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table.market-table-etf-cartera th.col-nombre-cartera,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table.market-table-etf-cartera td.col-nombre-cartera,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table.market-table-fondos-cartera th.col-nombre-cartera,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table.market-table-fondos-cartera td.col-nombre-cartera,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table.market-table-acciones-cartera th.col-nombre-cartera,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table.market-table-acciones-cartera td.col-nombre-cartera {
     width: 165px !important;
     min-width: 165px !important;
   }
 
-  body.print-cartera-only .market-table-etf-cartera th.col-cambio,
-  body.print-cartera-only .market-table-etf-cartera td.col-cambio,
-  body.print-cartera-only .market-table-fondos-cartera th.col-cambio,
-  body.print-cartera-only .market-table-fondos-cartera td.col-cambio,
-  body.print-cartera-only .market-table-acciones-cartera th.col-cambio,
-  body.print-cartera-only .market-table-acciones-cartera td.col-cambio {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera th.col-cambio,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera td.col-cambio,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera th.col-cambio,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera td.col-cambio,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera th.col-cambio,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera td.col-cambio {
     width: 50px !important;
     min-width: 50px !important;
   }
 
-  body.print-cartera-only .market-table-etf-cartera th.col-cotizacion,
-  body.print-cartera-only .market-table-etf-cartera td.col-cotizacion,
-  body.print-cartera-only .market-table-fondos-cartera th.col-cotizacion,
-  body.print-cartera-only .market-table-fondos-cartera td.col-cotizacion,
-  body.print-cartera-only .market-table-acciones-cartera th.col-cotizacion,
-  body.print-cartera-only .market-table-acciones-cartera td.col-cotizacion {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera th.col-cotizacion,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera td.col-cotizacion,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera th.col-cotizacion,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera td.col-cotizacion,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera th.col-cotizacion,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera td.col-cotizacion {
     width: 70px !important;
     min-width: 70px !important;
   }
 
-  body.print-cartera-only .market-table-etf-cartera th.col-valoracion-actual,
-  body.print-cartera-only .market-table-etf-cartera td.col-valoracion-actual,
-  body.print-cartera-only .market-table-fondos-cartera th.col-valoracion-actual,
-  body.print-cartera-only .market-table-fondos-cartera td.col-valoracion-actual,
-  body.print-cartera-only .market-table-acciones-cartera th.col-valoracion-actual,
-  body.print-cartera-only .market-table-acciones-cartera td.col-valoracion-actual {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera th.col-valoracion-actual,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera td.col-valoracion-actual,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera th.col-valoracion-actual,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera td.col-valoracion-actual,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera th.col-valoracion-actual,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera td.col-valoracion-actual {
     width: 70px !important;
     min-width: 70px !important;
   }
 
-  body.print-cartera-only .market-table-etf-cartera th.col-rent-importe,
-  body.print-cartera-only .market-table-etf-cartera td.col-rent-importe,
-  body.print-cartera-only .market-table-fondos-cartera th.col-rent-importe,
-  body.print-cartera-only .market-table-fondos-cartera td.col-rent-importe,
-  body.print-cartera-only .market-table-acciones-cartera th.col-rent-importe,
-  body.print-cartera-only .market-table-acciones-cartera td.col-rent-importe {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera th.col-rent-importe,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera td.col-rent-importe,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera th.col-rent-importe,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera td.col-rent-importe,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera th.col-rent-importe,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera td.col-rent-importe {
     width: 80px !important;
     min-width: 80px !important;
   }
 
-  body.print-cartera-only .market-table-etf-cartera th.col-titulos-compra,
-  body.print-cartera-only .market-table-etf-cartera td.purchase-cell,
-  body.print-cartera-only .market-table-fondos-cartera th.col-titulos-compra,
-  body.print-cartera-only .market-table-fondos-cartera td.purchase-cell,
-  body.print-cartera-only .market-table-acciones-cartera th.col-titulos-compra,
-  body.print-cartera-only .market-table-acciones-cartera td.purchase-cell {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera th.col-titulos-compra,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera td.purchase-cell,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera th.col-titulos-compra,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera td.purchase-cell,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera th.col-titulos-compra,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera td.purchase-cell {
     width: 95px !important;
     min-width: 95px !important;
   }
 
-  body.print-cartera-only .market-table-etf-cartera th.col-valoracion-compra,
-  body.print-cartera-only .market-table-etf-cartera td.col-valoracion-compra,
-  body.print-cartera-only .market-table-fondos-cartera th.col-valoracion-compra,
-  body.print-cartera-only .market-table-fondos-cartera td.col-valoracion-compra,
-  body.print-cartera-only .market-table-acciones-cartera th.col-valoracion-compra,
-  body.print-cartera-only .market-table-acciones-cartera td.col-valoracion-compra {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera th.col-valoracion-compra,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera td.col-valoracion-compra,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera th.col-valoracion-compra,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera td.col-valoracion-compra,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera th.col-valoracion-compra,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera td.col-valoracion-compra {
     width: 70px !important;
     min-width: 70px !important;
   }
 
-  body.print-cartera-only .market-table-etf-cartera th.col-actualizacion,
-  body.print-cartera-only .market-table-etf-cartera td.time-cell,
-  body.print-cartera-only .market-table-fondos-cartera th.col-actualizacion,
-  body.print-cartera-only .market-table-fondos-cartera td.time-cell,
-  body.print-cartera-only .market-table-acciones-cartera th.col-actualizacion,
-  body.print-cartera-only .market-table-acciones-cartera td.time-cell {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera th.col-actualizacion,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera td.time-cell,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera th.col-actualizacion,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera td.time-cell,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera th.col-actualizacion,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera td.time-cell {
     width: 90px !important;
     min-width: 90px !important;
   }
 
-  body.print-cartera-only .market-table-etf-cartera .market-clock,
-  body.print-cartera-only .market-table-fondos-cartera .market-clock,
-  body.print-cartera-only .market-table-acciones-cartera .market-clock {
+  /* Ocultar el icono de reloj (mercado abierto/cerrado) en la columna
+     "Actualización" en los 3 modos de impresión de cartera. */
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-etf-cartera .market-clock,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-fondos-cartera .market-clock,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-acciones-cartera .market-clock {
     display: none !important;
   }
 
-  /* "Imprimir cartera": mismo criterio (máximo 2 líneas en las cabeceras)
-     para la tabla Planes de pensiones (Cartera), que tiene sus propias
-     columnas. Suman ~695px. */
-  body.print-cartera-only .market-table.market-table-planes-cartera th.col-nombre-cartera,
-  body.print-cartera-only .market-table.market-table-planes-cartera td.col-nombre-cartera {
+  /* Mismo criterio (máximo 2 líneas en las cabeceras) para la tabla Planes
+     de pensiones (Cartera), que tiene sus propias columnas. Suman ~695px. */
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table.market-table-planes-cartera th.col-nombre-cartera,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table.market-table-planes-cartera td.col-nombre-cartera {
     width: 150px !important;
     min-width: 150px !important;
   }
 
-  body.print-cartera-only .market-table-planes-cartera th.col-participaciones,
-  body.print-cartera-only .market-table-planes-cartera td.col-participaciones {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera th.col-participaciones,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera td.col-participaciones {
     width: 95px !important;
     min-width: 95px !important;
   }
 
-  body.print-cartera-only .market-table-planes-cartera th.col-capital-invertido,
-  body.print-cartera-only .market-table-planes-cartera td.col-capital-invertido {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera th.col-capital-invertido,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera td.col-capital-invertido {
     width: 65px !important;
     min-width: 65px !important;
   }
 
-  body.print-cartera-only .market-table-planes-cartera th.col-rent-mes,
-  body.print-cartera-only .market-table-planes-cartera td.col-rent-mes {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera th.col-rent-mes,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera td.col-rent-mes {
     width: 65px !important;
     min-width: 65px !important;
   }
 
-  body.print-cartera-only .market-table-planes-cartera th.col-rent-12m,
-  body.print-cartera-only .market-table-planes-cartera td.col-rent-12m {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera th.col-rent-12m,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera td.col-rent-12m {
     width: 65px !important;
     min-width: 65px !important;
   }
 
-  body.print-cartera-only .market-table-planes-cartera th.col-valoracion-actual,
-  body.print-cartera-only .market-table-planes-cartera td.col-valoracion-actual {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera th.col-valoracion-actual,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera td.col-valoracion-actual {
     width: 65px !important;
     min-width: 65px !important;
   }
 
-  body.print-cartera-only .market-table-planes-cartera th.col-rent-inicio,
-  body.print-cartera-only .market-table-planes-cartera td.col-rent-inicio {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera th.col-rent-inicio,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera td.col-rent-inicio {
     width: 70px !important;
     min-width: 70px !important;
   }
 
-  body.print-cartera-only .market-table-planes-cartera th.col-codigo-dgsfp,
-  body.print-cartera-only .market-table-planes-cartera td.col-codigo-dgsfp {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera th.col-codigo-dgsfp,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera td.col-codigo-dgsfp {
     width: 55px !important;
     min-width: 55px !important;
   }
 
-  body.print-cartera-only .market-table-planes-cartera th.col-actualizacion,
-  body.print-cartera-only .market-table-planes-cartera td.col-actualizacion {
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera th.col-actualizacion,
+  :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr) .market-table-planes-cartera td.col-actualizacion {
     width: 65px !important;
     min-width: 65px !important;
   }
