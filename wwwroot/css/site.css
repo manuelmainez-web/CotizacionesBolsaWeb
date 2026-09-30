@@ -1827,4 +1827,26 @@ body.wco-active .topbar-datetime {
     width: 75% !important;
   }
 
+  /* "Imprimir cartera": en la tabla ETF (Cartera), la columna "TITULOS /
+     PRECIO COMPRA" un poco más ancha y "Rentabilidad / Importe" un poco más
+     estrecha (solo esta tabla, no afecta a Fondos/Acciones/Planes de
+     pensiones que comparten las mismas clases de columna). */
+  body.print-cartera-only .market-table-etf-cartera th.col-titulos-compra,
+  body.print-cartera-only .market-table-etf-cartera td.purchase-cell {
+    width: 100px !important;
+    min-width: 100px !important;
+  }
+
+  body.print-cartera-only .market-table-etf-cartera th.col-rent-importe,
+  body.print-cartera-only .market-table-etf-cartera td.col-rent-importe {
+    width: 90px !important;
+    min-width: 90px !important;
+  }
+
+  /* "Imprimir cartera": ocultar el icono de reloj (mercado abierto/cerrado)
+     en la columna "Actualización" de la tabla ETF (Cartera). */
+  body.print-cartera-only .market-table-etf-cartera .market-clock {
+    display: none !important;
+  }
+
 }
