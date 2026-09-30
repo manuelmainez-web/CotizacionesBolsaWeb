@@ -239,6 +239,26 @@ body.wco-active .topbar-datetime {
   margin-top: 0;
 }
 
+.summary-panel {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 16px;
+  background: rgba(14, 22, 30, 0.9);
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.32);
+}
+
+.summary-panel .summary-strip-label:last-of-type {
+  margin-bottom: 0;
+}
+
+.summary-panel .summary-strip:last-child.is-collapsed {
+  margin-bottom: 0;
+}
+
 .print-actions {
   display: flex;
   flex-direction: row;
