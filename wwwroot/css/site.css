@@ -1869,4 +1869,24 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
+  /* "Imprimir cartera": mismos ajustes que en ETF/Fondos (Cartera) pero para
+     la tabla Acciones (Cartera): "TITULOS / PRECIO COMPRA" más ancha,
+     "Rentabilidad / Importe" más estrecha, y sin icono de reloj en
+     "Actualización". */
+  body.print-cartera-only .market-table-acciones-cartera th.col-titulos-compra,
+  body.print-cartera-only .market-table-acciones-cartera td.purchase-cell {
+    width: 100px !important;
+    min-width: 100px !important;
+  }
+
+  body.print-cartera-only .market-table-acciones-cartera th.col-rent-importe,
+  body.print-cartera-only .market-table-acciones-cartera td.col-rent-importe {
+    width: 90px !important;
+    min-width: 90px !important;
+  }
+
+  body.print-cartera-only .market-table-acciones-cartera .market-clock {
+    display: none !important;
+  }
+
 }
