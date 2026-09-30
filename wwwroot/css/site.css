@@ -1889,4 +1889,26 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
+  /* "Imprimir cartera": en ETF/Fondos/Acciones (Cartera), columna "Cambio"
+     un poco más pequeña y "Actualización" un poco más grande. */
+  body.print-cartera-only .market-table-etf-cartera th.col-cambio,
+  body.print-cartera-only .market-table-etf-cartera td.col-cambio,
+  body.print-cartera-only .market-table-fondos-cartera th.col-cambio,
+  body.print-cartera-only .market-table-fondos-cartera td.col-cambio,
+  body.print-cartera-only .market-table-acciones-cartera th.col-cambio,
+  body.print-cartera-only .market-table-acciones-cartera td.col-cambio {
+    width: 65px !important;
+    min-width: 65px !important;
+  }
+
+  body.print-cartera-only .market-table-etf-cartera th.col-actualizacion,
+  body.print-cartera-only .market-table-etf-cartera td.time-cell,
+  body.print-cartera-only .market-table-fondos-cartera th.col-actualizacion,
+  body.print-cartera-only .market-table-fondos-cartera td.time-cell,
+  body.print-cartera-only .market-table-acciones-cartera th.col-actualizacion,
+  body.print-cartera-only .market-table-acciones-cartera td.time-cell {
+    width: 120px !important;
+    min-width: 120px !important;
+  }
+
 }
