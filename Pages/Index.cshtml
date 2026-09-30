@@ -1285,14 +1285,16 @@
 
     <div class="blank-lines-2"></div>
 
-    <div class="summary-strip-label" id="summary-strip-label-checkingaccounts">
-        <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-checkingaccounts" title="Mostrar/ocultar">Mostrar</button>
-        <span translate="no" class="notranslate">🏦 Cuenta Corriente (Resumen Total)</span>
-    </div>
-    <div class="summary-strip is-collapsed" id="summary-strip-checkingaccounts">
-        <div class="summary-box">
-            <span>Importe Total</span>
-            <strong>@Model.CheckingAccounts.Sum(a => a.Balance).ToString("#,##0.00 €")</strong>
+    <div class="summary-panel">
+        <div class="summary-strip-label" id="summary-strip-label-checkingaccounts">
+            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-checkingaccounts" title="Mostrar/ocultar">Mostrar</button>
+            <span translate="no" class="notranslate">🏦 Cuenta Corriente (Resumen Total)</span>
+        </div>
+        <div class="summary-strip is-collapsed" id="summary-strip-checkingaccounts">
+            <div class="summary-box">
+                <span>Importe Total</span>
+                <strong>@Model.CheckingAccounts.Sum(a => a.Balance).ToString("#,##0.00 €")</strong>
+            </div>
         </div>
     </div>
 
