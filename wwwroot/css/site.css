@@ -224,7 +224,9 @@ body.wco-active .topbar-datetime {
 }
 
 .quick-links-panel {
-  display: inline-block;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
   margin-top: 12px;
   padding: 10px 14px;
   border: 1px solid rgba(148, 163, 184, 0.12);
