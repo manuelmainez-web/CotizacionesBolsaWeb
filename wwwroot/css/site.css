@@ -223,6 +223,20 @@ body.wco-active .topbar-datetime {
   margin-top: 12px;
 }
 
+.quick-links-panel {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 16px;
+  background: rgba(14, 22, 30, 0.9);
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.32);
+}
+
+.quick-links-panel .quick-links {
+  margin-top: 0;
+}
+
 .print-actions {
   display: flex;
   flex-direction: row;
