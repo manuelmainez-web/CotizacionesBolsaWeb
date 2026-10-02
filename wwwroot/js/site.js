@@ -153,109 +153,317 @@ document.addEventListener('click', function (event) {
     window.addEventListener('beforeprint', updatePrintDateTime);
 })();
 
-// Botón "Imprimir cartera": imprime solo cartera, cuenta corriente, efectivo
-// y las casillas de resumen, ocultando los paneles de control de cotizaciones.
+// Botón "Imprimir cartera": crea un documento de impresión dedicado con el
+// orden exacto solicitado y sin tocar la UI principal.
 (function () {
-    var boton = document.getElementById('btn-print-cartera');
-    if (!boton) {
-        return;
+    function cloneSummaryBlock(selector) {
+        var el = document.querySelector(selector);
+        if (!el) {
+            return null;
+        }
+
+        var clone = el.cloneNode(true);
+        clone.querySelectorAll('.btn-toggle-summary, .mini-button, .btn-print-broker, .print-actions').forEach(function (node) {
+            node.remove();
+        });
+        return clone;
     }
 
-    boton.addEventListener('click', function () {
-        imprimirConNumeracion('print-cartera-only');
-    });
-})();
+    function cloneTableForBroker(selector, broker) {
+        var source = document.querySelector(selector);
+        if (!source) {
+            return null;
+        }
 
-// Botones "Imprimir" de ING Direct y Trade Republic: imprimen solo las filas
-// de la cartera de ese bróker, ocultando el resto de brókeres, cuenta
-// corriente, efectivo y los paneles de control de cotizaciones.
-(function () {
-    var configuraciones = [
-        { id: 'btn-print-ing', clase: 'print-broker-ing' },
-        { id: 'btn-print-tr', clase: 'print-broker-tr' }
-    ];
+        var clone;
+        if (source.tagName === 'TBODY') {
+            clone = document.createElement('table');
+            clone.appendChild(source.cloneNode(true));
+        } else {
+            clone = source.cloneNode(true);
+        }
 
-    configuraciones.forEach(function (config) {
-        var boton = document.getElementById(config.id);
+        var tbody = clone.querySelector('tbody') || clone;
+
+        Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function (row) {
+            var rowBroker = (row.getAttribute('data-broker') || '').trim();
+            if (rowBroker !== broker) {
+                row.remove();
+            }
+        });
+
+        clone.querySelectorAll('.delete-cell, .icon-button-edit, .icon-button-delete, .icon-button-move, .mini-button, form, button').forEach(function (node) {
+            node.remove();
+        });
+
+        if (!tbody.querySelector('tr')) {
+            return null;
+        }
+
+        return clone;
+    }
+
+    function buildBrokerSection(broker, title, summarySelector, tableConfigs) {
+        var section = document.createElement('section');
+        section.className = 'print-broker-section';
+
+        var header = document.createElement('div');
+        header.className = 'print-broker-header';
+
+        var logo = document.createElement('img');
+        logo.className = 'print-broker-logo';
+        logo.src = broker === 'ING' ? '/images/brokers/ing.png' : '/images/brokers/traderepublic.png';
+        logo.alt = title;
+        header.appendChild(logo);
+
+        var label = document.createElement('h3');
+        label.textContent = title + ' (Resumen total de las posiciones)';
+        header.appendChild(label);
+        section.appendChild(header);
+
+        var summary = cloneSummaryBlock(summarySelector);
+        if (summary) {
+            section.appendChild(summary);
+        }
+
+        var tablesAdded = 0;
+        tableConfigs.forEach(function (config) {
+            var tableClone = cloneTableForBroker(config.selector, broker);
+            if (!tableClone) {
+                return;
+            }
+
+            var block = document.createElement('div');
+            block.className = 'print-table-block';
+
+            var heading = document.createElement('h4');
+            heading.textContent = config.title;
+            block.appendChild(heading);
+            block.appendChild(tableClone);
+            section.appendChild(block);
+            tablesAdded += 1;
+        });
+
+        if (tablesAdded === 0) {
+            return null;
+        }
+
+        return section;
+    }
+
+    function printCloneDocument(mode) {
+        var root = document.createElement('div');
+        root.className = 'print-clone-root';
+
+        var globalSummary = cloneSummaryBlock('#summary-strip-general');
+        if (globalSummary) {
+            var globalHeader = document.createElement('h3');
+            globalHeader.textContent = 'RESUMEN TOTAL DE LAS POSICIONES';
+            root.appendChild(globalHeader);
+            root.appendChild(globalSummary);
+        }
+
+        var brokerSections = [
+            buildBrokerSection('ING', 'INGDIRECT', '#summary-strip-ing', [
+                { selector: '#tbody-etfs', title: 'ETF (Cartera)' },
+                { selector: '#tbody-portfolio-stocks', title: 'Acciones (Cartera)' },
+                { selector: '#tbody-pensionplans', title: 'Planes de pensiones (Cartera)' }
+            ]),
+            buildBrokerSection('TR', 'TRADE REPUBLIC', '#summary-strip-tr', [
+                { selector: '#tbody-etfs', title: 'ETF (Cartera)' },
+                { selector: '#tbody-portfolio-stocks', title: 'Acciones (Cartera)' },
+                { selector: '#tbody-pensionplans', title: 'Planes de pensiones (Cartera)' }
+            ])
+        ];
+
+        brokerSections.forEach(function (section) {
+            if (section) {
+                root.appendChild(section);
+            }
+        });
+
+        var iframe = document.createElement('iframe');
+        iframe.setAttribute('aria-hidden', 'true');
+        iframe.style.position = 'fixed';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        iframe.style.opacity = '0';
+        iframe.style.pointerEvents = 'none';
+        document.body.appendChild(iframe);
+
+        var styles = [
+            '@page { size: A4 portrait; margin: 8mm 5mm; }',
+            'html, body { margin: 0; padding: 0; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; }',
+            'body { padding: 12mm 8mm; }',
+            '.print-clone-root { display: block; width: 100%; }',
+            '.print-broker-section { margin: 0 0 18px; page-break-inside: avoid; break-inside: avoid; }',
+            '.print-broker-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }',
+            '.print-broker-header h3, h3 { margin: 0 0 8px; font-size: 15px; font-weight: 700; color: #000; }',
+            '.print-broker-logo { width: 116px; max-height: 42px; object-fit: contain; background: #fff; border-radius: 4px; }',
+            '.summary-strip { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 12px; margin-bottom: 10px; }',
+            '.summary-box { border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 10px; background: #fff; }',
+            '.summary-box span { display: block; font-size: 10px; color: #333; margin-bottom: 4px; }',
+            '.summary-box strong { display: block; font-size: 12px; font-weight: 700; color: #000; }',
+            '.print-table-block { margin-top: 14px; page-break-inside: avoid; break-inside: avoid; }',
+            '.print-table-block h4 { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #000; }',
+            'table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7pt; background: #fff; color: #000; }',
+            'th, td { border: 1px solid #b9b9b9; padding: 3px 5px; text-align: left; vertical-align: top; color: #000; background: #fff; word-wrap: break-word; }',
+            'th { background: #f3f3f3; font-weight: 700; text-transform: uppercase; }',
+            '.delete-cell, .broker-cell, .icon-button-edit, .icon-button-delete, .icon-button-move, form, button, .btn-toggle-summary, .mini-button, .print-actions { display: none !important; }',
+            '.text-success { color: #0a7a52; font-weight: 700; }',
+            '.text-danger { color: #b42318; font-weight: 700; }',
+            '@media print { body { margin: 0; } }'
+        ].join('');
+
+        var doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + styles + '</style></head><body>' + root.outerHTML + '</body></html>');
+        doc.close();
+
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        window.setTimeout(function () {
+            iframe.remove();
+        }, 1500);
+    }
+
+    function bindPrintButton(id, handler) {
+        var boton = document.getElementById(id);
         if (!boton) {
             return;
         }
 
-        boton.addEventListener('click', function () {
-            imprimirConNumeracion(config.clase);
-        });
+        boton.addEventListener('click', handler);
+    }
+
+    bindPrintButton('btn-print-cartera', function () {
+        imprimirConNumeracion('print-all');
     });
-})();
 
-// Al imprimir (cualquiera de los botones o Ctrl+P), oculta por completo los
-// paneles cuya tabla no tenga ninguna fila de datos visible (ni las vacías
-// por defecto, ni las descartadas por el filtro de bróker). No se usa
-// getComputedStyle porque el navegador no garantiza que los estilos de
-// @media print ya estén aplicados en el momento del evento 'beforeprint';
-// en su lugar se replica la misma condición que usa el CSS de impresión
-// (atributo data-broker + clase del body) directamente en JS.
-(function () {
-    function filaTieneDatos(fila) {
-        if (fila.querySelector('.empty-state-cell')) {
-            return false;
+    bindPrintButton('btn-print-ing', function () {
+        var section = buildBrokerSection('ING', 'INGDIRECT', '#summary-strip-ing', [
+            { selector: '#tbody-etfs', title: 'ETF (Cartera)' },
+            { selector: '#tbody-portfolio-stocks', title: 'Acciones (Cartera)' },
+            { selector: '#tbody-pensionplans', title: 'Planes de pensiones (Cartera)' }
+        ]);
+
+        if (!section) {
+            return;
         }
 
-        var broker = fila.getAttribute('data-broker');
-        if (broker !== null) {
-            if (document.body.classList.contains('print-broker-ing') && broker !== 'ING') {
-                return false;
-            }
-            if (document.body.classList.contains('print-broker-tr') && broker !== 'TR') {
-                return false;
-            }
+        var root = document.createElement('div');
+        root.className = 'print-clone-root';
+        root.appendChild(section);
+
+        var iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        iframe.style.opacity = '0';
+        document.body.appendChild(iframe);
+
+        var styles = [
+            '@page { size: A4 portrait; margin: 8mm 5mm; }',
+            'html, body { margin: 0; padding: 0; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; }',
+            'body { padding: 12mm 8mm; }',
+            '.print-clone-root { display: block; width: 100%; }',
+            '.print-broker-section { margin: 0 0 18px; page-break-inside: avoid; break-inside: avoid; }',
+            '.print-broker-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }',
+            '.print-broker-header h3 { margin: 0; font-size: 15px; font-weight: 700; color: #000; }',
+            '.print-broker-logo { width: 116px; max-height: 42px; object-fit: contain; background: #fff; border-radius: 4px; }',
+            '.summary-strip { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 12px; margin-bottom: 10px; }',
+            '.summary-box { border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 10px; background: #fff; }',
+            '.summary-box span { display: block; font-size: 10px; color: #333; margin-bottom: 4px; }',
+            '.summary-box strong { display: block; font-size: 12px; font-weight: 700; color: #000; }',
+            '.print-table-block { margin-top: 14px; }',
+            '.print-table-block h4 { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #000; }',
+            'table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7pt; background: #fff; color: #000; }',
+            'th, td { border: 1px solid #b9b9b9; padding: 3px 5px; text-align: left; vertical-align: top; color: #000; background: #fff; word-wrap: break-word; }',
+            'th { background: #f3f3f3; font-weight: 700; text-transform: uppercase; }',
+            '.delete-cell, .broker-cell, button, form, .btn-toggle-summary, .mini-button, .print-actions { display: none !important; }',
+            '.text-success { color: #0a7a52; font-weight: 700; }',
+            '.text-danger { color: #b42318; font-weight: 700; }',
+            '@media print { body { margin: 0; } }'
+        ].join('');
+
+        var doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + styles + '</style></head><body>' + root.outerHTML + '</body></html>');
+        doc.close();
+
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        window.setTimeout(function () {
+            iframe.remove();
+        }, 1500);
+    });
+
+    bindPrintButton('btn-print-tr', function () {
+        var section = buildBrokerSection('TR', 'TRADE REPUBLIC', '#summary-strip-tr', [
+            { selector: '#tbody-etfs', title: 'ETF (Cartera)' },
+            { selector: '#tbody-portfolio-stocks', title: 'Acciones (Cartera)' },
+            { selector: '#tbody-pensionplans', title: 'Planes de pensiones (Cartera)' }
+        ]);
+
+        if (!section) {
+            return;
         }
 
-        return true;
-    }
+        var root = document.createElement('div');
+        root.className = 'print-clone-root';
+        root.appendChild(section);
 
-    function ocultarPanelesVacios() {
-        document.querySelectorAll('.market-panel').forEach(function (panel) {
-            var filas = panel.querySelectorAll('tbody tr');
-            if (filas.length === 0) {
-                return;
-            }
+        var iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        iframe.style.opacity = '0';
+        document.body.appendChild(iframe);
 
-            var algunaVisible = false;
+        var styles = [
+            '@page { size: A4 portrait; margin: 8mm 5mm; }',
+            'html, body { margin: 0; padding: 0; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; }',
+            'body { padding: 12mm 8mm; }',
+            '.print-clone-root { display: block; width: 100%; }',
+            '.print-broker-section { margin: 0 0 18px; page-break-inside: avoid; break-inside: avoid; }',
+            '.print-broker-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }',
+            '.print-broker-header h3 { margin: 0; font-size: 15px; font-weight: 700; color: #000; }',
+            '.print-broker-logo { width: 116px; max-height: 42px; object-fit: contain; background: #fff; border-radius: 4px; }',
+            '.summary-strip { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 12px; margin-bottom: 10px; }',
+            '.summary-box { border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 10px; background: #fff; }',
+            '.summary-box span { display: block; font-size: 10px; color: #333; margin-bottom: 4px; }',
+            '.summary-box strong { display: block; font-size: 12px; font-weight: 700; color: #000; }',
+            '.print-table-block { margin-top: 14px; }',
+            '.print-table-block h4 { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #000; }',
+            'table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7pt; background: #fff; color: #000; }',
+            'th, td { border: 1px solid #b9b9b9; padding: 3px 5px; text-align: left; vertical-align: top; color: #000; background: #fff; word-wrap: break-word; }',
+            'th { background: #f3f3f3; font-weight: 700; text-transform: uppercase; }',
+            '.delete-cell, .broker-cell, button, form, .btn-toggle-summary, .mini-button, .print-actions { display: none !important; }',
+            '.text-success { color: #0a7a52; font-weight: 700; }',
+            '.text-danger { color: #b42318; font-weight: 700; }',
+            '@media print { body { margin: 0; } }'
+        ].join('');
 
-            filas.forEach(function (fila) {
-                if (filaTieneDatos(fila)) {
-                    algunaVisible = true;
-                } else if (fila.hasAttribute('data-broker')) {
-                    // Oculta también por JS (además del CSS de @media print)
-                    // las filas descartadas por el filtro de bróker, para que
-                    // el cálculo de altura/páginas sea fiable sin depender de
-                    // que el navegador ya haya aplicado los estilos de
-                    // impresión en el momento de 'beforeprint'.
-                    fila.setAttribute('data-print-hidden-row', 'true');
-                    fila.style.display = 'none';
-                }
-            });
+        var doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + styles + '</style></head><body>' + root.outerHTML + '</body></html>');
+        doc.close();
 
-            if (!algunaVisible) {
-                panel.setAttribute('data-print-hidden-empty', 'true');
-                panel.style.display = 'none';
-            }
-        });
-    }
-
-    function restaurarPanelesVacios() {
-        document.querySelectorAll('[data-print-hidden-empty="true"]').forEach(function (panel) {
-            panel.style.display = '';
-            panel.removeAttribute('data-print-hidden-empty');
-        });
-        document.querySelectorAll('[data-print-hidden-row="true"]').forEach(function (fila) {
-            fila.style.display = '';
-            fila.removeAttribute('data-print-hidden-row');
-        });
-    }
-
-    window.addEventListener('beforeprint', ocultarPanelesVacios);
-    window.addEventListener('afterprint', restaurarPanelesVacios);
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        window.setTimeout(function () {
+            iframe.remove();
+        }, 1500);
+    });
 })();
 
 // Alinea verticalmente los botones de imprimir con la fila de enlaces
@@ -1018,7 +1226,22 @@ document.addEventListener('click', function (event) {
 // filas ING), y después el logotipo de Trade Republic seguido de sus
 // tablas (solo filas TR). Las tablas sin ninguna fila de ese bróker se
 // omiten (igual que el resto de casos de "tabla vacía").
-function reorganizarCarteraPorBroker(shellClone) {
+function eliminarPanelesVaciosEnImpresion(shellClone) {
+    shellClone.querySelectorAll('.market-panel, .market-panel-watchlist, .market-panel-non-cartera').forEach(function (panel) {
+        var filas = Array.prototype.filter.call(panel.querySelectorAll('tbody tr'), function (fila) {
+            var visible = fila.style.display !== 'none';
+            var tieneTexto = (fila.textContent || '').replace(/\s+/g, ' ').trim().length > 0;
+            var esFilaVacia = fila.querySelector('.empty-state-cell') !== null;
+            return visible && tieneTexto && !esFilaVacia;
+        });
+
+        if (filas.length === 0) {
+            panel.remove();
+        }
+    });
+}
+
+function reorganizarCarteraPorBroker(shellClone, bodyClass) {
     var origen = window.location.origin;
 
     function filtrarFilasPorBroker(tabla, broker) {
@@ -1033,7 +1256,31 @@ function reorganizarCarteraPorBroker(shellClone) {
         return algunaVisible;
     }
 
-    function construirGrupoBroker(paneles, broker, logoSrc, logoAlt, resumen) {
+    function crearResumenGlobal() {
+        var resumen = shellClone.querySelector('#summary-strip');
+        if (!resumen) {
+            return null;
+        }
+
+        var bloque = document.createElement('div');
+        bloque.className = 'print-summary-global';
+
+        var titulo = document.createElement('div');
+        titulo.className = 'print-summary-global-title';
+        titulo.textContent = 'RESUMEN TOTAL DE LAS POSICIONES';
+        bloque.appendChild(titulo);
+
+        var resumenClonado = resumen.cloneNode(true);
+        resumenClonado.classList.add('print-summary-global-strip');
+        resumenClonado.querySelectorAll('.btn-toggle-summary').forEach(function (btn) {
+            btn.remove();
+        });
+        bloque.appendChild(resumenClonado);
+
+        return bloque;
+    }
+
+    function construirGrupoBroker(paneles, broker, logoSrc, logoAlt, resumen, titulo) {
         var grupo = document.createElement('div');
         grupo.className = 'print-broker-group';
 
@@ -1043,15 +1290,24 @@ function reorganizarCarteraPorBroker(shellClone) {
         logo.alt = logoAlt;
         grupo.appendChild(logo);
 
+        if (titulo) {
+            var tituloResumen = document.createElement('div');
+            tituloResumen.className = 'print-broker-summary-title';
+            tituloResumen.textContent = titulo;
+            grupo.appendChild(tituloResumen);
+        }
+
         if (resumen) {
-            grupo.appendChild(resumen);
+            var resumenClonado = resumen.cloneNode(true);
+            resumenClonado.classList.add('print-broker-summary-strip');
+            resumenClonado.querySelectorAll('.btn-toggle-summary').forEach(function (btn) {
+                btn.remove();
+            });
+            grupo.appendChild(resumenClonado);
         }
 
         paneles.forEach(function (panelOriginal) {
             var panel = panelOriginal.cloneNode(true);
-            // Al clonar cada panel dos veces (una por bróker) se duplicarían
-            // ids (tbody, etc.), lo que confunde a paged.js al maquetar.
-            // Como en el HTML impreso no se usan, se eliminan del clon.
             panel.removeAttribute('id');
             panel.querySelectorAll('[id]').forEach(function (el) {
                 el.removeAttribute('id');
@@ -1066,25 +1322,41 @@ function reorganizarCarteraPorBroker(shellClone) {
 
     var paneles = Array.prototype.filter.call(
         shellClone.querySelectorAll('.market-panel'),
-        function (panel) { return panel.querySelector('tr[data-broker]'); }
+        function (panel) {
+            if (!panel.querySelector('tr[data-broker]')) {
+                return false;
+            }
+
+            var textoPanel = (panel.querySelector('.panel-head') || panel).textContent || '';
+            return /ETF|Fondos|Acciones|Planes de pensiones|Cuenta Corriente/i.test(textoPanel) && !/Efectivo|EFECTIVO/i.test(textoPanel);
+        }
     );
 
     if (paneles.length === 0) {
         return;
     }
 
+    var resumenGlobal = crearResumenGlobal();
     var primerPanel = paneles[0];
     var resumenIng = shellClone.querySelector('#summary-strip-ing');
     var resumenTr = shellClone.querySelector('#summary-strip-tr');
-    var grupoIng = construirGrupoBroker(paneles, 'ING', origen + '/images/brokers/ing-direct-logo.png', 'ING Direct', resumenIng);
-    var grupoTr = construirGrupoBroker(paneles, 'TR', origen + '/images/brokers/logotipo-trade-republic.png', 'Trade Republic', resumenTr);
+    var grupoIng = construirGrupoBroker(paneles, 'ING', origen + '/images/brokers/ing-direct-logo.png', 'ING Direct', resumenIng, 'INGDIRECT (Resumen total de las posiciones)');
+    var grupoTr = construirGrupoBroker(paneles, 'TR', origen + '/images/brokers/logotipo-trade-republic.png', 'Trade Republic', resumenTr, 'TRADE REPUBLIC (Resumen total de las posiciones)');
 
-    // Salto de página antes del grupo de Trade Republic para que cada
-    // bróker empiece en una página distinta (no se usa ":first-of-type"
-    // en CSS porque ese pseudo-selector compara por etiqueta <div>, no por
-    // clase, y no distinguiría de forma fiable el primer grupo del resto).
+    var elementosAEliminar = ['.summary-panel', '.blank-line-1', '.blank-lines-2', '.market-panel-watchlist'];
+    if (bodyClass !== 'print-all') {
+        elementosAEliminar.push('.market-panel-non-cartera');
+    }
+
+    shellClone.querySelectorAll(elementosAEliminar.join(', ')).forEach(function (element) {
+        element.remove();
+    });
+
+    if (resumenGlobal) {
+        primerPanel.parentNode.insertBefore(resumenGlobal, primerPanel);
+    }
+
     grupoTr.classList.add('print-broker-group-break');
-
     primerPanel.parentNode.insertBefore(grupoIng, primerPanel);
     primerPanel.parentNode.insertBefore(grupoTr, primerPanel);
     paneles.forEach(function (panel) {
@@ -1114,7 +1386,8 @@ function imprimirConNumeracion(bodyClass) {
     }
 
     if (bodyClass === 'print-cartera-only' || bodyClass === 'print-all') {
-        reorganizarCarteraPorBroker(copiaContenido);
+        reorganizarCarteraPorBroker(copiaContenido, bodyClass);
+        eliminarPanelesVaciosEnImpresion(copiaContenido);
     }
 
     // El HTML clonado se serializa e inyecta en un iframe cuyo documento no

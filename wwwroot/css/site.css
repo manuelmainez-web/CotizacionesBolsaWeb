@@ -727,102 +727,233 @@ body.wco-active .topbar-datetime {
 }
 
 @media print {
-  .no-print,
-  .historico-tabs,
-  .chart-controls,
-  #range-select {
-    display: none !important;
-  }
-
-  /* Al imprimir solo se muestra la pestaña "Gráfica" (título, rentabilidad, recomendación y las 2
-     gráficas), independientemente de cuál esté activa en pantalla. Análisis técnico y fundamental
-     quedan fuera del informe impreso. */
-  #tab-tecnico,
-  #tab-fundamental {
-    display: none !important;
-  }
-
-  #tab-grafica {
-    display: block !important;
-  }
-
-  .historico-tab-panel .market-panel:not(.chart-panel-half),
-  .historico-tab-panel .summary-box,
-  .historico-tab-panel .rentabilidad-box,
-  .historico-tab-panel .tech-recommendation {
-    break-inside: avoid;
-  }
-
-  .historico-header .portfolio-subtitle {
-    display: block !important;
-    color: #000000 !important;
-  }
-
-  .charts-row {
-    flex-direction: row !important;
-    gap: 10px;
-  }
-
-  .chart-wrap {
-    min-height: 160px !important;
-    padding: 8px !important;
-  }
-
   body {
     background: #ffffff !important;
     color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  .market-panel {
+  .topbar,
+  .quick-links-panel,
+  .qr-box,
+  .portfolio-header-image,
+  .btn-refresh-page,
+  .print-actions,
+  .btn-toggle-summary,
+  .mini-button,
+  .panel-head .mini-button,
+  .add-entry-dialog,
+  .dialog-actions,
+  .market-panel .panel-head-row .mini-button,
+  .icon-button-delete,
+  .icon-button-edit,
+  .icon-button-move,
+  .delete-cell form,
+  .delete-cell button {
+    display: none !important;
+  }
+
+  .portfolio-header,
+  .summary-panel,
+  .market-panel,
+  .summary-strip,
+  .summary-box,
+  .table-wrap,
+  .panel-head,
+  .market-table,
+  .market-table tbody,
+  .market-table thead,
+  .chart-wrap,
+  .rentabilidad-box,
+  .tech-recommendation {
     background: #ffffff !important;
+    color: #000000 !important;
     border-color: #999999 !important;
     box-shadow: none !important;
   }
 
-  .panel-head,
-  .portfolio-subtitle,
-  .summary-box span,
-  .rentabilidad-box span,
-  .tech-recommendation-label,
-  .chart-sub-label,
-  .fundamental-note,
-  .empty-state-cell,
-  h1.mb-1 {
+  .print-only,
+  #print-datetime,
+  #print-datetime-ing,
+  #print-datetime-tr,
+  #print-datetime-cartera {
+    display: block !important;
     color: #000000 !important;
+  }
+
+  .portfolio-subtitle,
+  .summary-strip-label,
+  .summary-box span,
+  .summary-box strong,
+  .panel-head,
+  .panel-head-subtitle,
+  .market-table th,
+  .market-table td,
+  .empty-state-cell,
+  .portfolio-note,
+  .fundamental-note,
+  .chart-sub-label,
+  .rentabilidad-box span,
+  .rentabilidad-box strong,
+  .tech-recommendation strong,
+  .tech-recommendation-label,
+  h1,
+  h2,
+  h3,
+  p,
+  a,
+  span,
+  button {
+    color: #000000 !important;
+  }
+
+  .summary-strip {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(180px, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  body.print-cartera-only .summary-strip,
+  body.print-cartera-only .summary-strip.is-collapsed,
+  body.print-all .summary-strip,
+  body.print-all .summary-strip.is-collapsed,
+  body.print-cartera-only .table-wrap.is-collapsed,
+  body.print-all .table-wrap.is-collapsed,
+  body.print-cartera-only .cash-panel-body.is-collapsed,
+  body.print-all .cash-panel-body.is-collapsed,
+  .summary-strip.is-collapsed,
+  .table-wrap.is-collapsed,
+  .cash-panel-body.is-collapsed {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .summary-strip-label {
+    margin-bottom: 12px !important;
+  }
+
+  body.print-cartera-only .summary-strip-label,
+  body.print-all .summary-strip-label {
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .market-panel {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 16px !important;
+  }
+
+  .market-panel .panel-head-row {
+    display: flex !important;
+  }
+
+  .market-panel .panel-head {
+    padding: 10px 12px !important;
+  }
+
+  .name-link,
+  .name-link:hover {
+    color: #000000 !important;
+    text-decoration: none !important;
   }
 
   .summary-box,
   .rentabilidad-box,
   .tech-recommendation {
-    background: #ffffff !important;
-    border-color: #999999 !important;
+    border: 1px solid #bbbbbb !important;
     box-shadow: none !important;
-  }
-
-  .rentabilidad-box-current {
-    background: #eef2f7 !important;
+    background: #ffffff !important;
   }
 
   .summary-box strong,
   .rentabilidad-box strong,
   .tech-recommendation strong {
+    font-weight: 700 !important;
+  }
+
+  .summary-box.gain strong {
     color: #000000 !important;
   }
 
-  body .text-success {
-    color: #15803d !important;
+  .summary-box.loss strong {
+    color: #000000 !important;
   }
 
-  body .text-danger {
-    color: #b91c1c !important;
+  .summary-box.invested strong {
+    color: #000000 !important;
   }
 
-  body .text-amber {
-    color: #b45309 !important;
+  .market-table th,
+  .market-table td {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    color: #000000 !important;
   }
 
-  body .text-muted {
-    color: #4b5563 !important;
+  .market-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .print-cartera-only .market-panel,
+  .print-cartera-only .market-panel-watchlist,
+  .print-cartera-only .market-panel-watchlist + .market-panel,
+  .print-broker-ing .market-panel,
+  .print-broker-tr .market-panel,
+  .print-broker-ing .market-panel-watchlist,
+  .print-broker-tr .market-panel-watchlist {
+    display: none !important;
+  }
+
+  body.print-cartera-only tr[data-broker]:not([data-broker="ING"]):not([data-broker="TR"]) {
+    display: none !important;
+  }
+
+  body.print-broker-ing tr[data-broker]:not([data-broker="ING"]) {
+    display: none !important;
+  }
+
+  body.print-broker-tr tr[data-broker]:not([data-broker="TR"]) {
+    display: none !important;
+  }
+
+  .print-all .summary-panel,
+  .print-all .market-panel,
+  .print-broker-ing .summary-panel,
+  .print-broker-tr .summary-panel {
+    display: block !important;
+  }
+
+  .print-broker-ing .summary-panel,
+  .print-broker-tr .summary-panel {
+    display: none !important;
+  }
+
+  body.print-cartera-only .summary-panel,
+  body.print-cartera-only .market-panel,
+  body.print-cartera-only .market-panel-watchlist {
+    display: block !important;
+  }
+
+  .print-broker-ing .print-broker-letterhead-ing,
+  .print-broker-tr .print-broker-letterhead-tr,
+  .print-cartera-only .print-cartera-letterhead,
+  body.print-cartera-only .print-broker-letterhead-ing,
+  body.print-cartera-only .print-broker-letterhead-tr {
+    display: block !important;
+    page-break-after: always;
+  }
+
+  .print-all .print-broker-letterhead,
+  .print-cartera-only .print-broker-letterhead {
+    display: none !important;
+  }
+
+  @page {
+    margin: 12mm;
   }
 }
 
@@ -1623,10 +1754,7 @@ body.wco-active .topbar-datetime {
   }
 
   body.print-all .print-all-cash-image {
-    display: block !important;
-    max-width: 140px;
-    height: auto;
-    margin: 12px 0;
+    display: none !important;
   }
 
   .print-cartera-letterhead-title {
@@ -1679,6 +1807,18 @@ body.wco-active .topbar-datetime {
     max-width: 100px;
     margin-top: 55px;
     margin-bottom: 0;
+  }
+
+  .print-summary-global {
+    margin: 0 0 18px;
+  }
+
+  .print-summary-global-title,
+  .print-broker-summary-title {
+    color: #000000 !important;
+    font-size: 12pt;
+    font-weight: 700;
+    margin: 0 0 10px;
   }
 
   .print-broker-group {

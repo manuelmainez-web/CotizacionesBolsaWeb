@@ -1,8 +1,19 @@
+using Microsoft.AspNetCore.HttpOverrides;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 var invariantCultureOptions = new Microsoft.AspNetCore.Builder.RequestLocalizationOptions
 {
@@ -16,7 +27,12 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
-    app.UseHttpsRedirection();
+
+    var disableHttpsRedirect = app.Configuration.GetValue<bool>("DisableHttpsRedirection");
+    if (!disableHttpsRedirect)
+    {
+        app.UseHttpsRedirection();
+    }
 }
 
 app.Use(async (context, next) =>
