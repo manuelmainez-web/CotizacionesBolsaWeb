@@ -54,7 +54,7 @@ public sealed class Quote
     public string UpdatedTimeText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("HH:mm") : string.Empty;
     public string TrendCssClass => PercentChange.HasValue && PercentChange.Value >= 0 ? "text-success" : "text-danger";
     public bool IsMarketOpen => ComputeMarketOpen(CountryCode, Symbol);
-    public string MarketStatusLabel => IsMarketOpen ? "Mercado abierto" : "Mercado cerrado";
+    public string MarketStatusLabel => string.Empty;
     public string FlagUrl => GetFlagUrl(CountryCode);
 
     public static string GetFlagUrl(string? countryCode) => string.IsNullOrWhiteSpace(countryCode) ? "https://flagcdn.com/w40/gb.png" : countryCode switch

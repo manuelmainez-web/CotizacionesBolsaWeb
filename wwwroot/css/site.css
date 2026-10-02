@@ -371,6 +371,11 @@ body.wco-active .topbar-datetime {
   padding: 0.72rem 1rem;
   font-weight: 700;
   cursor: pointer;
+  min-width: 146px;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .btn-refresh {
@@ -437,20 +442,74 @@ body.wco-active .topbar-datetime {
 
 .btn-toggle-summary {
   margin-left: auto;
-  width: 92px;
+  min-width: 26px;
+  width: 26px;
+  height: 26px;
   box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   border: 1px solid rgba(148, 163, 184, 0.24);
   background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);
   color: #eff9ff;
   border-radius: 8px;
-  padding: 3px 10px;
-  font-size: 0.68rem;
-  font-weight: 600;
+  padding: 0;
+  font-size: 0;
+  line-height: 1;
+  font-weight: 700;
   text-transform: none;
   letter-spacing: normal;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.btn-toggle-summary::before {
+  content: "▴";
+  display: block;
+  margin: 0;
+  font-size: 1.4rem;
+  line-height: 1;
+  vertical-align: middle;
+  font-weight: 900;
+}
+
+.btn-toggle-summary[aria-expanded="false"]::before {
+  content: "▾";
+}
+
+.btn-toggle-summary:hover {
+  background: linear-gradient(180deg, #2b4059 0%, #1d2f42 100%);
+  border-color: rgba(96, 165, 250, 0.7);
+  transform: translateY(-1px);
+}
+
+.btn-toggle-summary-cash {
+  min-width: 26px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font-size: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  vertical-align: middle;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.btn-toggle-summary-cash::before {
+  margin-right: 0;
+  font-size: 1.4rem;
+  line-height: 1;
+  display: block;
+  transform: translateY(-1px);
+  flex-shrink: 0;
 }
 
 .summary-strip-label .btn-toggle-summary:first-child {
@@ -578,9 +637,32 @@ body.wco-active .topbar-datetime {
   gap: 10px;
 }
 
+.panel-head-row > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.panel-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
 .panel-head-row .mini-button {
   padding: 0.28rem 0.55rem;
   font-size: 0.72rem;
+  min-width: 138px;
+}
+
+.cash-panel-body.is-collapsed {
+  display: none;
+}
+
+.market-panel .table-wrap.is-collapsed {
+  display: none;
 }
 
 .panel-head-subtitle {
@@ -1353,14 +1435,54 @@ body.wco-active .topbar-datetime {
 
 /* Mayor especificidad que ".market-table td" (que fija font-size: 0.9rem)
    para que la reducción de fuente se aplique de verdad en estas celdas. */
+#tbody-commodities td.time-cell-compact {
+  font-size: 0.8rem;
+}
+
+#tbody-commodities td.time-cell-compact .commodity-updated-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+#tbody-commodities td.time-cell-compact .commodity-updated-text {
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
 .market-table td.time-cell-compact {
   font-size: 0.7rem;
+}
+
+.market-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 2px;
+  flex-wrap: nowrap;
+}
+
+.market-status-label {
+  font-size: 0.72rem;
+  opacity: 0.8;
+  color: #dfe8f1;
+}
+
+.market-status-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .market-clock {
   display: inline-flex;
   vertical-align: middle;
-  margin-left: 4px;
+  margin-left: 2px;
+  flex-shrink: 0;
 }
 
 .market-clock.market-open {

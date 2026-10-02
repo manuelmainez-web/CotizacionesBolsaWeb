@@ -40,19 +40,68 @@ document.addEventListener('click', function (event) {
 });
 
 // Botones de mostrar/ocultar las cajas de resumen por bróker
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.market-panel .panel-head-row').forEach(function (panelHead) {
+        var panel = panelHead.closest('.market-panel');
+        var tableWrap = panel ? panel.querySelector('.table-wrap') : null;
+        if (!tableWrap || panelHead.querySelector('[data-toggle-target]') || panelHead.querySelector('.table-toggle-button')) {
+            return;
+        }
+
+        var actions = panelHead.querySelector('.panel-head-actions');
+        if (!actions) {
+            actions = document.createElement('div');
+            actions.className = 'panel-head-actions';
+            panelHead.appendChild(actions);
+        }
+
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn-toggle-summary table-toggle-button';
+        button.setAttribute('data-toggle-target', '__auto-panel-table__');
+        button.setAttribute('data-toggle-name', (panelHead.querySelector('span') || panelHead).textContent.replace(/\s+/g, ' ').trim() || 'panel');
+        button.title = 'Mostrar/ocultar';
+        button.setAttribute('aria-label', 'Ocultar panel');
+        button.setAttribute('aria-expanded', 'true');
+        actions.appendChild(button);
+    });
+
+    document.querySelectorAll('[data-toggle-target]').forEach(function (button) {
+        var target = button.getAttribute('data-toggle-target') === '__auto-panel-table__'
+            ? (button.closest('.market-panel') ? button.closest('.market-panel').querySelector('.table-wrap') : null)
+            : document.getElementById(button.getAttribute('data-toggle-target'));
+        var estaOculto = target && target.classList.contains('is-collapsed');
+        var nombre = button.getAttribute('data-toggle-name') || 'panel';
+
+        button.setAttribute('aria-expanded', String(!estaOculto));
+        button.classList.toggle('is-expanded', !estaOculto);
+        button.setAttribute('aria-label', !estaOculto ? 'Ocultar ' + nombre : 'Mostrar ' + nombre);
+        button.title = !estaOculto ? 'Ocultar ' + nombre : 'Mostrar ' + nombre;
+        button.textContent = '';
+    });
+});
+
 document.addEventListener('click', function (event) {
     var button = event.target.closest('[data-toggle-target]');
     if (!button) {
         return;
     }
 
-    var target = document.getElementById(button.getAttribute('data-toggle-target'));
+    var target = button.getAttribute('data-toggle-target') === '__auto-panel-table__'
+        ? (button.closest('.market-panel') ? button.closest('.market-panel').querySelector('.table-wrap') : null)
+        : document.getElementById(button.getAttribute('data-toggle-target'));
     if (!target) {
         return;
     }
 
     var estaOculto = target.classList.toggle('is-collapsed');
-    button.textContent = estaOculto ? 'Mostrar' : 'Ocultar';
+    button.setAttribute('aria-expanded', String(!estaOculto));
+    button.classList.toggle('is-expanded', !estaOculto);
+
+    var nombre = button.getAttribute('data-toggle-name') || 'panel';
+    button.setAttribute('aria-label', estaOculto ? 'Mostrar ' + nombre : 'Ocultar ' + nombre);
+    button.title = estaOculto ? 'Mostrar ' + nombre : 'Ocultar ' + nombre;
+    button.textContent = '';
 
     var etiqueta = button.closest('.summary-strip-label');
     if (etiqueta) {

@@ -76,12 +76,16 @@
                 <img class="quick-link-icon" src="/images/brokers/traderepublic.png" alt="Trade Republic" />
                 <span translate="no" class="notranslate">Trade Republic</span>
             </a>
+            <a class="mini-button quick-link-button notranslate" translate="no" href="https://www.google.com/search?q=por+que+ha+subido+o+bajado+la+bolsa+en+la+jornada+actual&tbm=nws" target="_blank" rel="noopener noreferrer">
+                <span aria-hidden="true">📰</span>
+                <span translate="no" class="notranslate">Noticias</span>
+            </a>
         </div>
     </div>
 
     <div class="summary-panel">
         <div class="summary-strip-label" id="summary-strip-label-general">
-            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-general" title="Mostrar/ocultar">Mostrar</button>
+            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-general" data-toggle-name="resumen general" title="Mostrar/ocultar">Mostrar</button>
             <span class="summary-general-label-text">RESUMEN TOTAL DE LAS POSICIONES + CUENTA CORRIENTE + EFECTIVO</span>
             <div class="print-actions" id="print-actions">
                 <button type="button" class="mini-button quick-link-button" id="btn-print-cartera" title="Imprime solo la cartera, cuenta corriente y efectivo con las casillas de resumen">
@@ -100,7 +104,7 @@
         </div>
 
         <div class="summary-strip-label" id="summary-strip-label">
-            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip" title="Mostrar/ocultar">Mostrar</button>
+            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip" data-toggle-name="resumen total" title="Mostrar/ocultar">Mostrar</button>
             RESUMEN TOTAL DE LAS POSICIONES
         </div>
         <div class="summary-strip is-collapsed" id="summary-strip">
@@ -466,14 +470,14 @@
             <table class="market-table market-table-compact market-table-grid" style="table-layout: fixed;">
                 <thead>
                     <tr>
-                        <th style="width: 190px;">Nombre</th>
-                        <th class="text-align-right">% Var.</th>
-                        <th class="text-align-right">Var.</th>
-                        <th class="text-align-right">Último</th>
-                        <th class="text-align-right">Máximo</th>
-                        <th class="text-align-right">Mínimo</th>
-                        <th class="text-align-right">Clasificación</th>
-                        <th class="text-align-right" style="width: 130px;">Actualizado</th>
+                        <th style="width: 180px;">Nombre</th>
+                        <th class="text-align-right" style="width: 70px;">% Var.</th>
+                        <th class="text-align-right" style="width: 90px;">Var.</th>
+                        <th class="text-align-right" style="width: 90px;">Último</th>
+                        <th class="text-align-right" style="width: 90px;">Máximo</th>
+                        <th class="text-align-right" style="width: 100px;">Mínimo</th>
+                        <th class="text-align-right" style="width: 110px;">Actualización</th>
+                        <th class="text-align-right" style="width: 90px;">Clasificación</th>
                         <th style="width: 96px;"></th>
                     </tr>
                 </thead>
@@ -495,16 +499,18 @@
                             <td class="price-cell price-cell-quote">@item.DisplayPrice $</td>
                             <td class="price-cell price-cell-quote">@item.DisplayHigh $</td>
                             <td class="price-cell price-cell-quote">@item.DisplayLow $</td>
-                            <td class="text-align-right">@classification</td>
                             <td class="time-cell time-cell-compact">
-                                @item.UpdatedText
-                                <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
-                                    <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
-                                        <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
-                                        <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
+                                <div class="commodity-updated-content">
+                                    <span class="commodity-updated-text">@item.UpdatedText</span>
+                                    <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                            <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </td>
+                            <td class="text-align-right">@classification</td>
                             <td class="delete-cell">
                                 <form method="post" asp-page-handler="MoveCommodityUp">
                                     <input type="hidden" name="symbol" value="@item.Symbol" />
@@ -558,7 +564,7 @@
 
     <div class="summary-panel">
         <div class="summary-strip-label" id="summary-strip-label-ing">
-            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-ing" title="Mostrar/ocultar">Mostrar</button>
+            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-ing" data-toggle-name="resumen ING" title="Mostrar/ocultar">Mostrar</button>
             <span class="broker-label-text">
                 <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" /> <span translate="no" class="notranslate">INGDIRECT (Resumen total de las posiciones)</span>
             </span>
@@ -580,7 +586,7 @@
         </div>
 
         <div class="summary-strip-label" id="summary-strip-label-tr">
-            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-tr" title="Mostrar/ocultar">Mostrar</button>
+            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-tr" data-toggle-name="resumen Trade Republic" title="Mostrar/ocultar">Mostrar</button>
             <span class="broker-label-text">
                 <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" /> <span translate="no" class="notranslate">TRADE REPUBLIC (Resumen total de las posiciones)</span>
             </span>
@@ -607,7 +613,7 @@
             <span>ETF <span class="panel-head-subtitle">(Cartera)</span></span>
             <button type="button" class="mini-button" data-dialog-target="add-etf-dialog">+ Añadir ETF</button>
         </div>
-        <div class="table-wrap">
+        <div class="table-wrap is-collapsed">
             <table class="market-table market-table-grid market-table-cartera market-table-etf-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
@@ -782,7 +788,7 @@
         {
             <div class="form-error-banner">@Model.FundError</div>
         }
-        <div class="table-wrap">
+        <div class="table-wrap is-collapsed">
             <table class="market-table market-table-grid market-table-cartera market-table-fondos-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
@@ -939,7 +945,7 @@
         {
             <div class="form-error-banner">@Model.StockHoldingError</div>
         }
-        <div class="table-wrap">
+        <div class="table-wrap is-collapsed">
             <table class="market-table market-table-grid market-table-cartera market-table-acciones-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
@@ -1115,7 +1121,7 @@
         {
             <div class="form-error-banner">@Model.PensionPlanError</div>
         }
-        <div class="table-wrap">
+        <div class="table-wrap is-collapsed">
             <table class="market-table market-table-grid market-table-cartera market-table-planes-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
@@ -1287,7 +1293,7 @@
 
     <div class="summary-panel">
         <div class="summary-strip-label" id="summary-strip-label-checkingaccounts">
-            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-checkingaccounts" title="Mostrar/ocultar">Mostrar</button>
+            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-checkingaccounts" data-toggle-name="cuenta corriente" title="Mostrar/ocultar">Mostrar</button>
             <span translate="no" class="notranslate">🏦 Cuenta Corriente (Resumen Total)</span>
         </div>
         <div class="summary-strip is-collapsed" id="summary-strip-checkingaccounts">
@@ -1307,7 +1313,7 @@
         {
             <div class="form-error-banner">@Model.CheckingAccountError</div>
         }
-        <div class="table-wrap">
+        <div class="table-wrap is-collapsed">
             <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
                 <thead>
                     <tr>
@@ -1413,51 +1419,56 @@
     <div class="market-panel mt-4 market-panel-non-cartera">
         <div class="panel-head panel-head-row">
             <span>EFECTIVO</span>
-            <button type="button" class="mini-button" data-dialog-target="add-cash-dialog">+ Añadir Efectivo</button>
+            <div class="panel-head-actions">
+                <button type="button" class="mini-button" data-dialog-target="add-cash-dialog">+ Añadir Efectivo</button>
+                <button type="button" class="btn-toggle-summary btn-toggle-summary-cash" data-toggle-target="cash-panel-body" data-toggle-name="efectivo" title="Mostrar/ocultar" aria-label="Ocultar efectivo" aria-expanded="true"></button>
+            </div>
         </div>
-        @if (!string.IsNullOrWhiteSpace(Model.CashError))
-        {
-            <div class="form-error-banner">@Model.CashError</div>
-        }
-        <div class="table-wrap">
-            <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
-                <thead>
-                    <tr>
-                        <th class="col-nombre-wide" style="width: 942px;">Nombre</th>
-                        <th class="text-align-right" style="width: 122px;">Importe</th>
-                        <th class="text-align-right" style="width: 115px;">Actualización</th>
-                        <th style="width: 66px;"></th>
-                    </tr>
-                </thead>
-                <tbody id="tbody-cash">
-                    @if (Model.CashHoldings.Count == 0)
-                    {
+        <div id="cash-panel-body" class="cash-panel-body is-collapsed">
+            @if (!string.IsNullOrWhiteSpace(Model.CashError))
+            {
+                <div class="form-error-banner">@Model.CashError</div>
+            }
+            <div class="table-wrap">
+                <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
+                    <thead>
                         <tr>
-                            <td colspan="4" class="empty-state-cell">No hay efectivo añadido. Usa "+ Añadir Efectivo" para empezar.</td>
+                            <th class="col-nombre-wide" style="width: 942px;">Nombre</th>
+                            <th class="text-align-right" style="width: 122px;">Importe</th>
+                            <th class="text-align-right" style="width: 115px;">Actualización</th>
+                            <th style="width: 66px;"></th>
                         </tr>
-                    }
-                    else
-                    {
-                        @for (var i = 0; i < Model.CashHoldings.Count; i++)
+                    </thead>
+                    <tbody id="tbody-cash">
+                        @if (Model.CashHoldings.Count == 0)
                         {
-                            var item = Model.CashHoldings[i];
-
                             <tr>
-                                <td class="name-cell">@item.Name</td>
-                                <td class="price-cell price-cell-quote">@item.Amount.ToString("#,##0.00 €")</td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="delete-cell">
-                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-cash-@i" title="Editar">✎</button>
-                                    <form method="post" asp-page-handler="DeleteCash" onsubmit="return confirm('¿Eliminar este efectivo?');">
-                                        <input type="hidden" name="index" value="@i" />
-                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
-                                    </form>
-                                </td>
+                                <td colspan="4" class="empty-state-cell">No hay efectivo añadido. Usa "+ Añadir Efectivo" para empezar.</td>
                             </tr>
                         }
-                    }
-                </tbody>
-            </table>
+                        else
+                        {
+                            @for (var i = 0; i < Model.CashHoldings.Count; i++)
+                            {
+                                var item = Model.CashHoldings[i];
+
+                                <tr>
+                                    <td class="name-cell">@item.Name</td>
+                                    <td class="price-cell price-cell-quote">@item.Amount.ToString("#,##0.00 €")</td>
+                                    <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="delete-cell">
+                                        <button type="button" class="icon-button-edit" data-dialog-target="edit-cash-@i" title="Editar">✎</button>
+                                        <form method="post" asp-page-handler="DeleteCash" onsubmit="return confirm('¿Eliminar este efectivo?');">
+                                            <input type="hidden" name="index" value="@i" />
+                                            <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

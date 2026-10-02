@@ -26,8 +26,9 @@ public sealed class DataStore
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", restToken);
         }
 
-        _localFolder = Path.Combine(environment.ContentRootPath, "App_Data");
+        _localFolder = ResolveLocalFolder(environment);
         Directory.CreateDirectory(_localFolder);
+        MigrateExistingLocalData(environment.ContentRootPath);
     }
 
     public bool UsesRemoteStorage => _httpClient != null;
@@ -119,6 +120,53 @@ public sealed class DataStore
         catch
         {
             return null;
+        }
+    }
+
+    private static string ResolveLocalFolder(IWebHostEnvironment environment)
+    {
+        var candidates = new List<string>
+        {
+            Path.Combine(environment.ContentRootPath, "App_Data"),
+            Path.Combine(Directory.GetCurrentDirectory(), "App_Data")
+        };
+
+        var current = new DirectoryInfo(environment.ContentRootPath);
+        while (current != null)
+        {
+            candidates.Add(Path.Combine(current.FullName, "App_Data"));
+            if (File.Exists(Path.Combine(current.FullName, "CotizacionesBolsaWeb.csproj")))
+            {
+                return Path.Combine(current.FullName, "App_Data");
+            }
+
+            current = current.Parent;
+        }
+
+        var fallback = candidates
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(path => Directory.Exists(path) || path.Contains("CotizacionesBolsaWeb"));
+
+        return fallback ?? Path.Combine(environment.ContentRootPath, "App_Data");
+    }
+
+    private void MigrateExistingLocalData(string contentRootPath)
+    {
+        var contentRootAppData = Path.Combine(contentRootPath, "App_Data");
+        if (!string.Equals(Path.GetFullPath(contentRootAppData), Path.GetFullPath(_localFolder), StringComparison.OrdinalIgnoreCase))
+        {
+            if (Directory.Exists(contentRootAppData))
+            {
+                foreach (var file in Directory.GetFiles(contentRootAppData))
+                {
+                    var targetPath = Path.Combine(_localFolder, Path.GetFileName(file));
+                    if (!File.Exists(targetPath))
+                    {
+                        File.Copy(file, targetPath);
+                    }
+                }
+            }
         }
     }
 

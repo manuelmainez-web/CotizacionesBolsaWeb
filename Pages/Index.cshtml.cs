@@ -26,7 +26,14 @@ public class IndexModel : PageModel
     public IndexModel(IWebHostEnvironment environment, IConfiguration configuration)
     {
         _dataStore = new DataStore(environment, configuration);
-        PublicUrl = configuration["Portfolio:PublicUrl"] ?? string.Empty;
+
+        var publicUrl = configuration["Portfolio:PublicUrl"];
+        if (string.IsNullOrWhiteSpace(publicUrl))
+        {
+            publicUrl = configuration["RENDER_EXTERNAL_URL"];
+        }
+
+        PublicUrl = publicUrl ?? string.Empty;
     }
 
     public string PublicUrl { get; }
