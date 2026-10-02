@@ -1436,7 +1436,7 @@ body.wco-active .topbar-datetime {
 /* Mayor especificidad que ".market-table td" (que fija font-size: 0.9rem)
    para que la reducción de fuente se aplique de verdad en estas celdas. */
 #tbody-commodities td.time-cell-compact {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 #tbody-commodities td.time-cell-compact .commodity-updated-content {
@@ -1446,11 +1446,12 @@ body.wco-active .topbar-datetime {
   gap: 4px;
   white-space: nowrap;
   line-height: 1.2;
+  font-size: 0.85rem;
 }
 
 #tbody-commodities td.time-cell-compact .commodity-updated-text {
   white-space: nowrap;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 .market-table td.time-cell-compact {
