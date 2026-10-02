@@ -37,17 +37,20 @@ app.UseRouting();
 
 app.Use(async (context, next) =>
 {
+    var requireExternalBasicAuth = app.Configuration.GetValue<bool>("BasicAuth:RequireExternalAccess");
     var expectedUser = app.Configuration["BasicAuth:Username"];
     var expectedPassword = app.Configuration["BasicAuth:Password"];
 
-    if (string.IsNullOrEmpty(expectedUser) || string.IsNullOrEmpty(expectedPassword))
+    // La protección por Basic Auth es opt-in. Si no se activa explícitamente,
+    // la app queda pública para Render y otros entornos externos.
+    if (!requireExternalBasicAuth || string.IsNullOrEmpty(expectedUser) || string.IsNullOrEmpty(expectedPassword))
     {
         await next();
         return;
     }
 
-    // Solo se exige usuario/contraseña cuando el acceso llega desde fuera de la red local
-    // (por ejemplo, a través de internet). El acceso por localhost o red local queda libre.
+    // Solo se exige usuario/contraseña cuando se activa explícitamente la protección
+    // para acceso externo. El acceso por localhost o red local queda libre.
     if (IsLocalOrPrivateHost(context.Request.Host.Host))
     {
         await next();
