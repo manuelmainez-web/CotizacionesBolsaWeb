@@ -12,9 +12,9 @@ body {
 .site-footer {
   margin-top: 2rem;
   padding: 1.25rem 0 2rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.14);
-  background: rgba(8, 15, 20, 0.8);
-  color: #c7d3e2;
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+  background: #ffffff;
+  color: #111111;
 }
 
 .site-footer p {
@@ -22,21 +22,22 @@ body {
   font-size: 0.78rem;
   line-height: 1.6;
   text-align: justify;
+  color: #111111;
 }
 
 .site-footer strong {
-  color: #f8fafc;
+  color: #000000;
 }
 
 .site-footer-divider {
   height: 1px;
-  background: #ffffff;
+  background: rgba(17, 17, 17, 0.7);
   margin: 0.9rem 0 0.75rem;
 }
 
 .site-footer-copyright {
-  text-align: center;
-  color: #f8fafc;
+  text-align: left;
+  color: #111111;
   font-size: 0.76rem;
   font-weight: 600;
   letter-spacing: 0.02em;
