@@ -312,10 +312,15 @@ public class IndexModel : PageModel
                 config.Isin,
                 config.CountryCode,
                 config.Market))
+            .Where(config => !string.IsNullOrWhiteSpace(config.Symbol))
             .ToList();
 
         await _dataStore.SaveEntriesAsync(FuturesKey, futuresConfigs);
-        Futures = futuresConfigs.Count > 0 ? await _service.GetQuotesAsync(futuresConfigs) : new List<Quote>();
+        var futuresQuotes = futuresConfigs.Count > 0 ? await _service.GetQuotesAsync(futuresConfigs) : new List<Quote>();
+        Futures = futuresQuotes
+            .Where(quote => quote != null &&
+                (quote.Price.HasValue || quote.PercentChange.HasValue || quote.Open.HasValue || quote.PreviousClose.HasValue || quote.LastUpdated.HasValue))
+            .ToList();
 
         if (!await _dataStore.ExistsAsync(CommoditiesKey))
         {
@@ -557,7 +562,7 @@ public class IndexModel : PageModel
         "Agrícolas"
     };
 
-    private static string ResolveFutureSymbol(string indexName, string? indexSymbol)
+    public static string ResolveFutureSymbol(string indexName, string? indexSymbol)
     {
         if (string.IsNullOrWhiteSpace(indexSymbol))
         {
@@ -587,42 +592,44 @@ public class IndexModel : PageModel
             return "RTY=F";
         }
 
+        // Índices europeos y de volatilidad no son futuros válidos en Yahoo Finance para este panel;
+        // se excluyen para evitar filas con "N/A" en la tabla de futuros.
         if (normalizedName.Contains("VIX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^VIX")
         {
-            return "VX=F";
+            return string.Empty;
         }
 
         if (normalizedName.Contains("DAX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^GDAXI")
         {
-            return "DAX=F";
+            return string.Empty;
         }
 
         if (normalizedName.Contains("CAC", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^FCHI")
         {
-            return "FCHI=F";
+            return string.Empty;
         }
 
         if (normalizedName.Contains("EURO STOXX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^STOXX50E")
         {
-            return "STOXX50E=F";
+            return string.Empty;
         }
 
         if (normalizedName.Contains("IBEX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^IBEX")
         {
-            return "IBEX=F";
+            return string.Empty;
         }
 
         if (normalizedName.Contains("NIKKEI", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^N225")
         {
-            return "N225=F";
+            return string.Empty;
         }
 
         if (normalizedName.Contains("HANG SENG", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^HSI")
         {
-            return "HSI=F";
+            return string.Empty;
         }
 
-        return normalizedSymbol;
+        return string.Empty;
     }
 
     public async Task<IActionResult> OnPostAddCommodityAsync(string symbol, string classification)

@@ -1856,12 +1856,105 @@
                 return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
             }
 
-            function parseMoney(value) {
-                var normalized = String(value || '0')
+            function normalizeDecimalInputValue(value) {
+                if (value === null || value === undefined) {
+                    return '';
+                }
+
+                var source = String(value).replace(/\u00A0/g, '').trim();
+                if (!source) {
+                    return '';
+                }
+
+                if (source.includes(',') && !source.includes('.')) {
+                    return source.replace(',', '.');
+                }
+
+                return source;
+            }
+
+            function parseDecimalLocale(value) {
+                var source = String(value ?? '0').trim();
+                if (!source) {
+                    return 0;
+                }
+
+                var sanitized = source
                     .replace(/€/g, '')
                     .replace(/\s/g, '')
-                    .replace('.', '')
-                    .replace(',', '.');
+                    .replace(/[^\d,.-]/g, '');
+
+                if (!sanitized || sanitized === '-' || sanitized === '.' || sanitized === ',') {
+                    return 0;
+                }
+
+                var lastComma = sanitized.lastIndexOf(',');
+                var lastDot = sanitized.lastIndexOf('.');
+                var normalized;
+
+                if (lastComma !== -1 && lastDot !== -1) {
+                    normalized = lastComma > lastDot
+                        ? sanitized.replace(/\./g, '').replace(',', '.')
+                        : sanitized.replace(/,/g, '');
+                } else if (lastComma !== -1) {
+                    var fractionLength = sanitized.length - lastComma - 1;
+                    normalized = fractionLength <= 2
+                        ? sanitized.replace(',', '.')
+                        : sanitized.replace(/,/g, '');
+                } else {
+                    var dotParts = sanitized.split('.');
+                    if (dotParts.length > 2) {
+                        normalized = dotParts.slice(0, -1).join('') + '.' + dotParts[dotParts.length - 1];
+                    } else {
+                        normalized = sanitized;
+                    }
+                }
+
+                var parsed = Number(normalized);
+                return Number.isFinite(parsed) ? parsed : 0;
+            }
+
+            function parseMoney(value) {
+                if (typeof value === 'number' && Number.isFinite(value)) {
+                    return value;
+                }
+
+                var source = String(value ?? '0').trim();
+                if (!source) {
+                    return 0;
+                }
+
+                var sanitized = source
+                    .replace(/€/g, '')
+                    .replace(/\s/g, '')
+                    .replace(/[^\d,.-]/g, '');
+
+                if (!sanitized || sanitized === '-' || sanitized === '.' || sanitized === ',') {
+                    return 0;
+                }
+
+                var lastComma = sanitized.lastIndexOf(',');
+                var lastDot = sanitized.lastIndexOf('.');
+                var normalized;
+
+                if (lastComma !== -1 && lastDot !== -1) {
+                    normalized = lastComma > lastDot
+                        ? sanitized.replace(/\./g, '').replace(',', '.')
+                        : sanitized.replace(/,/g, '');
+                } else if (lastComma !== -1) {
+                    var fractionLength = sanitized.length - lastComma - 1;
+                    normalized = fractionLength <= 2
+                        ? sanitized.replace(',', '.')
+                        : sanitized.replace(/,/g, '');
+                } else {
+                    var dotParts = sanitized.split('.');
+                    if (dotParts.length > 2) {
+                        normalized = dotParts.slice(0, -1).join('') + '.' + dotParts[dotParts.length - 1];
+                    } else {
+                        normalized = sanitized;
+                    }
+                }
+
                 var parsed = Number(normalized);
                 return Number.isFinite(parsed) ? parsed : 0;
             }
@@ -1874,8 +1967,40 @@
                 return numberValue.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 6 });
             }
 
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('input[type="number"]').forEach(function (input) {
+                    input.setAttribute('inputmode', 'decimal');
+                    input.setAttribute('lang', 'es-ES');
+
+                    input.addEventListener('keydown', function (event) {
+                        if (event.key === ',' || event.key === '.') {
+                            event.preventDefault();
+                            var start = input.selectionStart ?? input.value.length;
+                            var end = input.selectionEnd ?? input.value.length;
+                            var nextValue = input.value.slice(0, start) + '.' + input.value.slice(end);
+                            input.value = nextValue;
+                            var caret = start + 1;
+                            requestAnimationFrame(function () {
+                                input.setSelectionRange(caret, caret);
+                            });
+                        }
+                    });
+
+                    input.addEventListener('change', function () {
+                        var normalized = normalizeDecimalInputValue(input.value);
+                        if (normalized !== input.value) {
+                            input.value = normalized;
+                        }
+                    });
+                });
+            });
+
             function getStorageKey(type, brokerCode) {
                 return 'cotizaciones.transactions.' + type + '.' + brokerCode;
+            }
+
+            function generateRowId() {
+                return 'tx-' + Date.now() + '-' + Math.random().toString(16).slice(2, 10);
             }
 
             function sanitizeStoredRows(rows) {
@@ -1909,8 +2034,9 @@
                     }
                     var title = cells[0].textContent.trim();
                     var tipo = cells[1].textContent.trim();
-                    var cantidad = parseFloat(String(cells[2].textContent).replace('.', '').replace(',', '.').trim()) || 0;
+                    var cantidad = parseDecimalLocale(cells[2].textContent);
                     rows.push({
+                        id: row.getAttribute('data-row-id') || generateRowId(),
                         titulo: title,
                         tipoOperacion: tipo,
                         numeroTitulos: cantidad,
@@ -1962,7 +2088,7 @@
                 }
 
                 tbody.innerHTML = sortedRows.map(function (row, index) {
-                    var rowId = (row.id || row.titulo || row.concept || 'row') + '-' + index;
+                    var rowId = row.id || ((row.titulo || row.concept || 'row') + '-' + index);
                     var title = row.titulo || row.concept || '';
                     var operation = row.tipoOperacion || getOperationFromRow(row, card);
                     var quantity = row.numeroTitulos !== undefined && row.numeroTitulos !== null ? row.numeroTitulos : (row.cantidad !== undefined ? row.cantidad : 0);
@@ -2079,9 +2205,31 @@
                     button.onclick = function () {
                         var row = button.closest('tr');
                         var allRows = JSON.parse(localStorage.getItem(key) || '[]');
+                        var rowId = row.getAttribute('data-row-id');
                         var index = Array.prototype.indexOf.call(row.parentNode.children, row);
-                        var current = allRows[index] || readExistingRows(card)[index];
-                        openTransactionDialog(card, current, index);
+                        var current = null;
+
+                        if (rowId) {
+                            current = allRows.find(function (item) {
+                                return item && item.id && String(item.id) === String(rowId);
+                            });
+                        }
+
+                        if (!current) {
+                            current = allRows[index] || readExistingRows(card)[index];
+                        }
+
+                        var resolvedIndex = current && current.id
+                            ? allRows.findIndex(function (item) {
+                                return item && item.id && String(item.id) === String(current.id);
+                            })
+                            : index;
+
+                        if (resolvedIndex < 0) {
+                            resolvedIndex = index;
+                        }
+
+                        openTransactionDialog(card, current, resolvedIndex);
                     };
                 });
 
@@ -2153,8 +2301,10 @@
                 };
 
                 if (rowIndex === null || Number.isNaN(rowIndex)) {
+                    row.id = generateRowId();
                     rows.push(row);
                 } else {
+                    row.id = rows[rowIndex] && rows[rowIndex].id ? rows[rowIndex].id : generateRowId();
                     rows[rowIndex] = row;
                 }
 
