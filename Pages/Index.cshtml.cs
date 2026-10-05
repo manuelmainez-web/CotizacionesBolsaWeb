@@ -77,6 +77,117 @@ public class IndexModel : PageModel
     public List<CheckingAccountHolding> CheckingAccounts { get; private set; } = new();
     public List<CashHolding> CashHoldings { get; private set; } = new();
 
+    public sealed class BrokerTransactionRow
+    {
+        public string Titulo { get; set; } = string.Empty;
+        public string TipoOperacion { get; set; } = string.Empty;
+        public decimal NumeroTitulos { get; set; }
+        public decimal ImporteTotal { get; set; }
+        public DateTime FechaOperacion { get; set; } = DateTime.Today;
+
+        public string Concept { get; set; } = string.Empty;
+        public decimal Valor { get; set; }
+    }
+
+    public sealed class BrokerTransactionGroup
+    {
+        public string Broker { get; set; } = string.Empty;
+        public string BrokerName { get; set; } = string.Empty;
+        public List<BrokerTransactionRow> Rows { get; set; } = new();
+    }
+
+    public List<BrokerTransactionGroup> PurchaseTransactionsByBroker => BuildBrokerTransactionGroups(PensionPlans, false);
+    public List<BrokerTransactionGroup> SaleTransactionsByBroker => BuildBrokerTransactionGroups(PensionPlans, true);
+
+    public List<string> AvailableTransactionTitles => BuildAvailableTransactionTitles();
+
+    private List<string> BuildAvailableTransactionTitles()
+    {
+        var titles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var plan in PensionPlans)
+        {
+            if (!string.IsNullOrWhiteSpace(plan.Name))
+            {
+                titles.Add(plan.Name.Trim());
+            }
+        }
+
+        foreach (var holding in StockHoldings)
+        {
+            if (!string.IsNullOrWhiteSpace(holding.Name))
+            {
+                titles.Add(holding.Name.Trim());
+            }
+        }
+
+        foreach (var holding in EtfHoldings)
+        {
+            if (!string.IsNullOrWhiteSpace(holding.Name))
+            {
+                titles.Add(holding.Name.Trim());
+            }
+        }
+
+        foreach (var holding in FundHoldings)
+        {
+            if (!string.IsNullOrWhiteSpace(holding.Name))
+            {
+                titles.Add(holding.Name.Trim());
+            }
+        }
+
+        return titles
+            .OrderBy(title => title, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static List<BrokerTransactionGroup> BuildBrokerTransactionGroups(IEnumerable<PensionPlanHolding> plans, bool salesOnly)
+    {
+        var brokerCodes = new[] { "ING", "TR" };
+        var groups = new List<BrokerTransactionGroup>();
+
+        foreach (var brokerCode in brokerCodes)
+        {
+            var brokerPlanRows = plans
+                .Where(p => string.Equals(p.Broker, brokerCode, StringComparison.OrdinalIgnoreCase))
+                .Select(p => new BrokerTransactionRow
+                {
+                    Titulo = p.Name,
+                    TipoOperacion = salesOnly ? "VENTA" : "COMPRA",
+                    NumeroTitulos = p.Participaciones,
+                    ImporteTotal = p.CapitalInvertido,
+                    FechaOperacion = DateTime.Today.AddDays(-(Math.Abs(p.Name.GetHashCode()) % 12)),
+                    Concept = p.Name,
+                    Valor = p.Participaciones * p.ValorLiquidativo
+                })
+                .OrderByDescending(r => r.FechaOperacion)
+                .ThenByDescending(r => r.ImporteTotal)
+                .ToList();
+
+            if (salesOnly)
+            {
+                brokerPlanRows.Clear();
+            }
+
+            groups.Add(new BrokerTransactionGroup
+            {
+                Broker = brokerCode,
+                BrokerName = ResolveBrokerDisplayName(brokerCode),
+                Rows = brokerPlanRows
+            });
+        }
+
+        return groups;
+    }
+
+    private static string ResolveBrokerDisplayName(string? broker) => broker?.Trim().ToUpperInvariant() switch
+    {
+        "TR" => "Trade Republic",
+        "OCCIDENT" => "Occident",
+        _ => "ING Direct"
+    };
+
     public decimal EtfsPurchaseValue => EtfHoldings.Sum(h => h.PositionCount * h.UnitPurchasePrice);
     public decimal EtfsCurrentValue => EtfHoldings.Sum(h => (Etfs.FirstOrDefault(q => q.Symbol == h.Symbol)?.Price ?? 0m) * h.PositionCount);
     public decimal EtfsGainValue => EtfsCurrentValue - EtfsPurchaseValue;

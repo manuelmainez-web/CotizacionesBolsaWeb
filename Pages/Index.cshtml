@@ -228,6 +228,65 @@
 
     <div class="market-panel mt-4 market-panel-watchlist">
         <div class="panel-head panel-head-row">
+            <span>Futuros <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+        </div>
+        <div class="table-wrap">
+            <table class="market-table market-table-compact market-table-grid" style="table-layout: fixed;">
+                <thead>
+                    <tr>
+                        <th style="width: 180px;">Nombre</th>
+                        <th class="text-align-right" style="width: 70px;">Cambio</th>
+                        <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
+                        <th class="text-align-right" style="width: 90px;">Apertura</th>
+                        <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
+                        <th class="text-align-right" style="width: 100px;">Volumen</th>
+                        <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                        <th class="text-align-right" style="width: 90px;">Símbolo</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-futures">
+                    @if (Model.Indices.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8" class="empty-state-cell">No hay índices seleccionados para mostrar futuros.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.Indices)
+                        {
+                            <tr>
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name&countryCode=@item.CountryCode">@item.Name</a>
+                                    </span>
+                                </td>
+                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
+                                <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen</td>
+                                <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose</td>
+                                <td class="text-align-right">@item.DisplayVolume</td>
+                                <td class="time-cell">
+                                    @item.UpdatedText
+                                    <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                            <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                </td>
+                                <td class="text-align-right">@item.DisplaySymbol</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="market-panel mt-4 market-panel-watchlist">
+        <div class="panel-head panel-head-row">
             <span>Acciones <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
             <button type="button" class="mini-button" data-dialog-target="add-stock-dialog">+ Añadir acción</button>
         </div>
@@ -1209,6 +1268,254 @@
         </div>
     </div>
 
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                Operaciones de compra y venta ING DIRECT
+            </span>
+        </div>
+        <div class="transaction-broker-grid">
+            <div class="transaction-broker-card" data-broker-code="ING" data-transaction-type="purchase">
+                <div class="transaction-broker-header">
+                    <div class="transaction-broker-name">
+                        <span>Compras</span>
+                    </div>
+                    <button type="button" class="mini-button transaction-add-button">+ Incluir compra</button>
+                </div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Tipo operación</th>
+                                <th class="text-align-right">N.º títulos</th>
+                                <th class="text-align-right">Importe total</th>
+                                <th class="text-align-right">Fecha de la operación</th>
+                                <th style="width: 96px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="6" class="empty-state-cell">No hay compras registradas para ING DIRECT.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var row in Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
+                                {
+                                    <tr data-row-key="@($"ING-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
+                                        <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
+                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######")</td>
+                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €")</td>
+                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
+                                        <td class="delete-cell">
+                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
+                                            <button type="button" class="icon-button-delete transaction-delete-row" title="Eliminar">✕</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="transaction-broker-card" data-broker-code="ING" data-transaction-type="sale">
+                <div class="transaction-broker-header">
+                    <div class="transaction-broker-name">
+                        <span>Ventas</span>
+                    </div>
+                    <button type="button" class="mini-button transaction-add-button">+ Incluir venta</button>
+                </div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Tipo operación</th>
+                                <th class="text-align-right">N.º títulos</th>
+                                <th class="text-align-right">Importe total</th>
+                                <th class="text-align-right">Fecha de la operación</th>
+                                <th style="width: 96px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="6" class="empty-state-cell">No hay ventas registradas para ING DIRECT.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var row in Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
+                                {
+                                    <tr data-row-key="@($"ING-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
+                                        <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
+                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######")</td>
+                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €")</td>
+                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
+                                        <td class="delete-cell">
+                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
+                                            <button type="button" class="icon-button-delete transaction-delete-row" title="Eliminar">✕</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
+                Operaciones de compra y venta Trade Republic
+            </span>
+        </div>
+        <div class="transaction-broker-grid">
+            <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="purchase">
+                <div class="transaction-broker-header">
+                    <div class="transaction-broker-name">
+                        <span>Compras</span>
+                    </div>
+                    <button type="button" class="mini-button transaction-add-button">+ Incluir compra</button>
+                </div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Tipo operación</th>
+                                <th class="text-align-right">N.º títulos</th>
+                                <th class="text-align-right">Importe total</th>
+                                <th class="text-align-right">Fecha de la operación</th>
+                                <th style="width: 96px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="6" class="empty-state-cell">No hay compras registradas para Trade Republic.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var row in Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
+                                {
+                                    <tr data-row-key="@($"TR-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
+                                        <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
+                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######")</td>
+                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €")</td>
+                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
+                                        <td class="delete-cell">
+                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
+                                            <button type="button" class="icon-button-delete transaction-delete-row" title="Eliminar">✕</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="sale">
+                <div class="transaction-broker-header">
+                    <div class="transaction-broker-name">
+                        <span>Ventas</span>
+                    </div>
+                    <button type="button" class="mini-button transaction-add-button">+ Incluir venta</button>
+                </div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Tipo operación</th>
+                                <th class="text-align-right">N.º títulos</th>
+                                <th class="text-align-right">Importe total</th>
+                                <th class="text-align-right">Fecha de la operación</th>
+                                <th style="width: 96px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="6" class="empty-state-cell">No hay ventas registradas para Trade Republic.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var row in Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
+                                {
+                                    <tr data-row-key="@($"TR-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
+                                        <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
+                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######")</td>
+                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €")</td>
+                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
+                                        <td class="delete-cell">
+                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
+                                            <button type="button" class="icon-button-delete transaction-delete-row" title="Eliminar">✕</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <dialog id="transaction-entry-dialog" class="add-entry-dialog">
+        <form id="transaction-entry-form" method="dialog">
+            <h3 id="transaction-dialog-title">Añadir movimiento</h3>
+            <input type="hidden" id="transaction-type-field" />
+            <input type="hidden" id="transaction-broker-field" />
+            <input type="hidden" id="transaction-row-index-field" />
+            <label>
+                Título de cartera
+                <select id="transaction-title-field" required>
+                    @foreach (var title in Model.AvailableTransactionTitles)
+                    {
+                        <option value="@title">@title</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Tipo de operación
+                <input id="transaction-operation-field" type="text" readonly value="COMPRA" />
+            </label>
+            <label>
+                Número de títulos
+                <input id="transaction-quantity-field" type="number" min="0.000001" step="0.000001" required placeholder="Ej. 10" />
+            </label>
+            <label>
+                Importe total de la operación
+                <input id="transaction-importe-field" type="number" required step="0.01" placeholder="Ej. 1500.00" />
+            </label>
+            <label>
+                Fecha de la operación
+                <input id="transaction-fecha-field" type="date" required />
+            </label>
+            <div class="dialog-actions">
+                <button type="button" id="transaction-cancel-button" class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Guardar</button>
+            </div>
+        </form>
+    </dialog>
+
     @foreach (var item in Model.PortfolioStocks)
     {
         var stockHolding = Model.StockHoldings.FirstOrDefault(h => h.Symbol == item.Symbol);
@@ -1522,6 +1829,319 @@
 </div>
 
 @section Scripts {
+    <script>
+        (function () {
+            function formatCurrency(value) {
+                return new Intl.NumberFormat('es-ES', {
+                    style: 'currency',
+                    currency: 'EUR',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(Number(value || 0));
+            }
+
+            function formatDate(value) {
+                var date = new Date(value);
+                if (Number.isNaN(date.getTime())) {
+                    return value;
+                }
+                return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            }
+
+            function parseMoney(value) {
+                var normalized = String(value || '0')
+                    .replace(/€/g, '')
+                    .replace(/\s/g, '')
+                    .replace('.', '')
+                    .replace(',', '.');
+                var parsed = Number(normalized);
+                return Number.isFinite(parsed) ? parsed : 0;
+            }
+
+            function formatNumber(value) {
+                var numberValue = Number(value || 0);
+                if (!Number.isFinite(numberValue)) {
+                    return '0';
+                }
+                return numberValue.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 6 });
+            }
+
+            function getStorageKey(type, brokerCode) {
+                return 'cotizaciones.transactions.' + type + '.' + brokerCode;
+            }
+
+            function readExistingRows(card) {
+                var rows = [];
+                Array.prototype.forEach.call(card.querySelectorAll('tbody tr'), function (row) {
+                    if (row.querySelector('.empty-state-cell')) {
+                        return;
+                    }
+                    var cells = row.querySelectorAll('td');
+                    if (cells.length < 5) {
+                        return;
+                    }
+                    var title = cells[0].textContent.trim();
+                    var tipo = cells[1].textContent.trim();
+                    var cantidad = parseFloat(String(cells[2].textContent).replace('.', '').replace(',', '.').trim()) || 0;
+                    rows.push({
+                        titulo: title,
+                        tipoOperacion: tipo,
+                        numeroTitulos: cantidad,
+                        importeTotal: parseMoney(cells[3].textContent),
+                        fechaOperacion: cells[4].textContent.trim(),
+                        concept: title,
+                        valor: parseMoney(cells[3].textContent)
+                    });
+                });
+                return rows;
+            }
+
+            function sortTransactionRows(rows) {
+                if (!Array.isArray(rows)) {
+                    return [];
+                }
+
+                return rows.slice().sort(function (left, right) {
+                    var leftDate = new Date(left && left.fechaOperacion ? left.fechaOperacion : 0);
+                    var rightDate = new Date(right && right.fechaOperacion ? right.fechaOperacion : 0);
+                    var leftValue = Number.isNaN(leftDate.getTime()) ? 0 : leftDate.getTime();
+                    var rightValue = Number.isNaN(rightDate.getTime()) ? 0 : rightDate.getTime();
+
+                    if (rightValue !== leftValue) {
+                        return rightValue - leftValue;
+                    }
+
+                    var leftImporte = Number(left && left.importeTotal !== undefined ? left.importeTotal : 0);
+                    var rightImporte = Number(right && right.importeTotal !== undefined ? right.importeTotal : 0);
+                    if (rightImporte !== leftImporte) {
+                        return rightImporte - leftImporte;
+                    }
+
+                    return String(left && left.titulo ? left.titulo : '').localeCompare(String(right && right.titulo ? right.titulo : ''), 'es', { sensitivity: 'base' });
+                });
+            }
+
+            function renderTable(card, rows) {
+                var tbody = card.querySelector('tbody');
+                if (!tbody) {
+                    return;
+                }
+
+                var sortedRows = sortTransactionRows(rows);
+
+                if (!sortedRows || sortedRows.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty-state-cell">No hay movimientos registrados para este broker.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = sortedRows.map(function (row, index) {
+                    var rowId = (row.id || row.titulo || row.concept || 'row') + '-' + index;
+                    var title = row.titulo || row.concept || '';
+                    var operation = row.tipoOperacion || getOperationFromRow(row, card);
+                    var quantity = row.numeroTitulos !== undefined && row.numeroTitulos !== null ? row.numeroTitulos : (row.cantidad !== undefined ? row.cantidad : 0);
+                    return '<tr data-row-id="' + rowId + '">' +
+                        '<td>' + title + '</td>' +
+                        '<td>' + operation + '</td>' +
+                        '<td class="text-align-right">' + formatNumber(quantity) + '</td>' +
+                        '<td class="text-align-right price-cell">' + formatCurrency(row.importeTotal) + '</td>' +
+                        '<td class="text-align-right">' + formatDate(row.fechaOperacion) + '</td>' +
+                        '<td class="delete-cell">' +
+                        '<button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>' +
+                        '<button type="button" class="icon-button-delete transaction-delete-row" title="Eliminar">✕</button>' +
+                        '</td>' +
+                        '</tr>';
+                }).join('');
+            }
+
+            function saveRows(card, rows) {
+                var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
+                localStorage.setItem(key, JSON.stringify(sortTransactionRows(rows)));
+            }
+
+            var activeTransactionCard = null;
+
+            function getTransactionConcept(type, title) {
+                var label = type === 'purchase' ? 'COMPRA' : 'VENTA';
+                return title ? label + ' - ' + title : label;
+            }
+
+            function resolveTitleFromConcept(concept) {
+                if (!concept) {
+                    return '';
+                }
+                var parts = String(concept).split(' - ');
+                return parts.length > 1 ? parts.slice(1).join(' - ') : '';
+            }
+
+            function getOperationFromRow(row, card) {
+                if (row && row.tipoOperacion) {
+                    return row.tipoOperacion;
+                }
+                if (row && row.concept) {
+                    var concept = String(row.concept).toUpperCase();
+                    if (concept.indexOf('VENTA') === 0) {
+                        return 'VENTA';
+                    }
+                    if (concept.indexOf('COMPRA') === 0) {
+                        return 'COMPRA';
+                    }
+                }
+                return card && card.getAttribute('data-transaction-type') === 'sale' ? 'VENTA' : 'COMPRA';
+            }
+
+            function openTransactionDialog(card, currentRow, rowIndex) {
+                var dialog = document.getElementById('transaction-entry-dialog');
+                var form = document.getElementById('transaction-entry-form');
+                var type = card.getAttribute('data-transaction-type');
+                var brokerCode = card.getAttribute('data-broker-code');
+                var formTitle = document.getElementById('transaction-dialog-title');
+                var titleField = document.getElementById('transaction-title-field');
+                var operationField = document.getElementById('transaction-operation-field');
+                var quantityField = document.getElementById('transaction-quantity-field');
+                var importeField = document.getElementById('transaction-importe-field');
+                var fechaField = document.getElementById('transaction-fecha-field');
+                var typeField = document.getElementById('transaction-type-field');
+                var brokerField = document.getElementById('transaction-broker-field');
+                var rowIndexField = document.getElementById('transaction-row-index-field');
+
+                activeTransactionCard = card;
+                typeField.value = type;
+                brokerField.value = brokerCode;
+                rowIndexField.value = rowIndex === null || rowIndex === undefined ? '' : String(rowIndex);
+
+                var operationValue = type === 'purchase' ? 'COMPRA' : 'VENTA';
+                formTitle.textContent = currentRow ? 'Editar ' + (type === 'purchase' ? 'compra' : 'venta') : 'Añadir ' + (type === 'purchase' ? 'compra' : 'venta');
+                if (operationField) {
+                    operationField.value = operationValue;
+                }
+
+                var defaultTitle = titleField && titleField.options.length ? titleField.options[0].value : '';
+                var selectedTitle = currentRow ? (currentRow.titulo || resolveTitleFromConcept(currentRow.concept)) : defaultTitle;
+                if (titleField) {
+                    titleField.value = selectedTitle || defaultTitle;
+                }
+                quantityField.value = currentRow ? String(currentRow.numeroTitulos || currentRow.cantidad || 0) : '1';
+                importeField.value = currentRow ? String(currentRow.importeTotal || 0) : '0';
+                fechaField.value = currentRow ? String(currentRow.fechaOperacion || '').substring(0, 10) : new Date().toISOString().substring(0, 10);
+
+                if (dialog && typeof dialog.showModal === 'function') {
+                    dialog.showModal();
+                }
+            }
+
+            function closeTransactionDialog() {
+                var dialog = document.getElementById('transaction-entry-dialog');
+                var form = document.getElementById('transaction-entry-form');
+                if (dialog && dialog.close) {
+                    form.reset();
+                    dialog.close();
+                }
+            }
+
+            function attachCardHandlers(card) {
+                var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
+
+                var addButton = card.querySelector('.transaction-add-button');
+                if (addButton) {
+                    addButton.onclick = function () {
+                        openTransactionDialog(card, null, null);
+                    };
+                }
+
+                card.querySelectorAll('.transaction-edit-row').forEach(function (button) {
+                    button.onclick = function () {
+                        var row = button.closest('tr');
+                        var allRows = JSON.parse(localStorage.getItem(key) || '[]');
+                        var index = Array.prototype.indexOf.call(row.parentNode.children, row);
+                        var current = allRows[index] || readExistingRows(card)[index];
+                        openTransactionDialog(card, current, index);
+                    };
+                });
+
+                card.querySelectorAll('.transaction-delete-row').forEach(function (button) {
+                    button.onclick = function () {
+                        var row = button.closest('tr');
+                        var allRows = JSON.parse(localStorage.getItem(key) || '[]');
+                        var index = Array.prototype.indexOf.call(row.parentNode.children, row);
+                        allRows.splice(index, 1);
+                        saveRows(card, allRows);
+                        renderTable(card, allRows);
+                        attachCardHandlers(card);
+                    };
+                });
+            }
+
+            function bindCard(card) {
+                var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
+                var storedRows = null;
+
+                try {
+                    storedRows = JSON.parse(localStorage.getItem(key));
+                } catch (error) {
+                    storedRows = null;
+                }
+
+                var rows = Array.isArray(storedRows) && storedRows.length > 0
+                    ? storedRows
+                    : readExistingRows(card);
+
+                var sortedRows = sortTransactionRows(rows);
+
+                if (!storedRows || storedRows.length === 0) {
+                    saveRows(card, sortedRows);
+                }
+
+                renderTable(card, sortedRows);
+                attachCardHandlers(card);
+            }
+
+            document.getElementById('transaction-entry-form').addEventListener('submit', function (event) {
+                event.preventDefault();
+                if (!activeTransactionCard) {
+                    closeTransactionDialog();
+                    return;
+                }
+
+                var key = getStorageKey(activeTransactionCard.getAttribute('data-transaction-type'), activeTransactionCard.getAttribute('data-broker-code'));
+                var rows = JSON.parse(localStorage.getItem(key) || '[]');
+                var rowIndexField = document.getElementById('transaction-row-index-field');
+                var rowIndex = rowIndexField.value === '' ? null : Number(rowIndexField.value);
+                var selectedTitle = document.getElementById('transaction-title-field').value;
+                var operationType = activeTransactionCard.getAttribute('data-transaction-type') === 'purchase' ? 'COMPRA' : 'VENTA';
+                var row = {
+                    titulo: selectedTitle,
+                    tipoOperacion: operationType,
+                    numeroTitulos: Number(document.getElementById('transaction-quantity-field').value || 0),
+                    importeTotal: parseMoney(document.getElementById('transaction-importe-field').value),
+                    fechaOperacion: document.getElementById('transaction-fecha-field').value,
+                    concept: getTransactionConcept(activeTransactionCard.getAttribute('data-transaction-type'), selectedTitle),
+                    valor: parseMoney(document.getElementById('transaction-importe-field').value)
+                };
+
+                if (rowIndex === null || Number.isNaN(rowIndex)) {
+                    rows.push(row);
+                } else {
+                    rows[rowIndex] = row;
+                }
+
+                var sortedRows = sortTransactionRows(rows);
+                saveRows(activeTransactionCard, sortedRows);
+                renderTable(activeTransactionCard, sortedRows);
+                attachCardHandlers(activeTransactionCard);
+                closeTransactionDialog();
+            });
+
+            document.getElementById('transaction-cancel-button').addEventListener('click', function () {
+                closeTransactionDialog();
+            });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.transaction-broker-card').forEach(function (card) {
+                    bindCard(card);
+                });
+            });
+        })();
+    </script>
     <script>
         (function () {
             var classificationSelect = document.getElementById('commodity-classification-select');
