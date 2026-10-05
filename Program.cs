@@ -57,19 +57,23 @@ app.Use(async (context, next) =>
     var expectedUser = app.Configuration["BasicAuth:Username"];
     var expectedPassword = app.Configuration["BasicAuth:Password"];
 
-    // La protección por Basic Auth es opt-in. Si no se activa explícitamente,
-    // la app queda pública para Render y otros entornos externos.
-    if (!requireExternalBasicAuth || string.IsNullOrEmpty(expectedUser) || string.IsNullOrEmpty(expectedPassword))
+    if (!requireExternalBasicAuth)
     {
         await next();
         return;
     }
 
-    // Solo se exige usuario/contraseña cuando se activa explícitamente la protección
-    // para acceso externo. El acceso por localhost o red local queda libre.
+    // El acceso por localhost o red local queda libre.
     if (IsLocalOrPrivateHost(context.Request.Host.Host))
     {
         await next();
+        return;
+    }
+
+    if (string.IsNullOrEmpty(expectedUser) || string.IsNullOrEmpty(expectedPassword))
+    {
+        context.Response.Headers.WWWAuthenticate = "Basic realm=\"Cotizaciones Bolsa\"";
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         return;
     }
 

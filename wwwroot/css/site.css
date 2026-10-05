@@ -9,6 +9,57 @@ body {
   font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
 
+.site-footer {
+  margin-top: 2rem;
+  padding: 1.25rem 0 2rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(8, 15, 20, 0.8);
+  color: #c7d3e2;
+}
+
+.site-footer p {
+  margin: 0 0 0.8rem;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+.site-footer strong {
+  color: #f8fafc;
+}
+
+.site-footer-divider {
+  height: 1px;
+  background: #ffffff;
+  margin: 0.9rem 0 0.75rem;
+}
+
+.site-footer-copyright {
+  text-align: center;
+  color: #f8fafc;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+
+@media (max-width: 576px) {
+  .site-footer {
+    padding-top: 1rem;
+    padding-bottom: 1.4rem;
+  }
+
+  .site-footer p {
+    font-size: 0.72rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  .site-footer-copyright {
+    font-size: 0.7rem;
+  }
+}
+
 .topbar {
   background: linear-gradient(180deg, #101e2b 0%, #0d1721 100%);
   border-bottom: 1px solid rgba(148, 163, 184, 0.14);
