@@ -62,15 +62,22 @@ body {
 }
 
 .topbar {
-  background: linear-gradient(180deg, #101e2b 0%, #0d1721 100%);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  background: #ffffff;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  color: #111111;
+}
+
+.topbar h2 {
+  color: #111111;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .topbar-datetime {
   font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
-  color: #8ec5ff;
+  color: #111111;
   white-space: nowrap;
 }
 
@@ -765,6 +772,10 @@ body.wco-active .topbar-datetime {
   gap: 16px;
   padding: 16px;
   background: rgba(15, 23, 42, 0.72);
+}
+
+.transaction-broker-grid.is-collapsed {
+  display: none;
 }
 
 .transaction-broker-card {

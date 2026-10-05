@@ -17,6 +17,7 @@ public class IndexModel : PageModel
     private const string PensionPlansKey = "custom-pensionplans";
     private const string CheckingAccountsKey = "custom-checkingaccounts";
     private const string CashKey = "custom-cash";
+    private const string FuturesKey = "custom-futures";
     private const string CommoditiesKey = "custom-commodities";
 
     private readonly YahooFinanceService _service = new();
@@ -68,6 +69,7 @@ public class IndexModel : PageModel
     public List<Quote> Funds { get; private set; } = new();
     public List<Quote> PortfolioStocks { get; private set; } = new();
     public List<Quote> EtfsControl { get; private set; } = new();
+    public List<Quote> Futures { get; private set; } = new();
     public List<Quote> Commodities { get; private set; } = new();
     public List<CommodityHolding> CommodityHoldings { get; private set; } = new();
     public List<EtfHolding> EtfHoldings { get; private set; } = new();
@@ -145,40 +147,15 @@ public class IndexModel : PageModel
     private static List<BrokerTransactionGroup> BuildBrokerTransactionGroups(IEnumerable<PensionPlanHolding> plans, bool salesOnly)
     {
         var brokerCodes = new[] { "ING", "TR" };
-        var groups = new List<BrokerTransactionGroup>();
 
-        foreach (var brokerCode in brokerCodes)
-        {
-            var brokerPlanRows = plans
-                .Where(p => string.Equals(p.Broker, brokerCode, StringComparison.OrdinalIgnoreCase))
-                .Select(p => new BrokerTransactionRow
-                {
-                    Titulo = p.Name,
-                    TipoOperacion = salesOnly ? "VENTA" : "COMPRA",
-                    NumeroTitulos = p.Participaciones,
-                    ImporteTotal = p.CapitalInvertido,
-                    FechaOperacion = DateTime.Today.AddDays(-(Math.Abs(p.Name.GetHashCode()) % 12)),
-                    Concept = p.Name,
-                    Valor = p.Participaciones * p.ValorLiquidativo
-                })
-                .OrderByDescending(r => r.FechaOperacion)
-                .ThenByDescending(r => r.ImporteTotal)
-                .ToList();
-
-            if (salesOnly)
-            {
-                brokerPlanRows.Clear();
-            }
-
-            groups.Add(new BrokerTransactionGroup
+        return brokerCodes
+            .Select(brokerCode => new BrokerTransactionGroup
             {
                 Broker = brokerCode,
                 BrokerName = ResolveBrokerDisplayName(brokerCode),
-                Rows = brokerPlanRows
-            });
-        }
-
-        return groups;
+                Rows = new List<BrokerTransactionRow>()
+            })
+            .ToList();
     }
 
     private static string ResolveBrokerDisplayName(string? broker) => broker?.Trim().ToUpperInvariant() switch
@@ -327,6 +304,18 @@ public class IndexModel : PageModel
         Funds = fundConfigs.Count > 0 ? await _service.GetQuotesAsync(fundConfigs) : new List<Quote>();
         PortfolioStocks = stockHoldingConfigs.Count > 0 ? await _service.GetQuotesAsync(stockHoldingConfigs) : new List<Quote>();
         EtfsControl = etfControlConfigs.Count > 0 ? await _service.GetQuotesAsync(etfControlConfigs) : new List<Quote>();
+
+        var futuresConfigs = indexConfigs
+            .Select(config => new QuoteConfig(
+                config.Name,
+                ResolveFutureSymbol(config.Name, config.Symbol),
+                config.Isin,
+                config.CountryCode,
+                config.Market))
+            .ToList();
+
+        await _dataStore.SaveEntriesAsync(FuturesKey, futuresConfigs);
+        Futures = futuresConfigs.Count > 0 ? await _service.GetQuotesAsync(futuresConfigs) : new List<Quote>();
 
         if (!await _dataStore.ExistsAsync(CommoditiesKey))
         {
@@ -567,6 +556,74 @@ public class IndexModel : PageModel
         "Energía",
         "Agrícolas"
     };
+
+    private static string ResolveFutureSymbol(string indexName, string? indexSymbol)
+    {
+        if (string.IsNullOrWhiteSpace(indexSymbol))
+        {
+            return string.Empty;
+        }
+
+        var normalizedName = indexName?.Trim() ?? string.Empty;
+        var normalizedSymbol = indexSymbol.Trim();
+
+        if (normalizedName.Contains("NASDAQ", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^IXIC")
+        {
+            return "NQ=F";
+        }
+
+        if (normalizedName.Contains("SP 500", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^GSPC")
+        {
+            return "ES=F";
+        }
+
+        if (normalizedName.Contains("DOW", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^DJI")
+        {
+            return "YM=F";
+        }
+
+        if (normalizedName.Contains("RUSSELL", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^RUT")
+        {
+            return "RTY=F";
+        }
+
+        if (normalizedName.Contains("VIX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^VIX")
+        {
+            return "VX=F";
+        }
+
+        if (normalizedName.Contains("DAX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^GDAXI")
+        {
+            return "DAX=F";
+        }
+
+        if (normalizedName.Contains("CAC", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^FCHI")
+        {
+            return "FCHI=F";
+        }
+
+        if (normalizedName.Contains("EURO STOXX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^STOXX50E")
+        {
+            return "STOXX50E=F";
+        }
+
+        if (normalizedName.Contains("IBEX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^IBEX")
+        {
+            return "IBEX=F";
+        }
+
+        if (normalizedName.Contains("NIKKEI", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^N225")
+        {
+            return "N225=F";
+        }
+
+        if (normalizedName.Contains("HANG SENG", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^HSI")
+        {
+            return "HSI=F";
+        }
+
+        return normalizedSymbol;
+    }
 
     public async Task<IActionResult> OnPostAddCommodityAsync(string symbol, string classification)
     {

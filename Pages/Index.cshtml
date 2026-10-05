@@ -242,18 +242,19 @@
                         <th class="text-align-right" style="width: 100px;">Volumen</th>
                         <th class="text-align-right" style="width: 110px;">Actualizado</th>
                         <th class="text-align-right" style="width: 90px;">Símbolo</th>
+                        <th style="width: 96px;"></th>
                     </tr>
                 </thead>
                 <tbody id="tbody-futures">
-                    @if (Model.Indices.Count == 0)
+                    @if (Model.Futures.Count == 0)
                     {
                         <tr>
-                            <td colspan="8" class="empty-state-cell">No hay índices seleccionados para mostrar futuros.</td>
+                            <td colspan="9" class="empty-state-cell">No hay futuros disponibles para mostrar.</td>
                         </tr>
                     }
                     else
                     {
-                        @foreach (var item in Model.Indices)
+                        @foreach (var item in Model.Futures)
                         {
                             <tr>
                                 <td class="name-cell">
@@ -277,6 +278,7 @@
                                     </span>
                                 </td>
                                 <td class="text-align-right">@item.DisplaySymbol</td>
+                                <td class="delete-cell"></td>
                             </tr>
                         }
                     }
@@ -1274,8 +1276,11 @@
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
                 Operaciones de compra y venta ING DIRECT
             </span>
+            <div class="panel-head-actions">
+                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-ing" data-toggle-name="operaciones de compra y venta ING DIRECT" title="Mostrar/ocultar" aria-label="Ocultar operaciones de compra y venta ING DIRECT" aria-expanded="true"></button>
+            </div>
         </div>
-        <div class="transaction-broker-grid">
+        <div id="transaction-broker-grid-ing" class="transaction-broker-grid">
             <div class="transaction-broker-card" data-broker-code="ING" data-transaction-type="purchase">
                 <div class="transaction-broker-header">
                     <div class="transaction-broker-name">
@@ -1379,8 +1384,11 @@
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                 Operaciones de compra y venta Trade Republic
             </span>
+            <div class="panel-head-actions">
+                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-tr" data-toggle-name="operaciones de compra y venta Trade Republic" title="Mostrar/ocultar" aria-label="Ocultar operaciones de compra y venta Trade Republic" aria-expanded="true"></button>
+            </div>
         </div>
-        <div class="transaction-broker-grid">
+        <div id="transaction-broker-grid-tr" class="transaction-broker-grid">
             <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="purchase">
                 <div class="transaction-broker-header">
                     <div class="transaction-broker-name">
@@ -1870,6 +1878,25 @@
                 return 'cotizaciones.transactions.' + type + '.' + brokerCode;
             }
 
+            function sanitizeStoredRows(rows) {
+                if (!Array.isArray(rows)) {
+                    return [];
+                }
+
+                return rows.filter(function (row) {
+                    if (!row || typeof row !== 'object') {
+                        return false;
+                    }
+
+                    var title = String(row.titulo || row.concept || '').trim();
+                    if (!title) {
+                        return false;
+                    }
+
+                    return !/(PLAN\s*2030|Compra prueba|COMPRA PRUEBA|Amundi EURO STOXX 50 Daily|PRUEBA|compra prueba)/i.test(title);
+                });
+            }
+
             function readExistingRows(card) {
                 var rows = [];
                 Array.prototype.forEach.call(card.querySelectorAll('tbody tr'), function (row) {
@@ -2081,11 +2108,18 @@
                     storedRows = null;
                 }
 
+                storedRows = sanitizeStoredRows(storedRows);
+
+                if (Array.isArray(storedRows) && storedRows.length === 0 && localStorage.getItem(key) !== null) {
+                    localStorage.removeItem(key);
+                }
+
                 var rows = Array.isArray(storedRows) && storedRows.length > 0
                     ? storedRows
                     : readExistingRows(card);
 
-                var sortedRows = sortTransactionRows(rows);
+                var sanitizedRows = sanitizeStoredRows(rows);
+                var sortedRows = sortTransactionRows(sanitizedRows);
 
                 if (!storedRows || storedRows.length === 0) {
                     saveRows(card, sortedRows);
