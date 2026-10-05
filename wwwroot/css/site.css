@@ -459,6 +459,15 @@ body.wco-active .topbar-datetime {
   padding: 2px 2px 0;
 }
 
+#summary-strip-general {
+  grid-template-columns: 1fr;
+  max-width: 100%;
+}
+
+#summary-strip-general .summary-box {
+  width: 100%;
+}
+
 .market-panel .summary-strip {
   padding: 18px;
   margin-bottom: 0;
