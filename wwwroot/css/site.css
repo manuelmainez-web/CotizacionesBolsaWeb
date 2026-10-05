@@ -622,6 +622,29 @@ body.wco-active .topbar-datetime {
   margin-bottom: 8px;
 }
 
+.summary-total-header {
+  margin-bottom: 8px;
+}
+
+.summary-box .summary-total-main {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a9bacd;
+  margin-bottom: 2px;
+}
+
+.summary-box .summary-total-detail {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #dfe8f5;
+  line-height: 1.4;
+  margin-bottom: 0;
+}
+
 .summary-box strong {
   font-size: 1.42rem;
   font-weight: 700;
@@ -632,7 +655,7 @@ body.wco-active .topbar-datetime {
 .summary-breakdown {
   display: block;
   margin-top: 10px;
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   line-height: 1.5;
   color: #dfe8f5;
   letter-spacing: 0.04em;

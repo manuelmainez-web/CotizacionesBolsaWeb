@@ -98,7 +98,10 @@
         </div>
         <div class="summary-strip is-collapsed" id="summary-strip-general">
             <div class="summary-box">
-                <span>Importe total de las posiciones + importe total cuenta corriente + importe efectivo</span>
+                <div class="summary-total-header">
+                    <span class="summary-total-main">IMPORTE TOTAL</span>
+                    <span class="summary-total-detail">(Importe total de las posiciones + importe total cuenta corriente + importe efectivo)</span>
+                </div>
                 <strong>@Model.TotalGeneralConCuentasYEfectivo.ToString("#,##0.00 €")</strong>
                 <div class="summary-breakdown">
                     @Model.PositionsCurrentValue.ToString("#,##0.00 €") + @Model.CheckingAccountsTotalValue.ToString("#,##0.00 €") + @Model.CashTotalValue.ToString("#,##0.00 €")
