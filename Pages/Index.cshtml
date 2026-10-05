@@ -2227,9 +2227,56 @@
                 }).join('');
             }
 
+            function safeGetStoredRows(card) {
+                var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
+                try {
+                    var parsed = JSON.parse(localStorage.getItem(key) || '[]');
+                    return sanitizeStoredRows(Array.isArray(parsed) ? parsed : []);
+                } catch (error) {
+                    return [];
+                }
+            }
+
+            function mergeUniqueRows(baseRows, incomingRows) {
+                var merged = [];
+                var seen = new Set();
+
+                function pushRow(row) {
+                    if (!row || typeof row !== 'object') {
+                        return;
+                    }
+
+                    var signature = row.id || [
+                        String(row.titulo || row.concept || ''),
+                        String(row.tipoOperacion || ''),
+                        String(row.numeroTitulos !== undefined ? row.numeroTitulos : row.cantidad || 0),
+                        String(row.importeTotal !== undefined ? row.importeTotal : 0),
+                        String(row.fechaOperacion || '')
+                    ].join('||');
+
+                    if (seen.has(signature)) {
+                        return;
+                    }
+
+                    seen.add(signature);
+                    merged.push(row);
+                }
+
+                if (Array.isArray(baseRows)) {
+                    baseRows.forEach(pushRow);
+                }
+
+                if (Array.isArray(incomingRows)) {
+                    incomingRows.forEach(pushRow);
+                }
+
+                return merged;
+            }
+
             function saveRows(card, rows) {
                 var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
-                localStorage.setItem(key, JSON.stringify(sortTransactionRows(rows)));
+                var mergedRows = mergeUniqueRows(safeGetStoredRows(card), rows);
+                localStorage.setItem(key, JSON.stringify(sortTransactionRows(mergedRows)));
             }
 
             var activeTransactionCard = null;
@@ -2359,7 +2406,7 @@
                 card.querySelectorAll('.transaction-edit-row').forEach(function (button) {
                     button.onclick = function () {
                         var row = button.closest('tr');
-                        var allRows = JSON.parse(localStorage.getItem(key) || '[]');
+                        var allRows = safeGetStoredRows(card);
                         var current = findRowByIdentity(allRows, row);
                         var index = Array.prototype.indexOf.call(row.parentNode.children, row);
 
@@ -2384,7 +2431,7 @@
                 card.querySelectorAll('.transaction-delete-row').forEach(function (button) {
                     button.onclick = function () {
                         var row = button.closest('tr');
-                        var allRows = JSON.parse(localStorage.getItem(key) || '[]');
+                        var allRows = safeGetStoredRows(card);
                         var index = Array.prototype.indexOf.call(row.parentNode.children, row);
                         allRows.splice(index, 1);
                         saveRows(card, allRows);
@@ -2396,28 +2443,18 @@
 
             function bindCard(card) {
                 var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
-                var storedRows = null;
-
-                try {
-                    storedRows = JSON.parse(localStorage.getItem(key));
-                } catch (error) {
-                    storedRows = null;
-                }
-
-                storedRows = sanitizeStoredRows(storedRows);
+                var storedRows = safeGetStoredRows(card);
+                var domRows = readExistingRows(card);
+                var mergedRows = mergeUniqueRows(storedRows, domRows);
 
                 if (Array.isArray(storedRows) && storedRows.length === 0 && localStorage.getItem(key) !== null) {
                     localStorage.removeItem(key);
                 }
 
-                var rows = Array.isArray(storedRows) && storedRows.length > 0
-                    ? storedRows
-                    : readExistingRows(card);
-
-                var sanitizedRows = sanitizeStoredRows(rows);
+                var sanitizedRows = sanitizeStoredRows(mergedRows);
                 var sortedRows = sortTransactionRows(sanitizedRows);
 
-                if (!storedRows || storedRows.length === 0) {
+                if (sortedRows.length > 0) {
                     saveRows(card, sortedRows);
                 }
 
@@ -2435,7 +2472,7 @@
                     }
 
                     var key = getStorageKey(activeTransactionCard.getAttribute('data-transaction-type'), activeTransactionCard.getAttribute('data-broker-code'));
-                    var rows = JSON.parse(localStorage.getItem(key) || '[]');
+                    var rows = safeGetStoredRows(activeTransactionCard);
                     var rowIndexField = document.getElementById('transaction-row-index-field');
                     var rowIndex = rowIndexField.value === '' ? null : Number(rowIndexField.value);
                     var selectedTitle = document.getElementById('transaction-title-field').value;
