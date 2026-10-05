@@ -592,44 +592,42 @@ public class IndexModel : PageModel
             return "RTY=F";
         }
 
-        // Índices europeos y de volatilidad no son futuros válidos en Yahoo Finance para este panel;
-        // se excluyen para evitar filas con "N/A" en la tabla de futuros.
         if (normalizedName.Contains("VIX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^VIX")
         {
-            return string.Empty;
+            return "^VIX";
         }
 
         if (normalizedName.Contains("DAX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^GDAXI")
         {
-            return string.Empty;
+            return "^GDAXI";
         }
 
         if (normalizedName.Contains("CAC", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^FCHI")
         {
-            return string.Empty;
+            return "^FCHI";
         }
 
         if (normalizedName.Contains("EURO STOXX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^STOXX50E")
         {
-            return string.Empty;
+            return "^STOXX50E";
         }
 
         if (normalizedName.Contains("IBEX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^IBEX")
         {
-            return string.Empty;
+            return "^IBEX";
         }
 
         if (normalizedName.Contains("NIKKEI", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^N225")
         {
-            return string.Empty;
+            return "^N225";
         }
 
         if (normalizedName.Contains("HANG SENG", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^HSI")
         {
-            return string.Empty;
+            return "^HSI";
         }
 
-        return string.Empty;
+        return normalizedSymbol;
     }
 
     public async Task<IActionResult> OnPostAddCommodityAsync(string symbol, string classification)

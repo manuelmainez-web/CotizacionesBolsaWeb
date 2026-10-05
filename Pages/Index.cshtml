@@ -791,11 +791,11 @@
                 </label>
                 <label>
                     Número de títulos
-                    <input type="number" name="positionCount" required min="0.000001" step="0.000001" value="@etfPositionCount" />
+                    <input type="text" name="positionCount" inputmode="decimal" pattern="[0-9.,]+" required min="0.000001" step="0.000001" value="@etfPositionCount" />
                 </label>
                 <label>
                     Precio de compra (unitario)
-                    <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" value="@etfPurchaseDisplayValue" />
+                    <input type="text" name="unitPurchasePrice" inputmode="decimal" pattern="[0-9.,]+" required min="0.01" step="0.01" value="@etfPurchaseDisplayValue" />
                 </label>
                 <div class="dialog-actions">
                     <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
@@ -826,11 +826,11 @@
             </label>
             <label>
                 Número de títulos
-                <input type="number" name="positionCount" required min="0.000001" step="0.000001" placeholder="Ej. 437" />
+                <input type="text" name="positionCount" inputmode="decimal" pattern="[0-9.,]+" required min="0.000001" step="0.000001" placeholder="Ej. 437" />
             </label>
             <label>
                 Precio de compra (unitario)
-                <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" placeholder="Ej. 25.62" />
+                <input type="text" name="unitPurchasePrice" inputmode="decimal" pattern="[0-9.,]+" required min="0.01" step="0.01" placeholder="Ej. 25.62" />
             </label>
             <label>
                 Bróker
@@ -966,11 +966,11 @@
                 </label>
                 <label>
                     Número de títulos
-                    <input type="number" name="positionCount" required min="0.000001" step="0.000001" value="@fundPositionCount" />
+                    <input type="text" name="positionCount" inputmode="decimal" pattern="[0-9.,]+" required min="0.000001" step="0.000001" value="@fundPositionCount" />
                 </label>
                 <label>
                     Precio de compra (unitario)
-                    <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" value="@fundPurchaseDisplayValue" />
+                    <input type="text" name="unitPurchasePrice" inputmode="decimal" pattern="[0-9.,]+" required min="0.01" step="0.01" value="@fundPurchaseDisplayValue" />
                 </label>
                 <div class="dialog-actions">
                     <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
@@ -989,11 +989,11 @@
             </label>
             <label>
                 Número de títulos
-                <input type="number" name="positionCount" required min="0.000001" step="0.000001" placeholder="Ej. 100" />
+                <input type="text" name="positionCount" inputmode="decimal" pattern="[0-9.,]+" required min="0.000001" step="0.000001" placeholder="Ej. 100" />
             </label>
             <label>
                 Precio de compra (unitario)
-                <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" placeholder="Ej. 67.60" />
+                <input type="text" name="unitPurchasePrice" inputmode="decimal" pattern="[0-9.,]+" required min="0.01" step="0.01" placeholder="Ej. 67.60" />
             </label>
             <p class="dialog-hint">El nombre, el símbolo y el país se buscan automáticamente a partir del ISIN.</p>
             <div class="dialog-actions">
@@ -1123,7 +1123,7 @@
                 </label>
                 <label>
                     Participaciones
-                    <input type="number" name="participaciones" required min="0.000001" step="0.000001" value="@item.Participaciones" />
+                    <input type="text" name="participaciones" inputmode="decimal" pattern="[0-9.,]+" required min="0.000001" step="0.000001" value="@item.Participaciones" />
                 </label>
                 <label>
                     Código DGSFP
@@ -1131,7 +1131,7 @@
                 </label>
                 <label>
                     Capital invertido
-                    <input type="number" name="capitalInvertido" step="0.01" value="@item.CapitalInvertido" />
+                    <input type="text" name="capitalInvertido" inputmode="decimal" pattern="[0-9.,]+" step="0.01" value="@item.CapitalInvertido" />
                 </label>
                 <div class="dialog-actions">
                     <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
@@ -1158,7 +1158,7 @@
             </label>
             <label>
                 Participaciones
-                <input type="number" name="participaciones" required min="0.000001" step="0.000001" placeholder="Ej. 100" />
+                <input type="text" name="participaciones" inputmode="decimal" pattern="[0-9.,]+" required min="0.000001" step="0.000001" placeholder="Ej. 100" />
             </label>
             <label>
                 Código DGSFP
@@ -1166,11 +1166,11 @@
             </label>
             <label>
                 Valor liquidativo <span class="panel-head-subtitle">(opcional, se calcula dinámicamente)</span>
-                <input type="number" name="valorLiquidativo" min="0.01" step="0.01" placeholder="Ej. 12.50" />
+                <input type="text" name="valorLiquidativo" inputmode="decimal" pattern="[0-9.,]+" min="0.01" step="0.01" placeholder="Ej. 12.50" />
             </label>
             <label>
                 Capital invertido
-                <input type="number" name="capitalInvertido" step="0.01" placeholder="Ej. 27484.40" />
+                <input type="text" name="capitalInvertido" inputmode="decimal" pattern="[0-9.,]+" step="0.01" placeholder="Ej. 27484.40" />
             </label>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
@@ -1314,8 +1314,8 @@
                                     <tr data-row-key="@($"ING-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
                                         <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
                                         <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
-                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######")</td>
-                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €")</td>
+                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
+                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
                                         <td class="delete-cell">
                                             <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
@@ -1361,8 +1361,8 @@
                                     <tr data-row-key="@($"ING-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
                                         <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
                                         <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
-                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######")</td>
-                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €")</td>
+                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
+                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
                                         <td class="delete-cell">
                                             <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
@@ -1422,8 +1422,8 @@
                                     <tr data-row-key="@($"TR-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
                                         <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
                                         <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
-                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######")</td>
-                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €")</td>
+                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
+                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
                                         <td class="delete-cell">
                                             <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
@@ -1469,8 +1469,8 @@
                                     <tr data-row-key="@($"TR-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
                                         <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
                                         <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
-                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######")</td>
-                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €")</td>
+                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
+                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
                                         <td class="delete-cell">
                                             <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
@@ -1507,11 +1507,11 @@
             </label>
             <label>
                 Número de títulos
-                <input id="transaction-quantity-field" type="number" min="0.000001" step="0.000001" required placeholder="Ej. 10" />
+                <input id="transaction-quantity-field" type="text" inputmode="decimal" min="0.000001" step="0.000001" required placeholder="Ej. 10" />
             </label>
             <label>
                 Importe total de la operación
-                <input id="transaction-importe-field" type="number" required step="0.01" placeholder="Ej. 1500.00" />
+                <input id="transaction-importe-field" type="text" inputmode="decimal" required step="0.01" placeholder="Ej. 1500.00" />
             </label>
             <label>
                 Fecha de la operación
@@ -1549,11 +1549,11 @@
                 </label>
                 <label>
                     Número de títulos
-                    <input type="number" name="positionCount" required min="0.000001" step="0.000001" value="@stockPositionCount" />
+                    <input type="text" name="positionCount" inputmode="decimal" pattern="[0-9.,]+" required min="0.000001" step="0.000001" value="@stockPositionCount" />
                 </label>
                 <label>
                     Precio de compra (unitario)
-                    <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" value="@stockPurchaseDisplayValue" />
+                    <input type="text" name="unitPurchasePrice" inputmode="decimal" pattern="[0-9.,]+" required min="0.01" step="0.01" value="@stockPurchaseDisplayValue" />
                 </label>
                 <div class="dialog-actions">
                     <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
@@ -1589,11 +1589,11 @@
             </label>
             <label>
                 Número de títulos
-                <input type="number" name="positionCount" required min="0.000001" step="0.000001" placeholder="Ej. 10" />
+                <input type="text" name="positionCount" inputmode="decimal" pattern="[0-9.,]+" required min="0.000001" step="0.000001" placeholder="Ej. 10" />
             </label>
             <label>
                 Importe por título
-                <input type="number" name="unitPurchasePrice" required min="0.01" step="0.01" placeholder="Ej. 150.00" />
+                <input type="text" name="unitPurchasePrice" inputmode="decimal" pattern="[0-9.,]+" required min="0.01" step="0.01" placeholder="Ej. 150.00" />
             </label>
             <label>
                 Bróker
@@ -1705,7 +1705,7 @@
                 </label>
                 <label>
                     Importe
-                    <input type="number" name="importe" required step="0.01" value="@item.Balance" />
+                    <input type="text" name="importe" inputmode="decimal" pattern="[0-9.,]+" required step="0.01" value="@item.Balance" />
                 </label>
                 <div class="dialog-actions">
                     <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
@@ -1727,7 +1727,7 @@
             </label>
             <label>
                 Importe
-                <input type="number" name="importe" required step="0.01" placeholder="Ej. 1500.00" />
+                <input type="text" name="importe" inputmode="decimal" pattern="[0-9.,]+" required step="0.01" placeholder="Ej. 1500.00" />
             </label>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
@@ -1807,7 +1807,7 @@
                 </label>
                 <label>
                     Importe
-                    <input type="number" name="importe" required step="0.01" value="@cashItem.Amount" />
+                    <input type="text" name="importe" inputmode="decimal" pattern="[0-9.,]+" required step="0.01" value="@cashItem.Amount" />
                 </label>
                 <div class="dialog-actions">
                     <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
@@ -1826,7 +1826,7 @@
             </label>
             <label>
                 Importe
-                <input type="number" name="importe" required step="0.01" placeholder="Ej. 200.00" />
+                <input type="text" name="importe" inputmode="decimal" pattern="[0-9.,]+" required step="0.01" placeholder="Ej. 200.00" />
             </label>
             <div class="dialog-actions">
                 <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
@@ -1839,13 +1839,53 @@
 @section Scripts {
     <script>
         (function () {
+            function normalizeMoneyValue(value) {
+                var source = String(value ?? '').trim();
+                if (!source) {
+                    return '0';
+                }
+
+                source = source.replace(/\u00A0/g, '').replace(/€/g, '').replace(/\s/g, '');
+                if (!source) {
+                    return '0';
+                }
+
+                var sanitized = source.replace(/[^0-9,.-]/g, '');
+                if (!sanitized || sanitized === '-' || sanitized === '.' || sanitized === ',') {
+                    return '0';
+                }
+
+                if (sanitized.indexOf(',') !== -1 && sanitized.indexOf('.') !== -1) {
+                    var lastComma = sanitized.lastIndexOf(',');
+                    var lastDot = sanitized.lastIndexOf('.');
+                    if (lastComma > lastDot) {
+                        sanitized = sanitized.replace(/\./g, '').replace(',', '.');
+                    } else {
+                        sanitized = sanitized.replace(/,/g, '');
+                    }
+                } else if (sanitized.indexOf(',') !== -1) {
+                    sanitized = sanitized.replace(/\./g, '').replace(',', '.');
+                }
+
+                return sanitized;
+            }
+
+            function formatSpanishNumber(value, decimalPlaces) {
+                var numberValue = Number(normalizeMoneyValue(value));
+                if (!Number.isFinite(numberValue)) {
+                    return '0';
+                }
+
+                var decimals = typeof decimalPlaces === 'number' ? decimalPlaces : 0;
+                var fixed = numberValue.toFixed(decimals);
+                var parts = fixed.split('.');
+                var integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                var decimalPart = parts.length > 1 ? ',' + parts[1] : '';
+                return integerPart + decimalPart;
+            }
+
             function formatCurrency(value) {
-                return new Intl.NumberFormat('es-ES', {
-                    style: 'currency',
-                    currency: 'EUR',
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }).format(Number(value || 0));
+                return formatSpanishNumber(value, 2) + ' €';
             }
 
             function formatDate(value) {
@@ -1866,11 +1906,63 @@
                     return '';
                 }
 
-                if (source.includes(',') && !source.includes('.')) {
-                    return source.replace(',', '.');
+                var cleaned = source.replace(/[^\d,.-]/g, '');
+                if (!cleaned || cleaned === '-' || cleaned === '.' || cleaned === ',') {
+                    return '';
                 }
 
-                return source;
+                var numberOfCommas = (cleaned.match(/,/g) || []).length;
+                var numberOfDots = (cleaned.match(/\./g) || []).length;
+
+                if (numberOfCommas === 0 && numberOfDots > 0) {
+                    var lastDotIndex = cleaned.lastIndexOf('.');
+                    var fractionPart = cleaned.substring(lastDotIndex + 1);
+                    if (fractionPart.length <= 2) {
+                        return cleaned.substring(0, lastDotIndex) + ',' + fractionPart;
+                    }
+
+                    return cleaned.replace(/\./g, '');
+                }
+
+                if (numberOfCommas > 0 && numberOfDots === 0) {
+                    var lastCommaIndex = cleaned.lastIndexOf(',');
+                    var fractionPartComma = cleaned.substring(lastCommaIndex + 1);
+                    if (fractionPartComma.length <= 2) {
+                        return cleaned;
+                    }
+
+                    return cleaned.replace(/,/g, '');
+                }
+
+                if (numberOfCommas > 0 && numberOfDots > 0) {
+                    var lastCommaIndex2 = cleaned.lastIndexOf(',');
+                    var lastDotIndex2 = cleaned.lastIndexOf('.');
+                    if (lastCommaIndex2 > lastDotIndex2) {
+                        return cleaned.replace(/\./g, '').replace(',', '.');
+                    }
+
+                    return cleaned.replace(/,/g, '');
+                }
+
+                return cleaned;
+            }
+
+            function normalizeDecimalInputForSubmit(input) {
+                if (!input || !input.value) {
+                    return;
+                }
+
+                if (input.type === 'text' && input.getAttribute('inputmode') === 'decimal') {
+                    input.value = normalizeDecimalInputValue(input.value);
+                }
+            }
+
+            function formatDecimalInput(value) {
+                var parsed = parseDecimalLocale(value);
+                if (!Number.isFinite(parsed)) {
+                    return '0,00';
+                }
+                return parsed.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
             function parseDecimalLocale(value) {
@@ -1919,70 +2011,87 @@
                     return value;
                 }
 
-                var source = String(value ?? '0').trim();
-                if (!source) {
-                    return 0;
-                }
-
-                var sanitized = source
-                    .replace(/€/g, '')
-                    .replace(/\s/g, '')
-                    .replace(/[^\d,.-]/g, '');
-
-                if (!sanitized || sanitized === '-' || sanitized === '.' || sanitized === ',') {
-                    return 0;
-                }
-
-                var lastComma = sanitized.lastIndexOf(',');
-                var lastDot = sanitized.lastIndexOf('.');
-                var normalized;
-
-                if (lastComma !== -1 && lastDot !== -1) {
-                    normalized = lastComma > lastDot
-                        ? sanitized.replace(/\./g, '').replace(',', '.')
-                        : sanitized.replace(/,/g, '');
-                } else if (lastComma !== -1) {
-                    var fractionLength = sanitized.length - lastComma - 1;
-                    normalized = fractionLength <= 2
-                        ? sanitized.replace(',', '.')
-                        : sanitized.replace(/,/g, '');
-                } else {
-                    var dotParts = sanitized.split('.');
-                    if (dotParts.length > 2) {
-                        normalized = dotParts.slice(0, -1).join('') + '.' + dotParts[dotParts.length - 1];
-                    } else {
-                        normalized = sanitized;
-                    }
-                }
-
+                var normalized = normalizeMoneyValue(value);
                 var parsed = Number(normalized);
                 return Number.isFinite(parsed) ? parsed : 0;
             }
 
             function formatNumber(value) {
-                var numberValue = Number(value || 0);
-                if (!Number.isFinite(numberValue)) {
+                var numericValue = Number(value || 0);
+                if (!Number.isFinite(numericValue)) {
                     return '0';
                 }
-                return numberValue.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 6 });
+
+                var formatted = numericValue.toFixed(6).replace(/\.?0+$/, '');
+                var parts = formatted.split('.');
+                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                return parts.join(',');
+            }
+
+            function setupDecimalTextInput(input) {
+                if (!input) {
+                    return;
+                }
+
+                input.setAttribute('inputmode', 'decimal');
+                input.setAttribute('lang', 'es-ES');
+
+                input.addEventListener('keydown', function (event) {
+                    if (event.key === ',' || event.key === '.') {
+                        event.preventDefault();
+                        if (/[.,]/.test(input.value)) {
+                            return;
+                        }
+                        var separator = ',';
+                        var start = input.selectionStart ?? input.value.length;
+                        var end = input.selectionEnd ?? input.value.length;
+                        var nextValue = input.value.slice(0, start) + separator + input.value.slice(end);
+                        input.value = nextValue;
+                        var caret = start + 1;
+                        if (typeof input.setSelectionRange === 'function') {
+                            requestAnimationFrame(function () {
+                                input.setSelectionRange(caret, caret);
+                            });
+                        }
+                    }
+                });
+
+                input.addEventListener('input', function () {
+                    var normalized = normalizeDecimalInputValue(input.value);
+                    if (normalized !== input.value) {
+                        input.value = normalized;
+                    }
+                });
+
+                input.addEventListener('blur', function () {
+                    if (input.id === 'transaction-importe-field') {
+                        input.value = formatDecimalInput(input.value);
+                    }
+                });
             }
 
             document.addEventListener('DOMContentLoaded', function () {
-                document.querySelectorAll('input[type="number"]').forEach(function (input) {
+                document.querySelectorAll('input[type="number"], input[type="text"][inputmode="decimal"]').forEach(function (input) {
                     input.setAttribute('inputmode', 'decimal');
                     input.setAttribute('lang', 'es-ES');
 
                     input.addEventListener('keydown', function (event) {
                         if (event.key === ',' || event.key === '.') {
                             event.preventDefault();
+                            if (/[.,]/.test(input.value)) {
+                                return;
+                            }
+                            var separator = ',';
                             var start = input.selectionStart ?? input.value.length;
                             var end = input.selectionEnd ?? input.value.length;
-                            var nextValue = input.value.slice(0, start) + '.' + input.value.slice(end);
+                            var nextValue = input.value.slice(0, start) + separator + input.value.slice(end);
                             input.value = nextValue;
                             var caret = start + 1;
-                            requestAnimationFrame(function () {
-                                input.setSelectionRange(caret, caret);
-                            });
+                            if (typeof input.setSelectionRange === 'function') {
+                                requestAnimationFrame(function () {
+                                    input.setSelectionRange(caret, caret);
+                                });
+                            }
                         }
                     });
 
@@ -1992,6 +2101,18 @@
                             input.value = normalized;
                         }
                     });
+                });
+
+                document.querySelectorAll('form').forEach(function (form) {
+                    form.addEventListener('submit', function () {
+                        form.querySelectorAll('input[type="text"][inputmode="decimal"]').forEach(function (input) {
+                            normalizeDecimalInputForSubmit(input);
+                        });
+                    });
+                });
+
+                ['transaction-quantity-field', 'transaction-importe-field'].forEach(function (fieldId) {
+                    setupDecimalTextInput(document.getElementById(fieldId));
                 });
             });
 
@@ -2142,6 +2263,40 @@
                 return card && card.getAttribute('data-transaction-type') === 'sale' ? 'VENTA' : 'COMPRA';
             }
 
+            function findRowByIdentity(allRows, row) {
+                if (!Array.isArray(allRows) || !row) {
+                    return null;
+                }
+
+                var rowId = row.getAttribute('data-row-id');
+                if (rowId) {
+                    return allRows.find(function (item) {
+                        return item && item.id && String(item.id) === String(rowId);
+                    }) || null;
+                }
+
+                var cells = row.querySelectorAll('td');
+                if (cells.length < 5) {
+                    return null;
+                }
+
+                var title = cells[0].textContent.trim();
+                var amount = parseMoney(cells[3].textContent);
+                var date = cells[4].textContent.trim();
+
+                return allRows.find(function (item) {
+                    if (!item) {
+                        return false;
+                    }
+
+                    var itemTitle = String(item.titulo || item.concept || '').trim();
+                    var itemDate = String(item.fechaOperacion || '').trim();
+                    var itemAmount = Number(item.importeTotal || 0);
+
+                    return itemTitle === title && Math.abs(itemAmount - amount) < 0.01 && String(itemDate).slice(0, 10) === String(date).slice(0, 10);
+                }) || null;
+            }
+
             function openTransactionDialog(card, currentRow, rowIndex) {
                 var dialog = document.getElementById('transaction-entry-dialog');
                 var form = document.getElementById('transaction-entry-form');
@@ -2173,8 +2328,8 @@
                 if (titleField) {
                     titleField.value = selectedTitle || defaultTitle;
                 }
-                quantityField.value = currentRow ? String(currentRow.numeroTitulos || currentRow.cantidad || 0) : '1';
-                importeField.value = currentRow ? String(currentRow.importeTotal || 0) : '0';
+                quantityField.value = currentRow ? String(currentRow.numeroTitulos || currentRow.cantidad || 1) : '1';
+                importeField.value = currentRow ? formatDecimalInput(currentRow.importeTotal || 0) : '0.00';
                 fechaField.value = currentRow ? String(currentRow.fechaOperacion || '').substring(0, 10) : new Date().toISOString().substring(0, 10);
 
                 if (dialog && typeof dialog.showModal === 'function') {
@@ -2205,18 +2360,11 @@
                     button.onclick = function () {
                         var row = button.closest('tr');
                         var allRows = JSON.parse(localStorage.getItem(key) || '[]');
-                        var rowId = row.getAttribute('data-row-id');
+                        var current = findRowByIdentity(allRows, row);
                         var index = Array.prototype.indexOf.call(row.parentNode.children, row);
-                        var current = null;
-
-                        if (rowId) {
-                            current = allRows.find(function (item) {
-                                return item && item.id && String(item.id) === String(rowId);
-                            });
-                        }
 
                         if (!current) {
-                            current = allRows[index] || readExistingRows(card)[index];
+                            current = allRows[index] || readExistingRows(card)[index] || null;
                         }
 
                         var resolvedIndex = current && current.id
@@ -2277,47 +2425,53 @@
                 attachCardHandlers(card);
             }
 
-            document.getElementById('transaction-entry-form').addEventListener('submit', function (event) {
-                event.preventDefault();
-                if (!activeTransactionCard) {
+            var transactionForm = document.getElementById('transaction-entry-form');
+            if (transactionForm) {
+                transactionForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    if (!activeTransactionCard) {
+                        closeTransactionDialog();
+                        return;
+                    }
+
+                    var key = getStorageKey(activeTransactionCard.getAttribute('data-transaction-type'), activeTransactionCard.getAttribute('data-broker-code'));
+                    var rows = JSON.parse(localStorage.getItem(key) || '[]');
+                    var rowIndexField = document.getElementById('transaction-row-index-field');
+                    var rowIndex = rowIndexField.value === '' ? null : Number(rowIndexField.value);
+                    var selectedTitle = document.getElementById('transaction-title-field').value;
+                    var operationType = activeTransactionCard.getAttribute('data-transaction-type') === 'purchase' ? 'COMPRA' : 'VENTA';
+                    var row = {
+                        titulo: selectedTitle,
+                        tipoOperacion: operationType,
+                        numeroTitulos: parseDecimalLocale(document.getElementById('transaction-quantity-field').value || '0'),
+                        importeTotal: parseMoney(document.getElementById('transaction-importe-field').value),
+                        fechaOperacion: document.getElementById('transaction-fecha-field').value,
+                        concept: getTransactionConcept(activeTransactionCard.getAttribute('data-transaction-type'), selectedTitle),
+                        valor: parseMoney(document.getElementById('transaction-importe-field').value)
+                    };
+
+                    if (rowIndex === null || Number.isNaN(rowIndex)) {
+                        row.id = generateRowId();
+                        rows.push(row);
+                    } else {
+                        row.id = rows[rowIndex] && rows[rowIndex].id ? rows[rowIndex].id : generateRowId();
+                        rows[rowIndex] = row;
+                    }
+
+                    var sortedRows = sortTransactionRows(rows);
+                    saveRows(activeTransactionCard, sortedRows);
+                    renderTable(activeTransactionCard, sortedRows);
+                    attachCardHandlers(activeTransactionCard);
                     closeTransactionDialog();
-                    return;
-                }
+                });
+            }
 
-                var key = getStorageKey(activeTransactionCard.getAttribute('data-transaction-type'), activeTransactionCard.getAttribute('data-broker-code'));
-                var rows = JSON.parse(localStorage.getItem(key) || '[]');
-                var rowIndexField = document.getElementById('transaction-row-index-field');
-                var rowIndex = rowIndexField.value === '' ? null : Number(rowIndexField.value);
-                var selectedTitle = document.getElementById('transaction-title-field').value;
-                var operationType = activeTransactionCard.getAttribute('data-transaction-type') === 'purchase' ? 'COMPRA' : 'VENTA';
-                var row = {
-                    titulo: selectedTitle,
-                    tipoOperacion: operationType,
-                    numeroTitulos: Number(document.getElementById('transaction-quantity-field').value || 0),
-                    importeTotal: parseMoney(document.getElementById('transaction-importe-field').value),
-                    fechaOperacion: document.getElementById('transaction-fecha-field').value,
-                    concept: getTransactionConcept(activeTransactionCard.getAttribute('data-transaction-type'), selectedTitle),
-                    valor: parseMoney(document.getElementById('transaction-importe-field').value)
-                };
-
-                if (rowIndex === null || Number.isNaN(rowIndex)) {
-                    row.id = generateRowId();
-                    rows.push(row);
-                } else {
-                    row.id = rows[rowIndex] && rows[rowIndex].id ? rows[rowIndex].id : generateRowId();
-                    rows[rowIndex] = row;
-                }
-
-                var sortedRows = sortTransactionRows(rows);
-                saveRows(activeTransactionCard, sortedRows);
-                renderTable(activeTransactionCard, sortedRows);
-                attachCardHandlers(activeTransactionCard);
-                closeTransactionDialog();
-            });
-
-            document.getElementById('transaction-cancel-button').addEventListener('click', function () {
-                closeTransactionDialog();
-            });
+            var transactionCancelButton = document.getElementById('transaction-cancel-button');
+            if (transactionCancelButton) {
+                transactionCancelButton.addEventListener('click', function () {
+                    closeTransactionDialog();
+                });
+            }
 
             document.addEventListener('DOMContentLoaded', function () {
                 document.querySelectorAll('.transaction-broker-card').forEach(function (card) {

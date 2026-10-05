@@ -13,6 +13,8 @@ public sealed class QuoteMeta
 
 public sealed class Quote
 {
+    private static readonly System.Globalization.CultureInfo SpanishCulture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+
     public string Name { get; set; } = string.Empty;
     public string Symbol { get; set; } = string.Empty;
     public string Isin { get; set; } = string.Empty;
@@ -37,15 +39,15 @@ public sealed class Quote
         _ => "€"
     };
 
-    public string DisplayPrice => Price.HasValue ? Price.Value.ToString("#,##0.00") : "N/A";
-    public string DisplayPercent => PercentChange.HasValue ? $"{PercentChange.Value:0.00}% {(PercentChange.Value >= 0 ? "▲" : "▼")}" : "N/A";
-    public string DisplayOpen => Open.HasValue ? Open.Value.ToString("#,##0.00") : "N/A";
-    public string DisplayPreviousClose => PreviousClose.HasValue ? PreviousClose.Value.ToString("#,##0.00") : "N/A";
-    public string DisplayHigh => High.HasValue ? High.Value.ToString("#,##0.00") : "N/A";
-    public string DisplayLow => Low.HasValue ? Low.Value.ToString("#,##0.00") : "N/A";
-    public string DisplayVolume => Volume.HasValue ? Volume.Value.ToString("#,##0") : "N/A";
+    public string DisplayPrice => Price.HasValue ? Price.Value.ToString("N2", SpanishCulture) : "N/A";
+    public string DisplayPercent => PercentChange.HasValue ? $"{PercentChange.Value.ToString("0.00", SpanishCulture)}% {(PercentChange.Value >= 0 ? "▲" : "▼")}" : "N/A";
+    public string DisplayOpen => Open.HasValue ? Open.Value.ToString("N2", SpanishCulture) : "N/A";
+    public string DisplayPreviousClose => PreviousClose.HasValue ? PreviousClose.Value.ToString("N2", SpanishCulture) : "N/A";
+    public string DisplayHigh => High.HasValue ? High.Value.ToString("N2", SpanishCulture) : "N/A";
+    public string DisplayLow => Low.HasValue ? Low.Value.ToString("N2", SpanishCulture) : "N/A";
+    public string DisplayVolume => Volume.HasValue ? Volume.Value.ToString("N0", SpanishCulture) : "N/A";
     public decimal? Change => Price.HasValue && PreviousClose.HasValue ? Price.Value - PreviousClose.Value : null;
-    public string DisplayChange => Change.HasValue ? Change.Value.ToString("+#,##0.00;-#,##0.00;0.00") : "N/A";
+    public string DisplayChange => Change.HasValue ? Change.Value.ToString("+#,##0.00;-#,##0.00;0.00", SpanishCulture) : "N/A";
     public string DisplaySymbol => Symbol.TrimStart('^');
     public string DisplayIsin => string.IsNullOrWhiteSpace(Isin) ? "—" : Isin;
     public string DisplayMarket => string.IsNullOrWhiteSpace(Market) ? "—" : Market;

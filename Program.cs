@@ -15,13 +15,17 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 
-var invariantCultureOptions = new Microsoft.AspNetCore.Builder.RequestLocalizationOptions
+var spanishCulture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+var localizationOptions = new Microsoft.AspNetCore.Builder.RequestLocalizationOptions
 {
-    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(System.Globalization.CultureInfo.InvariantCulture, System.Globalization.CultureInfo.InvariantCulture),
-    SupportedCultures = new[] { System.Globalization.CultureInfo.InvariantCulture },
-    SupportedUICultures = new[] { System.Globalization.CultureInfo.InvariantCulture }
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(spanishCulture, spanishCulture),
+    SupportedCultures = new[] { spanishCulture },
+    SupportedUICultures = new[] { spanishCulture }
 };
-app.UseRequestLocalization(invariantCultureOptions);
+app.UseRequestLocalization(localizationOptions);
+
+System.Globalization.CultureInfo.DefaultThreadCurrentCulture = spanishCulture;
+System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = spanishCulture;
 
 if (!app.Environment.IsDevelopment())
 {
