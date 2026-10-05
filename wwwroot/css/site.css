@@ -620,6 +620,16 @@ body.wco-active .topbar-datetime {
   letter-spacing: -0.02em;
 }
 
+.summary-breakdown {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #dfe8f5;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
 .summary-box.gain strong {
   color: #7ef0a7;
 }

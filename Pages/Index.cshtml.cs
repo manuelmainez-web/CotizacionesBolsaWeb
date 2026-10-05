@@ -94,9 +94,10 @@ public class IndexModel : PageModel
     public decimal TotalGainPercent => TotalPurchaseValue == 0 ? 0m : (TotalGainValue / TotalPurchaseValue) * 100m;
 
     public decimal PensionPlansTotalValue => PensionPlans.Sum(p => p.Participaciones * p.ValorLiquidativo);
+    public decimal PositionsCurrentValue => EtfsCurrentValue + FundsCurrentValue + PensionPlansTotalValue;
     public decimal CheckingAccountsTotalValue => CheckingAccounts.Sum(a => a.Balance);
     public decimal CashTotalValue => CashHoldings.Sum(c => c.Amount);
-    public decimal TotalGeneralConCuentasYEfectivo => EtfsCurrentValue + FundsCurrentValue + PensionPlansTotalValue + CheckingAccountsTotalValue + CashTotalValue;
+    public decimal TotalGeneralConCuentasYEfectivo => PositionsCurrentValue + CheckingAccountsTotalValue + CashTotalValue;
 
     private decimal PurchaseValueByBroker(string broker) =>
         EtfHoldings.Where(h => h.Broker == broker).Sum(h => h.PositionCount * h.UnitPurchasePrice) +
