@@ -1494,12 +1494,13 @@
             <input type="hidden" id="transaction-row-index-field" />
             <label>
                 Título de cartera
-                <select id="transaction-title-field" required>
+                <input id="transaction-title-field" list="transaction-title-options" required placeholder="Ej. Aena S.M.E., S.A." />
+                <datalist id="transaction-title-options">
                     @foreach (var title in Model.AvailableTransactionTitles)
                     {
-                        <option value="@title">@title</option>
+                        <option value="@title"></option>
                     }
-                </select>
+                </datalist>
             </label>
             <label>
                 Tipo de operación
@@ -2124,6 +2125,33 @@
                 return 'tx-' + Date.now() + '-' + Math.random().toString(16).slice(2, 10);
             }
 
+            function normalizeTitleFieldValue(title) {
+                var normalized = String(title || '').trim();
+                if (!normalized) {
+                    return '';
+                }
+
+                var datalist = document.getElementById('transaction-title-options');
+                if (datalist) {
+                    var exists = Array.prototype.some.call(datalist.options, function (option) {
+                        return String(option.value || '').trim().toLowerCase() === normalized.toLowerCase();
+                    });
+
+                    if (!exists) {
+                        var option = document.createElement('option');
+                        option.value = normalized;
+                        datalist.appendChild(option);
+                    }
+                }
+
+                var input = document.getElementById('transaction-title-field');
+                if (input) {
+                    input.value = normalized;
+                }
+
+                return normalized;
+            }
+
             function sanitizeStoredRows(rows) {
                 if (!Array.isArray(rows)) {
                     return [];
@@ -2370,10 +2398,10 @@
                     operationField.value = operationValue;
                 }
 
-                var defaultTitle = titleField && titleField.options.length ? titleField.options[0].value : '';
+                var defaultTitle = titleField && titleField.value ? String(titleField.value).trim() : '';
                 var selectedTitle = currentRow ? (currentRow.titulo || resolveTitleFromConcept(currentRow.concept)) : defaultTitle;
                 if (titleField) {
-                    titleField.value = selectedTitle || defaultTitle;
+                    titleField.value = normalizeTitleFieldValue(selectedTitle || defaultTitle);
                 }
                 quantityField.value = currentRow ? String(currentRow.numeroTitulos || currentRow.cantidad || 1) : '1';
                 importeField.value = currentRow ? formatDecimalInput(currentRow.importeTotal || 0) : '0.00';
@@ -2475,7 +2503,7 @@
                     var rows = safeGetStoredRows(activeTransactionCard);
                     var rowIndexField = document.getElementById('transaction-row-index-field');
                     var rowIndex = rowIndexField.value === '' ? null : Number(rowIndexField.value);
-                    var selectedTitle = document.getElementById('transaction-title-field').value;
+                    var selectedTitle = normalizeTitleFieldValue(document.getElementById('transaction-title-field').value);
                     var operationType = activeTransactionCard.getAttribute('data-transaction-type') === 'purchase' ? 'COMPRA' : 'VENTA';
                     var row = {
                         titulo: selectedTitle,
