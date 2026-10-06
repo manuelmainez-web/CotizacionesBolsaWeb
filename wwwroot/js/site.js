@@ -80,27 +80,37 @@ document.addEventListener('DOMContentLoaded', function () {
         button.textContent = '';
     });
 
-    syncSummaryPanelState();
+    document.querySelectorAll('.summary-panel').forEach(function (panel) {
+        syncSummaryPanelState(panel);
+    });
 });
 
-function syncSummaryPanelState() {
-    var panelResumen = document.querySelector('.summary-panel');
+function syncSummaryPanelState(panelResumen) {
     if (!panelResumen) {
         return;
     }
 
-    var hayResumenVisible = document.querySelectorAll('.summary-strip:not(.is-collapsed)').length > 0;
+    var strips = panelResumen.querySelectorAll('.summary-strip');
+    var hayResumenVisible = Array.prototype.some.call(strips, function (strip) {
+        return !strip.classList.contains('is-collapsed');
+    });
+
     panelResumen.classList.toggle('summary-panel--expanded', hayResumenVisible);
 
-    if (hayResumenVisible) {
-        panelResumen.style.height = panelResumen.scrollHeight + 'px';
-        panelResumen.style.maxHeight = panelResumen.scrollHeight + 'px';
-        panelResumen.style.overflow = 'visible';
-    } else {
-        panelResumen.style.height = '96px';
-        panelResumen.style.maxHeight = '96px';
-        panelResumen.style.overflow = 'hidden';
-    }
+    requestAnimationFrame(function () {
+        if (hayResumenVisible) {
+            panelResumen.style.height = 'auto';
+            panelResumen.style.maxHeight = 'none';
+            panelResumen.style.overflow = 'visible';
+            var altoNecesario = panelResumen.scrollHeight;
+            panelResumen.style.height = altoNecesario + 'px';
+            panelResumen.style.maxHeight = altoNecesario + 'px';
+        } else {
+            panelResumen.style.height = '96px';
+            panelResumen.style.maxHeight = '96px';
+            panelResumen.style.overflow = 'hidden';
+        }
+    });
 }
 
 document.addEventListener('click', function (event) {
@@ -130,7 +140,8 @@ document.addEventListener('click', function (event) {
         etiqueta.classList.toggle('is-expanded', !estaOculto);
     }
 
-    syncSummaryPanelState();
+    var panelResumen = button.closest('.summary-panel');
+    syncSummaryPanelState(panelResumen);
 });
 
 // Reloj con fecha y hora actual en la cabecera
