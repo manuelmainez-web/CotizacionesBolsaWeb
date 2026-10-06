@@ -1492,6 +1492,7 @@
             <input type="hidden" id="transaction-type-field" />
             <input type="hidden" id="transaction-broker-field" />
             <input type="hidden" id="transaction-row-index-field" />
+            <input type="hidden" id="transaction-row-id-field" />
             <label>
                 Título de cartera
                 <select id="transaction-title-field" required>
@@ -2173,6 +2174,47 @@
                 return normalized;
             }
 
+            function buildLegacyRowIdentity(row) {
+                if (!row || typeof row !== 'object') {
+                    return '';
+                }
+
+                if (row.id && String(row.id).trim()) {
+                    return 'id:' + String(row.id).trim();
+                }
+
+                var title = String(row.titulo || row.concept || '').trim().toLowerCase();
+                var operation = String(row.tipoOperacion || '').trim().toUpperCase();
+                var date = String(row.fechaOperacion || '').trim();
+                var concept = String(row.concept || '').trim().toLowerCase();
+
+                return ['legacy', title, operation, date, concept].join('|');
+            }
+
+            function ensureRowId(row, index) {
+                if (!row || typeof row !== 'object') {
+                    return row;
+                }
+
+                if (row.id && String(row.id).trim()) {
+                    return row;
+                }
+
+                var seed = [
+                    String(row.titulo || row.concept || ''),
+                    String(row.tipoOperacion || ''),
+                    String(row.fechaOperacion || ''),
+                    String(row.concept || '')
+                ].join('|');
+
+                var hash = Array.from(seed).reduce(function (total, character) {
+                    return total + character.charCodeAt(0);
+                }, 0).toString(16);
+
+                row.id = 'tx-' + hash;
+                return row;
+            }
+
             function sanitizeStoredRows(rows) {
                 if (!Array.isArray(rows)) {
                     return [];
@@ -2189,12 +2231,14 @@
                     }
 
                     return !/(PLAN\s*2030|Compra prueba|COMPRA PRUEBA|Amundi EURO STOXX 50 Daily|PRUEBA|compra prueba)/i.test(title);
+                }).map(function (row, index) {
+                    return ensureRowId(row, index);
                 });
             }
 
             function readExistingRows(card) {
                 var rows = [];
-                Array.prototype.forEach.call(card.querySelectorAll('tbody tr'), function (row) {
+                Array.prototype.forEach.call(card.querySelectorAll('tbody tr'), function (row, index) {
                     if (row.querySelector('.empty-state-cell')) {
                         return;
                     }
@@ -2205,8 +2249,8 @@
                     var title = cells[0].textContent.trim();
                     var tipo = cells[1].textContent.trim();
                     var cantidad = parseDecimalLocale(cells[2].textContent);
-                    rows.push({
-                        id: row.getAttribute('data-row-id') || generateRowId(),
+                    var parsedRow = {
+                        id: row.getAttribute('data-row-id') || undefined,
                         titulo: title,
                         tipoOperacion: tipo,
                         numeroTitulos: cantidad,
@@ -2214,7 +2258,8 @@
                         fechaOperacion: cells[4].textContent.trim(),
                         concept: title,
                         valor: parseMoney(cells[3].textContent)
-                    });
+                    };
+                    rows.push(ensureRowId(parsedRow, index));
                 });
                 return rows;
             }
@@ -2295,13 +2340,8 @@
                         return;
                     }
 
-                    var signature = row.id || [
-                        String(row.titulo || row.concept || ''),
-                        String(row.tipoOperacion || ''),
-                        String(row.numeroTitulos !== undefined ? row.numeroTitulos : row.cantidad || 0),
-                        String(row.importeTotal !== undefined ? row.importeTotal : 0),
-                        String(row.fechaOperacion || '')
-                    ].join('||');
+                    ensureRowId(row, merged.length);
+                    var signature = buildLegacyRowIdentity(row);
 
                     if (seen.has(signature)) {
                         var index = seen.get(signature);
@@ -2415,11 +2455,13 @@
                 var typeField = document.getElementById('transaction-type-field');
                 var brokerField = document.getElementById('transaction-broker-field');
                 var rowIndexField = document.getElementById('transaction-row-index-field');
+                var rowIdField = document.getElementById('transaction-row-id-field');
 
                 activeTransactionCard = card;
                 typeField.value = type;
                 brokerField.value = brokerCode;
                 rowIndexField.value = rowIndex === null || rowIndex === undefined ? '' : String(rowIndex);
+                rowIdField.value = currentRow && currentRow.id ? String(currentRow.id) : '';
 
                 var operationValue = type === 'purchase' ? 'COMPRA' : 'VENTA';
                 formTitle.textContent = currentRow ? 'Editar ' + (type === 'purchase' ? 'compra' : 'venta') : 'Añadir ' + (type === 'purchase' ? 'compra' : 'venta');
@@ -2531,7 +2573,19 @@
                     var key = getStorageKey(activeTransactionCard.getAttribute('data-transaction-type'), activeTransactionCard.getAttribute('data-broker-code'));
                     var rows = safeGetStoredRows(activeTransactionCard);
                     var rowIndexField = document.getElementById('transaction-row-index-field');
+                    var rowIdField = document.getElementById('transaction-row-id-field');
                     var rowIndex = rowIndexField.value === '' ? null : Number(rowIndexField.value);
+                    var rowId = rowIdField && rowIdField.value ? String(rowIdField.value).trim() : '';
+
+                    if (rowId) {
+                        var rowMatchIndex = rows.findIndex(function (item) {
+                            return item && item.id && String(item.id) === rowId;
+                        });
+                        if (rowMatchIndex >= 0) {
+                            rowIndex = rowMatchIndex;
+                        }
+                    }
+
                     var selectedTitle = normalizeTitleFieldValue(document.getElementById('transaction-title-field').value);
                     var operationType = activeTransactionCard.getAttribute('data-transaction-type') === 'purchase' ? 'COMPRA' : 'VENTA';
                     var row = {
@@ -2548,7 +2602,7 @@
                         row.id = generateRowId();
                         rows.push(row);
                     } else {
-                        row.id = rows[rowIndex] && rows[rowIndex].id ? rows[rowIndex].id : generateRowId();
+                        row.id = rows[rowIndex] && rows[rowIndex].id ? rows[rowIndex].id : (rowId || generateRowId());
                         rows[rowIndex] = row;
                     }
 
