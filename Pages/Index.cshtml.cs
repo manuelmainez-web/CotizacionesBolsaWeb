@@ -586,40 +586,12 @@ public class IndexModel : PageModel
 
         if (normalizedName.Contains("VIX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^VIX")
         {
-            return "^VIX";
+            return "VX=F";
         }
 
-        if (normalizedName.Contains("DAX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^GDAXI")
-        {
-            return "^GDAXI";
-        }
-
-        if (normalizedName.Contains("CAC", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^FCHI")
-        {
-            return "^FCHI";
-        }
-
-        if (normalizedName.Contains("EURO STOXX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^STOXX50E")
-        {
-            return "^STOXX50E";
-        }
-
-        if (normalizedName.Contains("IBEX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^IBEX")
-        {
-            return "^IBEX";
-        }
-
-        if (normalizedName.Contains("NIKKEI", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^N225")
-        {
-            return "^N225";
-        }
-
-        if (normalizedName.Contains("HANG SENG", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^HSI")
-        {
-            return "^HSI";
-        }
-
-        return normalizedSymbol;
+        // Los índices europeos y asiáticos no tienen un ticker de futuro equivalente
+        // en Yahoo Finance; evitamos reutilizar el índice como si fuera un futuro.
+        return string.Empty;
     }
 
     public async Task<IActionResult> OnPostAddCommodityAsync(string symbol, string classification)
