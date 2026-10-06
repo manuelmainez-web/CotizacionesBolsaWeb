@@ -886,6 +886,15 @@ body.wco-active .topbar-datetime {
 
 .market-tab-shell {
   margin-top: 8px;
+  min-height: 260px;
+}
+
+.tab-content {
+  min-height: 260px;
+}
+
+.tab-pane {
+  min-height: 260px;
 }
 
 .market-tabs {
