@@ -79,7 +79,29 @@ document.addEventListener('DOMContentLoaded', function () {
         button.title = !estaOculto ? 'Ocultar ' + nombre : 'Mostrar ' + nombre;
         button.textContent = '';
     });
+
+    syncSummaryPanelState();
 });
+
+function syncSummaryPanelState() {
+    var panelResumen = document.querySelector('.summary-panel');
+    if (!panelResumen) {
+        return;
+    }
+
+    var hayResumenVisible = document.querySelectorAll('.summary-strip:not(.is-collapsed)').length > 0;
+    panelResumen.classList.toggle('summary-panel--expanded', hayResumenVisible);
+
+    if (hayResumenVisible) {
+        panelResumen.style.height = panelResumen.scrollHeight + 'px';
+        panelResumen.style.maxHeight = panelResumen.scrollHeight + 'px';
+        panelResumen.style.overflow = 'visible';
+    } else {
+        panelResumen.style.height = '96px';
+        panelResumen.style.maxHeight = '96px';
+        panelResumen.style.overflow = 'hidden';
+    }
+}
 
 document.addEventListener('click', function (event) {
     var button = event.target.closest('[data-toggle-target]');
@@ -108,11 +130,7 @@ document.addEventListener('click', function (event) {
         etiqueta.classList.toggle('is-expanded', !estaOculto);
     }
 
-    var panelResumen = document.querySelector('.summary-panel');
-    if (panelResumen) {
-        var hayResumenVisible = document.querySelectorAll('.summary-strip:not(.is-collapsed)').length > 0;
-        panelResumen.classList.toggle('summary-panel--expanded', hayResumenVisible);
-    }
+    syncSummaryPanelState();
 });
 
 // Reloj con fecha y hora actual en la cabecera
