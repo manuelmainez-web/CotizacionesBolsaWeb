@@ -341,15 +341,50 @@ body.wco-active .topbar-datetime {
   min-height: 96px;
   max-height: 96px;
   overflow: hidden;
+  transition: height 0.2s ease, max-height 0.2s ease, overflow 0.2s ease;
+}
+
+.summary-panel.summary-panel--expanded {
+  height: auto;
+  min-height: 96px;
+  max-height: none;
+  overflow: visible;
 }
 
 .summary-panel .summary-strip-label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 8px;
   flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  min-height: 28px;
+  height: 28px;
   margin-bottom: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+#summary-strip-label {
+  grid-template-columns: auto minmax(0, 1fr);
 }
 
 .summary-panel .summary-strip-label:last-of-type {
   margin-bottom: 0;
+}
+
+.summary-panel .summary-strip-label > * {
+  min-width: 0;
+}
+
+.summary-panel .summary-strip-label .summary-general-label-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .summary-panel .summary-strip {
@@ -362,15 +397,32 @@ body.wco-active .topbar-datetime {
 }
 
 .print-actions {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
   gap: 8px;
-  margin-left: auto;
+  align-items: center;
+  width: 260px;
+  min-width: 260px;
+  max-width: 260px;
+  justify-items: stretch;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .print-actions .quick-link-button {
   justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
+  display: inline-flex;
+}
+
+.print-actions .quick-link-button span {
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .quick-link-button.mini-button {
@@ -535,8 +587,8 @@ body.wco-active .topbar-datetime {
 }
 
 .summary-strip-label.is-expanded {
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
 }
 
 .blank-lines-2 {
