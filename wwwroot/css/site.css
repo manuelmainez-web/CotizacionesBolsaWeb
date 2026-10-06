@@ -326,7 +326,9 @@ body.wco-active .topbar-datetime {
 }
 
 .summary-panel {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   width: 100%;
   box-sizing: border-box;
   margin-top: 12px;
@@ -336,12 +338,23 @@ body.wco-active .topbar-datetime {
   background: rgba(14, 22, 30, 0.9);
   box-shadow: 0 12px 30px rgba(2, 6, 23, 0.32);
   height: 96px;
+  min-height: 96px;
   max-height: 96px;
   overflow: hidden;
 }
 
+.summary-panel .summary-strip-label {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
 .summary-panel .summary-strip-label:last-of-type {
   margin-bottom: 0;
+}
+
+.summary-panel .summary-strip {
+  flex-shrink: 0;
+  min-height: 42px;
 }
 
 .summary-panel .summary-strip:last-child.is-collapsed {
