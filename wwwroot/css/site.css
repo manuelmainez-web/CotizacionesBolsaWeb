@@ -335,6 +335,9 @@ body.wco-active .topbar-datetime {
   border-radius: 16px;
   background: rgba(14, 22, 30, 0.9);
   box-shadow: 0 12px 30px rgba(2, 6, 23, 0.32);
+  height: 156px;
+  max-height: 156px;
+  overflow: hidden;
 }
 
 .summary-panel .summary-strip-label:last-of-type {
@@ -886,15 +889,6 @@ body.wco-active .topbar-datetime {
 
 .market-tab-shell {
   margin-top: 8px;
-  min-height: 260px;
-}
-
-.tab-content {
-  min-height: 260px;
-}
-
-.tab-pane {
-  min-height: 260px;
 }
 
 .market-tabs {
