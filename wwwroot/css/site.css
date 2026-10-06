@@ -335,8 +335,8 @@ body.wco-active .topbar-datetime {
   border-radius: 16px;
   background: rgba(14, 22, 30, 0.9);
   box-shadow: 0 12px 30px rgba(2, 6, 23, 0.32);
-  height: 128px;
-  max-height: 128px;
+  height: 112px;
+  max-height: 112px;
   overflow: hidden;
 }
 
