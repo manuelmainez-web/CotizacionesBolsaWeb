@@ -330,13 +330,13 @@ body.wco-active .topbar-datetime {
   width: 100%;
   box-sizing: border-box;
   margin-top: 12px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
   background: rgba(14, 22, 30, 0.9);
   box-shadow: 0 12px 30px rgba(2, 6, 23, 0.32);
-  height: 112px;
-  max-height: 112px;
+  height: 96px;
+  max-height: 96px;
   overflow: hidden;
 }
 
