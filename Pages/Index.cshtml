@@ -62,27 +62,6 @@
         }
     </div>
 
-    <div class="quick-links-panel">
-        <div class="quick-links" translate="no">
-            <a class="mini-button quick-link-button notranslate" translate="no" href="https://es.investing.com/indices/major-indices" target="_blank" rel="noopener noreferrer">
-                <img class="quick-link-icon" src="/images/brokers/investing.png" alt="Investing" />
-                <span translate="no" class="notranslate">Investing</span>
-            </a>
-            <a class="mini-button quick-link-button notranslate" translate="no" href="https://ing.ingdirect.es/app-login/" target="_blank" rel="noopener noreferrer">
-                <img class="quick-link-icon" src="/images/brokers/ing.png" alt="Ingdirect" />
-                <span translate="no" class="notranslate">Ingdirect</span>
-            </a>
-            <a class="mini-button quick-link-button notranslate" translate="no" href="https://app.traderepublic.com/" target="_blank" rel="noopener noreferrer">
-                <img class="quick-link-icon" src="/images/brokers/traderepublic.png" alt="Trade Republic" />
-                <span translate="no" class="notranslate">Trade Republic</span>
-            </a>
-            <a class="mini-button quick-link-button notranslate" translate="no" href="https://www.google.com/search?q=por+que+ha+subido+o+bajado+la+bolsa+en+la+jornada+actual&tbm=nws" target="_blank" rel="noopener noreferrer">
-                <span aria-hidden="true">📰</span>
-                <span translate="no" class="notranslate">Noticias</span>
-            </a>
-        </div>
-    </div>
-
     <div class="summary-panel">
         <div class="summary-strip-label" id="summary-strip-label-general">
             <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-general" data-toggle-name="resumen general" title="Mostrar/ocultar">Mostrar</button>
@@ -131,159 +110,219 @@
 
     <div class="blank-line-1"></div>
 
-    <div class="market-panel market-panel-watchlist">
-        <div class="panel-head panel-head-row">
-            <span>Índices <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
-            <button type="button" class="mini-button" data-dialog-target="add-index-dialog">+ Añadir índice</button>
-        </div>
-        <div class="table-wrap">
-            <table class="market-table market-table-compact market-table-grid" style="table-layout: fixed;">
-                <thead>
-                    <tr>
-                        <th style="width: 180px;">Nombre</th>
-                        <th class="text-align-right" style="width: 70px;">Cambio</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 90px;">Apertura</th>
-                        <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
-                        <th class="text-align-right" style="width: 100px;">Volumen</th>
-                        <th class="text-align-right" style="width: 110px;">Actualizado</th>
-                        <th class="text-align-right" style="width: 90px;">Símbolo</th>
-                        <th style="width: 96px;"></th>
-                    </tr>
-                </thead>
-                <tbody id="tbody-indices">
-                    @for (var indexRow = 0; indexRow < Model.Indices.Count; indexRow++)
-                    {
-                        var item = Model.Indices[indexRow];
-                        var isLastOfRegion = indexRow < Model.Indices.Count - 1
-                            && Model.GetIndexRegionOrder(item.CountryCode) != Model.GetIndexRegionOrder(Model.Indices[indexRow + 1].CountryCode);
-                        var esVix = string.Equals(item.Symbol, "^VIX", StringComparison.OrdinalIgnoreCase);
-                        <tr class="@(isLastOfRegion ? "row-divider-bottom" : "") @(esVix ? "row-highlight-vix" : "")">
-                            <td class="name-cell">
-                                <span class="name-with-flag">
-                                    <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
-                                    <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name&countryCode=@item.CountryCode">@item.Name</a>
-                                </span>
-                            </td>
-                            <td class="@item.TrendCssClass">@item.DisplayPercent</td>
-                            <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
-                            <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen</td>
-                            <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose</td>
-                            <td class="text-align-right">@item.DisplayVolume</td>
-                            <td class="time-cell">
-                                @item.UpdatedText
-                                <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
-                                    <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
-                                        <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
-                                        <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                            </td>
-                            <td class="text-align-right">@item.DisplaySymbol</td>
-                            <td class="delete-cell">
-                                <form method="post" asp-page-handler="MoveIndexUp" class="inline-form">
-                                    <input type="hidden" name="symbol" value="@item.Symbol" />
-                                    <button type="submit" class="icon-button-move" title="Subir" @(indexRow == 0 ? "disabled" : "")>▲</button>
-                                </form>
-                                <form method="post" asp-page-handler="MoveIndexDown" class="inline-form">
-                                    <input type="hidden" name="symbol" value="@item.Symbol" />
-                                    <button type="submit" class="icon-button-move" title="Bajar" @(indexRow == Model.Indices.Count - 1 ? "disabled" : "")>▼</button>
-                                </form>
-                                <form method="post" asp-page-handler="DeleteIndex" onsubmit="return confirm('¿Eliminar este índice?');">
-                                    <input type="hidden" name="symbol" value="@item.Symbol" />
-                                    <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <div class="market-tab-shell">
+        <ul class="nav nav-tabs market-tabs" id="market-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="indices-tab" data-bs-toggle="tab" data-bs-target="#indices-tab-pane" type="button" role="tab" aria-controls="indices-tab-pane" aria-selected="true">Índices</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="futures-tab" data-bs-toggle="tab" data-bs-target="#futures-tab-pane" type="button" role="tab" aria-controls="futures-tab-pane" aria-selected="false">Futuros</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="accesos-tab" data-bs-toggle="tab" data-bs-target="#accesos-tab-pane" type="button" role="tab" aria-controls="accesos-tab-pane" aria-selected="false">Accesos</button>
+            </li>
+        </ul>
 
-    <dialog id="add-index-dialog" class="add-entry-dialog">
-        <form method="post" asp-page-handler="AddIndex">
-            <h3>Añadir índice</h3>
-            <label>
-                País
-                <select id="add-index-country" required>
-                    <option value="" selected disabled>Selecciona un país</option>
-                </select>
-            </label>
-            <label>
-                Índice
-                <select id="add-index-select" required disabled>
-                    <option value="" selected disabled>Selecciona primero un país</option>
-                </select>
-            </label>
-            <input type="hidden" name="name" id="add-index-name-hidden" />
-            <input type="hidden" name="symbol" id="add-index-symbol-hidden" />
-            <input type="hidden" name="countryCode" id="add-index-country-hidden" />
-            <div class="dialog-actions">
-                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
-                <button type="submit" class="mini-button" id="add-index-submit" disabled>Añadir</button>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="indices-tab-pane" role="tabpanel" aria-labelledby="indices-tab">
+                <div class="market-panel market-panel-watchlist">
+                    <div class="panel-head panel-head-row">
+                        <span>Índices <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+                        <button type="button" class="mini-button" data-dialog-target="add-index-dialog">+ Añadir índice</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="market-table market-table-compact market-table-grid" style="table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">Nombre</th>
+                                    <th class="text-align-right" style="width: 70px;">Cambio</th>
+                                    <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
+                                    <th class="text-align-right" style="width: 90px;">Apertura</th>
+                                    <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
+                                    <th class="text-align-right" style="width: 100px;">Volumen</th>
+                                    <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                                    <th class="text-align-right" style="width: 90px;">Símbolo</th>
+                                    <th style="width: 96px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-indices">
+                                @for (var indexRow = 0; indexRow < Model.Indices.Count; indexRow++)
+                                {
+                                    var item = Model.Indices[indexRow];
+                                    var isLastOfRegion = indexRow < Model.Indices.Count - 1
+                                        && Model.GetIndexRegionOrder(item.CountryCode) != Model.GetIndexRegionOrder(Model.Indices[indexRow + 1].CountryCode);
+                                    var esVix = string.Equals(item.Symbol, "^VIX", StringComparison.OrdinalIgnoreCase);
+                                    <tr class="@(isLastOfRegion ? "row-divider-bottom" : "") @(esVix ? "row-highlight-vix" : "")">
+                                        <td class="name-cell">
+                                            <span class="name-with-flag">
+                                                <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                                <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name&countryCode=@item.CountryCode">@item.Name</a>
+                                            </span>
+                                        </td>
+                                        <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                        <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
+                                        <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen</td>
+                                        <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose</td>
+                                        <td class="text-align-right">@item.DisplayVolume</td>
+                                        <td class="time-cell">
+                                            @item.UpdatedText
+                                            <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                                <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                                    <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                                    <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </span>
+                                        </td>
+                                        <td class="text-align-right">@item.DisplaySymbol</td>
+                                        <td class="delete-cell">
+                                            <form method="post" asp-page-handler="MoveIndexUp" class="inline-form">
+                                                <input type="hidden" name="symbol" value="@item.Symbol" />
+                                                <button type="submit" class="icon-button-move" title="Subir" @(indexRow == 0 ? "disabled" : "")>▲</button>
+                                            </form>
+                                            <form method="post" asp-page-handler="MoveIndexDown" class="inline-form">
+                                                <input type="hidden" name="symbol" value="@item.Symbol" />
+                                                <button type="submit" class="icon-button-move" title="Bajar" @(indexRow == Model.Indices.Count - 1 ? "disabled" : "")>▼</button>
+                                            </form>
+                                            <form method="post" asp-page-handler="DeleteIndex" onsubmit="return confirm('¿Eliminar este índice?');">
+                                                <input type="hidden" name="symbol" value="@item.Symbol" />
+                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <dialog id="add-index-dialog" class="add-entry-dialog">
+                    <form method="post" asp-page-handler="AddIndex">
+                        <h3>Añadir índice</h3>
+                        <label>
+                            País
+                            <select id="add-index-country" required>
+                                <option value="" selected disabled>Selecciona un país</option>
+                            </select>
+                        </label>
+                        <label>
+                            Índice
+                            <select id="add-index-select" required disabled>
+                                <option value="" selected disabled>Selecciona primero un país</option>
+                            </select>
+                        </label>
+                        <input type="hidden" name="name" id="add-index-name-hidden" />
+                        <input type="hidden" name="symbol" id="add-index-symbol-hidden" />
+                        <input type="hidden" name="countryCode" id="add-index-country-hidden" />
+                        <div class="dialog-actions">
+                            <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                            <button type="submit" class="mini-button" id="add-index-submit" disabled>Añadir</button>
+                        </div>
+                    </form>
+                </dialog>
             </div>
-        </form>
-    </dialog>
 
-    <div class="market-panel mt-4 market-panel-watchlist">
-        <div class="panel-head panel-head-row">
-            <span>Futuros <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
-        </div>
-        <div class="table-wrap">
-            <table class="market-table market-table-compact market-table-grid" style="table-layout: fixed;">
-                <thead>
-                    <tr>
-                        <th style="width: 180px;">Nombre</th>
-                        <th class="text-align-right" style="width: 70px;">Cambio</th>
-                        <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
-                        <th class="text-align-right" style="width: 90px;">Apertura</th>
-                        <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
-                        <th class="text-align-right" style="width: 100px;">Volumen</th>
-                        <th class="text-align-right" style="width: 110px;">Actualizado</th>
-                        <th class="text-align-right" style="width: 90px;">Símbolo</th>
-                        <th style="width: 96px;"></th>
-                    </tr>
-                </thead>
-                <tbody id="tbody-futures">
-                    @if (Model.Futures.Count == 0)
-                    {
-                        <tr>
-                            <td colspan="9" class="empty-state-cell">No hay futuros disponibles para mostrar.</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        @foreach (var item in Model.Futures)
-                        {
-                            <tr>
-                                <td class="name-cell">
-                                    <span class="name-with-flag">
-                                        <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
-                                        <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name&countryCode=@item.CountryCode">@item.Name</a>
-                                    </span>
-                                </td>
-                                <td class="@item.TrendCssClass">@item.DisplayPercent</td>
-                                <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
-                                <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen</td>
-                                <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose</td>
-                                <td class="text-align-right">@item.DisplayVolume</td>
-                                <td class="time-cell">
-                                    @item.UpdatedText
-                                    <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
-                                        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
-                                            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
-                                            <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                    </span>
-                                </td>
-                                <td class="text-align-right">@item.DisplaySymbol</td>
-                                <td class="delete-cell"></td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
+            <div class="tab-pane fade" id="futures-tab-pane" role="tabpanel" aria-labelledby="futures-tab">
+                <div class="market-panel mt-4 market-panel-watchlist">
+                    <div class="panel-head panel-head-row">
+                        <span>Futuros <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="market-table market-table-compact market-table-grid" style="table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">Nombre</th>
+                                    <th class="text-align-right" style="width: 70px;">Cambio</th>
+                                    <th class="text-align-right notranslate" translate="no" style="width: 90px;">COTIZACIÓN ACTUAL</th>
+                                    <th class="text-align-right" style="width: 90px;">Apertura</th>
+                                    <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
+                                    <th class="text-align-right" style="width: 100px;">Volumen</th>
+                                    <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                                    <th class="text-align-right" style="width: 90px;">Símbolo</th>
+                                    <th style="width: 96px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-futures">
+                                @if (Model.Futures.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="9" class="empty-state-cell">No hay futuros disponibles para mostrar.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var item in Model.Futures)
+                                    {
+                                        <tr>
+                                            <td class="name-cell">
+                                                <span class="name-with-flag">
+                                                    <img class="flag-badge" src="@item.FlagUrl" alt="@item.CountryCode" title="@item.CountryCode" />
+                                                    <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name&countryCode=@item.CountryCode">@item.Name</a>
+                                                </span>
+                                            </td>
+                                            <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                            <td class="price-cell price-cell-quote">@item.DisplayPrice</td>
+                                            <td class="price-cell price-cell-quote text-align-right">@item.DisplayOpen</td>
+                                            <td class="price-cell price-cell-quote text-align-right">@item.DisplayPreviousClose</td>
+                                            <td class="text-align-right">@item.DisplayVolume</td>
+                                            <td class="time-cell">
+                                                @item.UpdatedText
+                                                <span class="market-clock @(item.IsMarketOpen ? "market-open" : "market-closed")" title="@item.MarketStatusLabel" aria-label="@item.MarketStatusLabel">
+                                                    <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                                        <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                                        <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                </span>
+                                            </td>
+                                            <td class="text-align-right">@item.DisplaySymbol</td>
+                                            <td class="delete-cell"></td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="accesos-tab-pane" role="tabpanel" aria-labelledby="accesos-tab">
+                <div class="market-panel mt-4 market-panel-watchlist">
+                    <div class="panel-head panel-head-row">
+                        <span>Accesos</span>
+                    </div>
+                    <div class="quick-links-panel">
+                        <div class="quick-links" translate="no">
+                            <div class="quick-link-inline">
+                                <a class="mini-button quick-link-button notranslate" translate="no" href="https://es.investing.com/indices/major-indices" target="_blank" rel="noopener noreferrer">
+                                    <img class="quick-link-icon" src="/images/brokers/investing.png" alt="Investing" />
+                                    <span translate="no" class="notranslate">Investing</span>
+                                </a>
+                                <span class="quick-link-text">Plataformas financieras y portales de noticias bursátiles.</span>
+                            </div>
+                            <div class="quick-link-inline">
+                                <a class="mini-button quick-link-button notranslate" translate="no" href="https://ing.ingdirect.es/app-login/" target="_blank" rel="noopener noreferrer">
+                                    <img class="quick-link-icon" src="/images/brokers/ing.png" alt="Ingdirect" />
+                                    <span translate="no" class="notranslate">Ingdirect</span>
+                                </a>
+                                <span class="quick-link-text">Acceso a entidad financiera de origen neerlandés perteneciente a ING Group.</span>
+                            </div>
+                            <div class="quick-link-inline">
+                                <a class="mini-button quick-link-button notranslate" translate="no" href="https://app.traderepublic.com/" target="_blank" rel="noopener noreferrer">
+                                    <img class="quick-link-icon" src="/images/brokers/traderepublic.png" alt="Trade Republic" />
+                                    <span translate="no" class="notranslate">Trade Republic</span>
+                                </a>
+                                <span class="quick-link-text">Acceso al banco digital alemán y un bróker en línea.</span>
+                            </div>
+                            <div class="quick-link-inline">
+                                <a class="mini-button quick-link-button notranslate" translate="no" href="https://www.google.com/search?q=por+que+ha+subido+o+bajado+la+bolsa+en+la+jornada+actual&tbm=nws" target="_blank" rel="noopener noreferrer">
+                                    <span aria-hidden="true">📰</span>
+                                    <span translate="no" class="notranslate">Noticias</span>
+                                </a>
+                                <span class="quick-link-text">Acceso a noticias bursátiles.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

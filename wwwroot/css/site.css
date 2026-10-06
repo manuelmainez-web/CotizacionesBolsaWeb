@@ -295,7 +295,34 @@ body.wco-active .topbar-datetime {
 }
 
 .quick-links-panel .quick-links {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
   margin-top: 0;
+}
+
+.quick-links-panel .quick-links .quick-link-button {
+  width: 80px;
+  min-width: 80px;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+.quick-link-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.quick-link-text {
+  color: #bfd0df;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  opacity: 0.9;
+  font-weight: 400;
 }
 
 .summary-panel {
@@ -857,8 +884,48 @@ body.wco-active .topbar-datetime {
   width: 80px;
 }
 
-.transaction-table th {
-  white-space: nowrap;
+.market-tab-shell {
+  margin-top: 8px;
+}
+
+.market-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  margin: 0 0 12px;
+  padding: 0 0 2px;
+}
+
+.market-tabs .nav-item {
+  margin: 0;
+}
+
+.market-tabs .nav-link {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom-color: transparent;
+  border-radius: 8px 8px 0 0;
+  color: #a9bacd;
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 10px 18px;
+  transition: all 0.2s ease;
+}
+
+.market-tabs .nav-link:hover {
+  color: #edf6ff;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.market-tabs .nav-link.active {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(96, 165, 250, 0.35);
+  border-bottom-color: rgba(37, 99, 235, 0.15);
+  color: #edf6ff;
+}
+
+.market-tabs .nav-link:focus {
+  box-shadow: none;
 }
 
 .panel-head-subtitle {
