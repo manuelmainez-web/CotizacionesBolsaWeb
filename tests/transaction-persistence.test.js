@@ -1,5 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { ensureTransactionSummary, formatTransactionSummaryText } = require('../wwwroot/js/transaction-summary.js');
 
 function buildLegacyRowIdentity(row) {
   if (!row || typeof row !== 'object') {
@@ -150,4 +151,34 @@ test('modificar el importe de una operación antigua sin id la reemplaza como la
   assert.equal(result.length, 1);
   assert.equal(result[0].importeTotal, 1800);
   assert.equal(result[0].numeroTitulos, 10);
+});
+
+test('las tarjetas de Trade Republic deben conservar siempre su resumen visible', () => {
+  const name = {
+    appendChild(child) {
+      this.child = child;
+      return child;
+    }
+  };
+
+  const card = {
+    getAttribute(attributeName) {
+      if (attributeName === 'data-transaction-type') {
+        return 'purchase';
+      }
+      return null;
+    },
+    querySelector(selector) {
+      if (selector === '.transaction-broker-name') {
+        return name;
+      }
+      return null;
+    }
+  };
+
+  const result = ensureTransactionSummary(card, [{ importeTotal: 123.45 }, { importeTotal: 234.55 }]);
+
+  assert.ok(result);
+  assert.equal(result.textContent, '(Importe total compras: 358,00 €)');
+  assert.equal(formatTransactionSummaryText('purchase', 358), '(Importe total compras: 358,00 €)');
 });

@@ -1281,10 +1281,12 @@
             </div>
         </div>
         <div id="transaction-broker-grid-ing" class="transaction-broker-grid">
+            @{ var ingPurchaseTotal = Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
             <div class="transaction-broker-card" data-broker-code="ING" data-transaction-type="purchase">
                 <div class="transaction-broker-header">
                     <div class="transaction-broker-name">
                         <span>Compras</span>
+                        <span class="transaction-total-summary">(@("Importe total compras: " + ingPurchaseTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))))</span>
                     </div>
                     <button type="button" class="mini-button transaction-add-button">+ Incluir compra</button>
                 </div>
@@ -1328,10 +1330,12 @@
                     </table>
                 </div>
             </div>
+            @{ var ingSaleTotal = Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
             <div class="transaction-broker-card" data-broker-code="ING" data-transaction-type="sale">
                 <div class="transaction-broker-header">
                     <div class="transaction-broker-name">
                         <span>Ventas</span>
+                        <span class="transaction-total-summary">(Importe total ventas: @ingSaleTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES")))</span>
                     </div>
                     <button type="button" class="mini-button transaction-add-button">+ Incluir venta</button>
                 </div>
@@ -1389,10 +1393,12 @@
             </div>
         </div>
         <div id="transaction-broker-grid-tr" class="transaction-broker-grid">
+            @{ var trPurchaseTotal = Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
             <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="purchase">
                 <div class="transaction-broker-header">
                     <div class="transaction-broker-name">
                         <span>Compras</span>
+                        <span class="transaction-total-summary">(Importe total compras: @trPurchaseTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES")))</span>
                     </div>
                     <button type="button" class="mini-button transaction-add-button">+ Incluir compra</button>
                 </div>
@@ -1436,10 +1442,12 @@
                     </table>
                 </div>
             </div>
+            @{ var trSaleTotal = Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
             <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="sale">
                 <div class="transaction-broker-header">
                     <div class="transaction-broker-name">
                         <span>Ventas</span>
+                        <span class="transaction-total-summary">(Importe total ventas: @trSaleTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES")))</span>
                     </div>
                     <button type="button" class="mini-button transaction-add-button">+ Incluir venta</button>
                 </div>
@@ -2296,9 +2304,28 @@
                 }
 
                 var sortedRows = sortTransactionRows(rows);
+                var summaryApi = window.TransactionSummary;
 
                 if (!sortedRows || sortedRows.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" class="empty-state-cell">No hay movimientos registrados para este broker.</td></tr>';
+                    if (summaryApi && summaryApi.ensureTransactionSummary) {
+                        summaryApi.ensureTransactionSummary(card, sortedRows);
+                    } else {
+                        var fallbackSummary = card.querySelector('.transaction-total-summary');
+                        if (!fallbackSummary) {
+                            var summaryName = card.querySelector('.transaction-broker-name');
+                            if (summaryName) {
+                                fallbackSummary = document.createElement('span');
+                                fallbackSummary.className = 'transaction-total-summary';
+                                summaryName.appendChild(fallbackSummary);
+                            }
+                        }
+                        if (fallbackSummary) {
+                            var fallbackType = card.getAttribute('data-transaction-type');
+                            var fallbackLabel = fallbackType === 'purchase' ? 'Importe total compras: ' : 'Importe total ventas: ';
+                            fallbackSummary.textContent = '(' + fallbackLabel + formatCurrency(0) + ')';
+                        }
+                    }
                     return;
                 }
 
@@ -2319,6 +2346,45 @@
                         '</td>' +
                         '</tr>';
                 }).join('');
+
+                if (summaryApi && summaryApi.ensureTransactionSummary) {
+                    summaryApi.ensureTransactionSummary(card, sortedRows);
+                    return;
+                }
+
+                if (card.getAttribute('data-broker-code') === 'ING' && card.getAttribute('data-transaction-type') === 'purchase') {
+                    var summaryText = card.querySelector('.transaction-total-summary');
+                    if (summaryText) {
+                        var totalValue = sortedRows.reduce(function (accumulator, row) {
+                            var value = Number(row && row.importeTotal !== undefined && row.importeTotal !== null ? row.importeTotal : 0);
+                            return accumulator + (Number.isFinite(value) ? value : 0);
+                        }, 0);
+                        summaryText.textContent = '(Importe total compras: ' + formatCurrency(totalValue) + ')';
+                    }
+                }
+
+                if (card.getAttribute('data-broker-code') === 'ING' && card.getAttribute('data-transaction-type') === 'sale') {
+                    var saleSummaryText = card.querySelector('.transaction-total-summary');
+                    if (saleSummaryText) {
+                        var saleTotalValue = sortedRows.reduce(function (accumulator, row) {
+                            var value = Number(row && row.importeTotal !== undefined && row.importeTotal !== null ? row.importeTotal : 0);
+                            return accumulator + (Number.isFinite(value) ? value : 0);
+                        }, 0);
+                        saleSummaryText.textContent = '(Importe total ventas: ' + formatCurrency(saleTotalValue) + ')';
+                    }
+                }
+
+                if (card.getAttribute('data-broker-code') === 'TR') {
+                    var trSummaryText = card.querySelector('.transaction-total-summary');
+                    if (trSummaryText) {
+                        var trTotalValue = sortedRows.reduce(function (accumulator, row) {
+                            var value = Number(row && row.importeTotal !== undefined && row.importeTotal !== null ? row.importeTotal : 0);
+                            return accumulator + (Number.isFinite(value) ? value : 0);
+                        }, 0);
+                        var trLabel = card.getAttribute('data-transaction-type') === 'purchase' ? 'Importe total compras: ' : 'Importe total ventas: ';
+                        trSummaryText.textContent = '(' + trLabel + formatCurrency(trTotalValue) + ')';
+                    }
+                }
             }
 
             function safeGetStoredRows(card) {
@@ -2710,4 +2776,5 @@
             window.refreshPageData = actualizarDatos;
         })();
     </script>
+    <script src="/js/transaction-summary.js"></script>
 }

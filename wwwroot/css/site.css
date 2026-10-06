@@ -799,12 +799,26 @@ body.wco-active .topbar-datetime {
 .transaction-broker-name {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   color: #edf6ff;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.transaction-total-summary {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  color: #d6e8ff;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: normal;
+  font-weight: 400;
 }
 
 .transaction-broker-logo {
@@ -961,6 +975,61 @@ body.wco-active .topbar-datetime {
   #print-datetime-tr,
   #print-datetime-cartera {
     display: block !important;
+    color: #000000 !important;
+  }
+
+  .transaction-broker-grid,
+  .transaction-broker-card,
+  .transaction-broker-header,
+  .transaction-broker-name,
+  .transaction-total-summary,
+  .transaction-table,
+  .transaction-table tbody,
+  .transaction-table thead,
+  .transaction-table tr,
+  .transaction-table th,
+  .transaction-table td {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #999999 !important;
+    box-shadow: none !important;
+  }
+
+  .transaction-broker-card {
+    border: 1px solid #b9b9b9 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
+
+  .transaction-broker-header {
+    border-bottom: 1px solid #b9b9b9 !important;
+    background: #ffffff !important;
+    padding: 8px 10px !important;
+  }
+
+  .transaction-broker-name {
+    font-size: 0.7rem !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: #000000 !important;
+  }
+
+  .transaction-total-summary {
+    font-size: 0.68rem !important;
+    color: #000000 !important;
+    font-weight: 400 !important;
+  }
+
+  .transaction-table th {
+    background: #f3f3f3 !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    white-space: nowrap;
+  }
+
+  .transaction-table td {
+    background: #ffffff !important;
     color: #000000 !important;
   }
 
@@ -2087,6 +2156,15 @@ body.wco-active .topbar-datetime {
     background: #ffffff !important;
   }
 
+  body.print-broker-ing .transaction-broker-logo,
+  body.print-broker-ing .panel-header-logo,
+  body.print-broker-tr .transaction-broker-logo,
+  body.print-broker-tr .panel-header-logo,
+  body.print-all .transaction-broker-logo,
+  body.print-all .panel-header-logo {
+    display: none !important;
+  }
+
   /* El recuadro del panel (.market-panel) y las casillas de resumen
      (.summary-box) YA NO mantienen su fondo oscuro original al imprimir
      (cartera, todo, ING Direct o Trade Republic); se fuerza fondo blanco y
@@ -2146,6 +2224,9 @@ body.wco-active .topbar-datetime {
   body.print-broker-ing #summary-strip-label-ing,
   body.print-broker-ing #summary-strip-label-checkingaccounts,
   body.print-broker-ing #summary-strip-checkingaccounts,
+  body.print-broker-ing #transaction-broker-grid-tr,
+  body.print-broker-ing .transaction-broker-card[data-broker-code="TR"],
+  body.print-broker-ing .market-panel:has(.transaction-broker-card[data-broker-code="TR"]),
   body.print-broker-ing tr[data-broker]:not([data-broker="ING"]) {
     display: none !important;
   }
@@ -2161,6 +2242,9 @@ body.wco-active .topbar-datetime {
   body.print-broker-tr #summary-strip-label-tr,
   body.print-broker-tr #summary-strip-label-checkingaccounts,
   body.print-broker-tr #summary-strip-checkingaccounts,
+  body.print-broker-tr #transaction-broker-grid-ing,
+  body.print-broker-tr .transaction-broker-card[data-broker-code="ING"],
+  body.print-broker-tr .market-panel:has(.transaction-broker-card[data-broker-code="ING"]),
   body.print-broker-tr tr[data-broker]:not([data-broker="TR"]) {
     display: none !important;
   }

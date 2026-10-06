@@ -153,317 +153,24 @@ document.addEventListener('click', function (event) {
     window.addEventListener('beforeprint', updatePrintDateTime);
 })();
 
-// Botón "Imprimir cartera": crea un documento de impresión dedicado con el
-// orden exacto solicitado y sin tocar la UI principal.
+// Botón "Imprimir cartera": conserva el contenido de la impresión original
+// y solo ajusta el formato visual mediante la plantilla de impresión ya
+// definida para cartera y brókeres.
 (function () {
-    function cloneSummaryBlock(selector) {
-        var el = document.querySelector(selector);
-        if (!el) {
-            return null;
-        }
-
-        var clone = el.cloneNode(true);
-        clone.querySelectorAll('.btn-toggle-summary, .mini-button, .btn-print-broker, .print-actions').forEach(function (node) {
-            node.remove();
-        });
-        return clone;
-    }
-
-    function cloneTableForBroker(selector, broker) {
-        var source = document.querySelector(selector);
-        if (!source) {
-            return null;
-        }
-
-        var clone;
-        if (source.tagName === 'TBODY') {
-            clone = document.createElement('table');
-            clone.appendChild(source.cloneNode(true));
-        } else {
-            clone = source.cloneNode(true);
-        }
-
-        var tbody = clone.querySelector('tbody') || clone;
-
-        Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function (row) {
-            var rowBroker = (row.getAttribute('data-broker') || '').trim();
-            if (rowBroker !== broker) {
-                row.remove();
-            }
-        });
-
-        clone.querySelectorAll('.delete-cell, .icon-button-edit, .icon-button-delete, .icon-button-move, .mini-button, form, button').forEach(function (node) {
-            node.remove();
-        });
-
-        if (!tbody.querySelector('tr')) {
-            return null;
-        }
-
-        return clone;
-    }
-
-    function buildBrokerSection(broker, title, summarySelector, tableConfigs) {
-        var section = document.createElement('section');
-        section.className = 'print-broker-section';
-
-        var header = document.createElement('div');
-        header.className = 'print-broker-header';
-
-        var logo = document.createElement('img');
-        logo.className = 'print-broker-logo';
-        logo.src = broker === 'ING' ? '/images/brokers/ing.png' : '/images/brokers/traderepublic.png';
-        logo.alt = title;
-        header.appendChild(logo);
-
-        var label = document.createElement('h3');
-        label.textContent = title + ' (Resumen total de las posiciones)';
-        header.appendChild(label);
-        section.appendChild(header);
-
-        var summary = cloneSummaryBlock(summarySelector);
-        if (summary) {
-            section.appendChild(summary);
-        }
-
-        var tablesAdded = 0;
-        tableConfigs.forEach(function (config) {
-            var tableClone = cloneTableForBroker(config.selector, broker);
-            if (!tableClone) {
-                return;
-            }
-
-            var block = document.createElement('div');
-            block.className = 'print-table-block';
-
-            var heading = document.createElement('h4');
-            heading.textContent = config.title;
-            block.appendChild(heading);
-            block.appendChild(tableClone);
-            section.appendChild(block);
-            tablesAdded += 1;
-        });
-
-        if (tablesAdded === 0) {
-            return null;
-        }
-
-        return section;
-    }
-
-    function printCloneDocument(mode) {
-        var root = document.createElement('div');
-        root.className = 'print-clone-root';
-
-        var globalSummary = cloneSummaryBlock('#summary-strip-general');
-        if (globalSummary) {
-            var globalHeader = document.createElement('h3');
-            globalHeader.textContent = 'RESUMEN TOTAL DE LAS POSICIONES';
-            root.appendChild(globalHeader);
-            root.appendChild(globalSummary);
-        }
-
-        var brokerSections = [
-            buildBrokerSection('ING', 'INGDIRECT', '#summary-strip-ing', [
-                { selector: '#tbody-etfs', title: 'ETF (Cartera)' },
-                { selector: '#tbody-portfolio-stocks', title: 'Acciones (Cartera)' },
-                { selector: '#tbody-pensionplans', title: 'Planes de pensiones (Cartera)' }
-            ]),
-            buildBrokerSection('TR', 'TRADE REPUBLIC', '#summary-strip-tr', [
-                { selector: '#tbody-etfs', title: 'ETF (Cartera)' },
-                { selector: '#tbody-portfolio-stocks', title: 'Acciones (Cartera)' },
-                { selector: '#tbody-pensionplans', title: 'Planes de pensiones (Cartera)' }
-            ])
-        ];
-
-        brokerSections.forEach(function (section) {
-            if (section) {
-                root.appendChild(section);
-            }
-        });
-
-        var iframe = document.createElement('iframe');
-        iframe.setAttribute('aria-hidden', 'true');
-        iframe.style.position = 'fixed';
-        iframe.style.left = '-9999px';
-        iframe.style.top = '0';
-        iframe.style.width = '0';
-        iframe.style.height = '0';
-        iframe.style.border = '0';
-        iframe.style.opacity = '0';
-        iframe.style.pointerEvents = 'none';
-        document.body.appendChild(iframe);
-
-        var styles = [
-            '@page { size: A4 portrait; margin: 8mm 5mm; }',
-            'html, body { margin: 0; padding: 0; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; }',
-            'body { padding: 12mm 8mm; }',
-            '.print-clone-root { display: block; width: 100%; }',
-            '.print-broker-section { margin: 0 0 18px; page-break-inside: avoid; break-inside: avoid; }',
-            '.print-broker-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }',
-            '.print-broker-header h3, h3 { margin: 0 0 8px; font-size: 15px; font-weight: 700; color: #000; }',
-            '.print-broker-logo { width: 116px; max-height: 42px; object-fit: contain; background: #fff; border-radius: 4px; }',
-            '.summary-strip { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 12px; margin-bottom: 10px; }',
-            '.summary-box { border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 10px; background: #fff; }',
-            '.summary-box span { display: block; font-size: 10px; color: #333; margin-bottom: 4px; }',
-            '.summary-box strong { display: block; font-size: 12px; font-weight: 700; color: #000; }',
-            '.print-table-block { margin-top: 14px; page-break-inside: avoid; break-inside: avoid; }',
-            '.print-table-block h4 { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #000; }',
-            'table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7pt; background: #fff; color: #000; }',
-            'th, td { border: 1px solid #b9b9b9; padding: 3px 5px; text-align: left; vertical-align: top; color: #000; background: #fff; word-wrap: break-word; }',
-            'th { background: #f3f3f3; font-weight: 700; text-transform: uppercase; }',
-            '.delete-cell, .broker-cell, .icon-button-edit, .icon-button-delete, .icon-button-move, form, button, .btn-toggle-summary, .mini-button, .print-actions { display: none !important; }',
-            '.text-success { color: #0a7a52; font-weight: 700; }',
-            '.text-danger { color: #b42318; font-weight: 700; }',
-            '@media print { body { margin: 0; } }'
-        ].join('');
-
-        var doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + styles + '</style></head><body>' + root.outerHTML + '</body></html>');
-        doc.close();
-
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-        window.setTimeout(function () {
-            iframe.remove();
-        }, 1500);
-    }
-
-    function bindPrintButton(id, handler) {
+    function bindPrintButton(id, bodyClass) {
         var boton = document.getElementById(id);
         if (!boton) {
             return;
         }
 
-        boton.addEventListener('click', handler);
+        boton.addEventListener('click', function () {
+            imprimirConNumeracion(bodyClass);
+        });
     }
 
-    bindPrintButton('btn-print-cartera', function () {
-        imprimirConNumeracion('print-all');
-    });
-
-    bindPrintButton('btn-print-ing', function () {
-        var section = buildBrokerSection('ING', 'INGDIRECT', '#summary-strip-ing', [
-            { selector: '#tbody-etfs', title: 'ETF (Cartera)' },
-            { selector: '#tbody-portfolio-stocks', title: 'Acciones (Cartera)' },
-            { selector: '#tbody-pensionplans', title: 'Planes de pensiones (Cartera)' }
-        ]);
-
-        if (!section) {
-            return;
-        }
-
-        var root = document.createElement('div');
-        root.className = 'print-clone-root';
-        root.appendChild(section);
-
-        var iframe = document.createElement('iframe');
-        iframe.style.position = 'fixed';
-        iframe.style.left = '-9999px';
-        iframe.style.top = '0';
-        iframe.style.width = '0';
-        iframe.style.height = '0';
-        iframe.style.border = '0';
-        iframe.style.opacity = '0';
-        document.body.appendChild(iframe);
-
-        var styles = [
-            '@page { size: A4 portrait; margin: 8mm 5mm; }',
-            'html, body { margin: 0; padding: 0; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; }',
-            'body { padding: 12mm 8mm; }',
-            '.print-clone-root { display: block; width: 100%; }',
-            '.print-broker-section { margin: 0 0 18px; page-break-inside: avoid; break-inside: avoid; }',
-            '.print-broker-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }',
-            '.print-broker-header h3 { margin: 0; font-size: 15px; font-weight: 700; color: #000; }',
-            '.print-broker-logo { width: 116px; max-height: 42px; object-fit: contain; background: #fff; border-radius: 4px; }',
-            '.summary-strip { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 12px; margin-bottom: 10px; }',
-            '.summary-box { border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 10px; background: #fff; }',
-            '.summary-box span { display: block; font-size: 10px; color: #333; margin-bottom: 4px; }',
-            '.summary-box strong { display: block; font-size: 12px; font-weight: 700; color: #000; }',
-            '.print-table-block { margin-top: 14px; }',
-            '.print-table-block h4 { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #000; }',
-            'table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7pt; background: #fff; color: #000; }',
-            'th, td { border: 1px solid #b9b9b9; padding: 3px 5px; text-align: left; vertical-align: top; color: #000; background: #fff; word-wrap: break-word; }',
-            'th { background: #f3f3f3; font-weight: 700; text-transform: uppercase; }',
-            '.delete-cell, .broker-cell, button, form, .btn-toggle-summary, .mini-button, .print-actions { display: none !important; }',
-            '.text-success { color: #0a7a52; font-weight: 700; }',
-            '.text-danger { color: #b42318; font-weight: 700; }',
-            '@media print { body { margin: 0; } }'
-        ].join('');
-
-        var doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + styles + '</style></head><body>' + root.outerHTML + '</body></html>');
-        doc.close();
-
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-        window.setTimeout(function () {
-            iframe.remove();
-        }, 1500);
-    });
-
-    bindPrintButton('btn-print-tr', function () {
-        var section = buildBrokerSection('TR', 'TRADE REPUBLIC', '#summary-strip-tr', [
-            { selector: '#tbody-etfs', title: 'ETF (Cartera)' },
-            { selector: '#tbody-portfolio-stocks', title: 'Acciones (Cartera)' },
-            { selector: '#tbody-pensionplans', title: 'Planes de pensiones (Cartera)' }
-        ]);
-
-        if (!section) {
-            return;
-        }
-
-        var root = document.createElement('div');
-        root.className = 'print-clone-root';
-        root.appendChild(section);
-
-        var iframe = document.createElement('iframe');
-        iframe.style.position = 'fixed';
-        iframe.style.left = '-9999px';
-        iframe.style.top = '0';
-        iframe.style.width = '0';
-        iframe.style.height = '0';
-        iframe.style.border = '0';
-        iframe.style.opacity = '0';
-        document.body.appendChild(iframe);
-
-        var styles = [
-            '@page { size: A4 portrait; margin: 8mm 5mm; }',
-            'html, body { margin: 0; padding: 0; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; }',
-            'body { padding: 12mm 8mm; }',
-            '.print-clone-root { display: block; width: 100%; }',
-            '.print-broker-section { margin: 0 0 18px; page-break-inside: avoid; break-inside: avoid; }',
-            '.print-broker-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }',
-            '.print-broker-header h3 { margin: 0; font-size: 15px; font-weight: 700; color: #000; }',
-            '.print-broker-logo { width: 116px; max-height: 42px; object-fit: contain; background: #fff; border-radius: 4px; }',
-            '.summary-strip { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 12px; margin-bottom: 10px; }',
-            '.summary-box { border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 10px; background: #fff; }',
-            '.summary-box span { display: block; font-size: 10px; color: #333; margin-bottom: 4px; }',
-            '.summary-box strong { display: block; font-size: 12px; font-weight: 700; color: #000; }',
-            '.print-table-block { margin-top: 14px; }',
-            '.print-table-block h4 { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #000; }',
-            'table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7pt; background: #fff; color: #000; }',
-            'th, td { border: 1px solid #b9b9b9; padding: 3px 5px; text-align: left; vertical-align: top; color: #000; background: #fff; word-wrap: break-word; }',
-            'th { background: #f3f3f3; font-weight: 700; text-transform: uppercase; }',
-            '.delete-cell, .broker-cell, button, form, .btn-toggle-summary, .mini-button, .print-actions { display: none !important; }',
-            '.text-success { color: #0a7a52; font-weight: 700; }',
-            '.text-danger { color: #b42318; font-weight: 700; }',
-            '@media print { body { margin: 0; } }'
-        ].join('');
-
-        var doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + styles + '</style></head><body>' + root.outerHTML + '</body></html>');
-        doc.close();
-
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-        window.setTimeout(function () {
-            iframe.remove();
-        }, 1500);
-    });
+    bindPrintButton('btn-print-cartera', 'print-all');
+    bindPrintButton('btn-print-ing', 'print-broker-ing');
+    bindPrintButton('btn-print-tr', 'print-broker-tr');
 })();
 
 // Alinea verticalmente los botones de imprimir con la fila de enlaces
@@ -1245,6 +952,14 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass) {
     var origen = window.location.origin;
 
     function filtrarFilasPorBroker(tabla, broker) {
+        var textoPanel = ((tabla.querySelector('.panel-head') || tabla).textContent || '').replace(/\s+/g, ' ').trim();
+        var esOperacionBroker = /Operaciones de compra y venta/i.test(textoPanel);
+
+        if (esOperacionBroker) {
+            var esBrokerCorrecto = (/ING/i.test(textoPanel) && broker === 'ING') || (/Trade Republic|TR/i.test(textoPanel) && broker === 'TR');
+            return esBrokerCorrecto;
+        }
+
         var algunaVisible = false;
         tabla.querySelectorAll('tbody tr[data-broker]').forEach(function (fila) {
             if (fila.getAttribute('data-broker') === broker) {
@@ -1254,6 +969,24 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass) {
             }
         });
         return algunaVisible;
+    }
+
+    function obtenerOrdenPanel(panel) {
+        var textoPanel = ((panel.querySelector('.panel-head') || panel).textContent || '').replace(/\s+/g, ' ').trim();
+
+        if (/CUENTA CORRIENTE/i.test(textoPanel)) {
+            return 4;
+        }
+
+        if (/Operaciones de compra y venta|Compras|Ventas/i.test(textoPanel)) {
+            return 5;
+        }
+
+        if (/Planes de pensiones/i.test(textoPanel)) {
+            return 3;
+        }
+
+        return 2;
     }
 
     function crearResumenGlobal() {
@@ -1306,16 +1039,21 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass) {
             grupo.appendChild(resumenClonado);
         }
 
-        paneles.forEach(function (panelOriginal) {
-            var panel = panelOriginal.cloneNode(true);
-            panel.removeAttribute('id');
-            panel.querySelectorAll('[id]').forEach(function (el) {
-                el.removeAttribute('id');
+        paneles
+            .slice()
+            .sort(function (a, b) {
+                return obtenerOrdenPanel(a) - obtenerOrdenPanel(b);
+            })
+            .forEach(function (panelOriginal) {
+                var panel = panelOriginal.cloneNode(true);
+                panel.removeAttribute('id');
+                panel.querySelectorAll('[id]').forEach(function (el) {
+                    el.removeAttribute('id');
+                });
+                if (filtrarFilasPorBroker(panel, broker)) {
+                    grupo.appendChild(panel);
+                }
             });
-            if (filtrarFilasPorBroker(panel, broker)) {
-                grupo.appendChild(panel);
-            }
-        });
 
         return grupo;
     }
@@ -1323,12 +1061,15 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass) {
     var paneles = Array.prototype.filter.call(
         shellClone.querySelectorAll('.market-panel'),
         function (panel) {
-            if (!panel.querySelector('tr[data-broker]')) {
+            var textoPanel = ((panel.querySelector('.panel-head') || panel).textContent || '').replace(/\s+/g, ' ').trim();
+            var tieneFilasBroker = !!panel.querySelector('tr[data-broker]');
+            var esOperacionBroker = /Operaciones de compra y venta/i.test(textoPanel);
+
+            if (!tieneFilasBroker && !esOperacionBroker) {
                 return false;
             }
 
-            var textoPanel = (panel.querySelector('.panel-head') || panel).textContent || '';
-            return /ETF|Fondos|Acciones|Planes de pensiones|Cuenta Corriente/i.test(textoPanel) && !/Efectivo|EFECTIVO/i.test(textoPanel);
+            return (/ETF|Fondos|Acciones|Planes de pensiones|Cuenta Corriente|Operaciones de compra y venta/i.test(textoPanel)) && !/Efectivo|EFECTIVO/i.test(textoPanel);
         }
     );
 
@@ -1356,9 +1097,17 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass) {
         primerPanel.parentNode.insertBefore(resumenGlobal, primerPanel);
     }
 
+    var cuentaCorrienteIng = shellClone.querySelector('.market-panel-non-cartera');
     grupoTr.classList.add('print-broker-group-break');
-    primerPanel.parentNode.insertBefore(grupoIng, primerPanel);
-    primerPanel.parentNode.insertBefore(grupoTr, primerPanel);
+
+    if (cuentaCorrienteIng) {
+        cuentaCorrienteIng.parentNode.insertBefore(grupoIng, cuentaCorrienteIng.nextSibling);
+        cuentaCorrienteIng.parentNode.insertBefore(grupoTr, grupoIng.nextSibling || cuentaCorrienteIng.nextSibling);
+    } else {
+        primerPanel.parentNode.insertBefore(grupoIng, primerPanel);
+        primerPanel.parentNode.insertBefore(grupoTr, grupoIng.nextSibling || primerPanel);
+    }
+
     paneles.forEach(function (panel) {
         panel.remove();
     });
