@@ -297,15 +297,22 @@ public class IndexModel : PageModel
         PortfolioStocks = stockHoldingConfigs.Count > 0 ? await _service.GetQuotesAsync(stockHoldingConfigs) : new List<Quote>();
         EtfsControl = etfControlConfigs.Count > 0 ? await _service.GetQuotesAsync(etfControlConfigs) : new List<Quote>();
 
-        var futuresConfigs = indexConfigs
-            .Select(config => new QuoteConfig(
+        var futuresConfigs = new List<QuoteConfig>();
+        foreach (var config in indexConfigs)
+        {
+            var futureSymbol = await _service.ResolveFutureSymbolByNameAsync(config.Name, config.Symbol);
+            if (string.IsNullOrWhiteSpace(futureSymbol))
+            {
+                futureSymbol = config.Symbol;
+            }
+
+            futuresConfigs.Add(new QuoteConfig(
                 config.Name,
-                ResolveFutureSymbol(config.Name, config.Symbol),
+                futureSymbol,
                 config.Isin,
                 config.CountryCode,
-                config.Market))
-            .Where(config => !string.IsNullOrWhiteSpace(config.Symbol))
-            .ToList();
+                config.Market));
+        }
 
         await _dataStore.SaveEntriesAsync(FuturesKey, futuresConfigs);
         var futuresQuotes = futuresConfigs.Count > 0 ? await _service.GetQuotesAsync(futuresConfigs) : new List<Quote>();
@@ -556,13 +563,8 @@ public class IndexModel : PageModel
 
     public static string ResolveFutureSymbol(string indexName, string? indexSymbol)
     {
-        if (string.IsNullOrWhiteSpace(indexSymbol))
-        {
-            return string.Empty;
-        }
-
-        var normalizedName = indexName?.Trim() ?? string.Empty;
-        var normalizedSymbol = indexSymbol.Trim();
+        var normalizedName = (indexName ?? string.Empty).Trim();
+        var normalizedSymbol = (indexSymbol ?? string.Empty).Trim();
 
         if (normalizedName.Contains("NASDAQ", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^IXIC")
         {
@@ -579,18 +581,36 @@ public class IndexModel : PageModel
             return "YM=F";
         }
 
+        if (normalizedName.Contains("DAX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^GDAXI")
+        {
+            return "Q2JF.DE";
+        }
+
+        if (normalizedName.Contains("CAC", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^FCHI")
+        {
+            return "CAFME.PA";
+        }
+
+        if (normalizedName.Contains("EURO STOXX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^STOXX50E")
+        {
+            return "797B.Z";
+        }
+
+        if (normalizedName.Contains("NIKKEI", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^N225")
+        {
+            return "^NKFT.OS";
+        }
+
         if (normalizedName.Contains("RUSSELL", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^RUT")
         {
             return "RTY=F";
         }
 
-        if (normalizedName.Contains("VIX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^VIX")
+        if (normalizedSymbol.Contains("=F", StringComparison.OrdinalIgnoreCase))
         {
-            return "VX=F";
+            return normalizedSymbol;
         }
 
-        // Los índices europeos y asiáticos no tienen un ticker de futuro equivalente
-        // en Yahoo Finance; evitamos reutilizar el índice como si fuera un futuro.
         return string.Empty;
     }
 

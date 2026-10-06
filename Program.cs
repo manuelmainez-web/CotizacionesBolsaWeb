@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var tempProtectionPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aspnet-data-protection");
+var protectionPath = System.IO.Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys");
+System.IO.Directory.CreateDirectory(protectionPath);
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new System.IO.DirectoryInfo(tempProtectionPath));
+    .PersistKeysToFileSystem(new System.IO.DirectoryInfo(protectionPath));
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {

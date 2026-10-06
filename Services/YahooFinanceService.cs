@@ -525,6 +525,27 @@ public sealed class YahooFinanceService
 
     private async Task<Quote?> GetQuoteAsync(QuoteConfig config, string symbol, CancellationToken cancellationToken)
     {
+        var yahooQuote = await GetQuoteFromYahooAsync(config, symbol, cancellationToken);
+        if (yahooQuote != null)
+        {
+            return yahooQuote;
+        }
+
+        var alternativeSymbol = await ResolveFutureSymbolByNameAsync(config.Name, symbol, cancellationToken);
+        if (!string.IsNullOrWhiteSpace(alternativeSymbol) && !string.Equals(alternativeSymbol, symbol, StringComparison.OrdinalIgnoreCase))
+        {
+            var alternativeQuote = await GetQuoteFromYahooAsync(config, alternativeSymbol, cancellationToken);
+            if (alternativeQuote != null)
+            {
+                return alternativeQuote;
+            }
+        }
+
+        return null;
+    }
+
+    private async Task<Quote?> GetQuoteFromYahooAsync(QuoteConfig config, string symbol, CancellationToken cancellationToken)
+    {
         var url = $"https://query1.finance.yahoo.com/v8/finance/chart/{Uri.EscapeDataString(symbol)}?range=1d&interval=1d";
 
         try
@@ -584,6 +605,210 @@ public sealed class YahooFinanceService
         {
             return null;
         }
+    }
+
+    private async Task<Quote?> GetQuoteFromAlphaVantageAsync(QuoteConfig config, string symbol, CancellationToken cancellationToken)
+    {
+        var url = $"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={Uri.EscapeDataString(symbol)}&apikey=demo";
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
+            request.Headers.Accept.ParseAdd("application/json");
+
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var payload = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var json = JsonDocument.Parse(payload);
+            if (!json.RootElement.TryGetProperty("Global Quote", out var quoteElement) ||
+                quoteElement.ValueKind != JsonValueKind.Object)
+            {
+                return null;
+            }
+
+            var price = GetAlphaDecimal(quoteElement, "05. price");
+            var open = GetAlphaDecimal(quoteElement, "02. open");
+            var high = GetAlphaDecimal(quoteElement, "03. high");
+            var low = GetAlphaDecimal(quoteElement, "04. low");
+            var previousClose = GetAlphaDecimal(quoteElement, "08. previous close");
+            var volume = GetAlphaLong(quoteElement, "06. volume");
+            var percentChange = GetAlphaPercent(quoteElement, "10. change percent");
+            var updated = GetAlphaDate(quoteElement, "07. latest trading day");
+
+            if (!price.HasValue)
+            {
+                return null;
+            }
+
+            return new Quote
+            {
+                Name = config.Name,
+                Symbol = config.Symbol,
+                Isin = config.Isin ?? string.Empty,
+                CountryCode = config.CountryCode ?? string.Empty,
+                Price = price,
+                PercentChange = percentChange,
+                Open = open,
+                PreviousClose = previousClose,
+                High = high,
+                Low = low,
+                Volume = volume,
+                LastUpdated = updated
+            };
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<string?> ResolveFutureSymbolByNameAsync(string indexName, string? indexSymbol, CancellationToken cancellationToken = default)
+    {
+        var candidate = ResolveFutureSymbol(indexName, indexSymbol);
+        if (!string.IsNullOrWhiteSpace(candidate))
+        {
+            return candidate;
+        }
+
+        if (!string.IsNullOrWhiteSpace(indexSymbol))
+        {
+            return indexSymbol.Trim();
+        }
+
+        var searchQuery = BuildFutureSearchQuery(indexName, indexSymbol);
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            return null;
+        }
+
+        var url = $"https://query1.finance.yahoo.com/v1/finance/search?q={Uri.EscapeDataString(searchQuery)}&quotesCount=10&newsCount=0";
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
+            request.Headers.Accept.ParseAdd("application/json");
+
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var payload = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var json = JsonDocument.Parse(payload);
+            if (!json.RootElement.TryGetProperty("quotes", out var quotes) || quotes.ValueKind != JsonValueKind.Array)
+            {
+                return null;
+            }
+
+            foreach (var quote in quotes.EnumerateArray())
+            {
+                if (!quote.TryGetProperty("symbol", out var symbolElement))
+                {
+                    continue;
+                }
+
+                var symbol = symbolElement.GetString();
+                if (string.IsNullOrWhiteSpace(symbol) || symbol.StartsWith("^", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var longName = quote.TryGetProperty("longname", out var longNameElement) ? longNameElement.GetString() : string.Empty;
+                var shortName = quote.TryGetProperty("shortname", out var shortNameElement) ? shortNameElement.GetString() : string.Empty;
+                var name = string.IsNullOrWhiteSpace(longName) ? shortName : longName;
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    continue;
+                }
+
+                var normalizedIndexName = (indexName ?? string.Empty).Trim();
+                if (!name.Contains(normalizedIndexName, StringComparison.OrdinalIgnoreCase) &&
+                    !normalizedIndexName.Contains(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                return symbol;
+            }
+        }
+        catch
+        {
+            return null;
+        }
+
+        return null;
+    }
+
+    public static string ResolveFutureSymbol(string indexName, string? indexSymbol)
+    {
+        var normalizedName = (indexName ?? string.Empty).Trim();
+        var normalizedSymbol = (indexSymbol ?? string.Empty).Trim();
+
+        if (normalizedName.Contains("NASDAQ", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^IXIC")
+        {
+            return "NQ=F";
+        }
+
+        if (normalizedName.Contains("SP 500", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^GSPC")
+        {
+            return "ES=F";
+        }
+
+        if (normalizedName.Contains("DOW", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^DJI")
+        {
+            return "YM=F";
+        }
+
+        if (normalizedName.Contains("DAX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^GDAXI")
+        {
+            return "Q2JF.DE";
+        }
+
+        if (normalizedName.Contains("CAC", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^FCHI")
+        {
+            return "CAFME.PA";
+        }
+
+        if (normalizedName.Contains("EURO STOXX", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^STOXX50E")
+        {
+            return "797B.Z";
+        }
+
+        if (normalizedName.Contains("NIKKEI", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^N225")
+        {
+            return "^NKFT.OS";
+        }
+
+        if (normalizedName.Contains("RUSSELL", StringComparison.OrdinalIgnoreCase) || normalizedSymbol == "^RUT")
+        {
+            return "RTY=F";
+        }
+
+        if (normalizedSymbol.Contains("=F", StringComparison.OrdinalIgnoreCase))
+        {
+            return normalizedSymbol;
+        }
+
+        return string.Empty;
+    }
+
+    private static string BuildFutureSearchQuery(string indexName, string? indexSymbol)
+    {
+        var normalizedName = (indexName ?? string.Empty).Trim();
+        if (!string.IsNullOrWhiteSpace(normalizedName))
+        {
+            return normalizedName + " futures";
+        }
+
+        var normalizedSymbol = (indexSymbol ?? string.Empty).Trim();
+        return string.IsNullOrWhiteSpace(normalizedSymbol) ? string.Empty : normalizedSymbol + " futures";
     }
 
     public async Task<QuoteMeta?> GetQuoteMetaAsync(string symbol, CancellationToken cancellationToken = default)
@@ -765,5 +990,62 @@ public sealed class YahooFinanceService
         if (value.TryGetInt64(out var longValue)) return longValue;
         if (value.TryGetDouble(out var doubleValue)) return Convert.ToInt64(doubleValue);
         return null;
+    }
+
+    private static decimal? GetAlphaDecimal(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var value) || value.ValueKind == JsonValueKind.Null)
+            return null;
+
+        var text = value.GetString();
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+
+        return decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed)
+            ? parsed
+            : null;
+    }
+
+    private static decimal? GetAlphaPercent(JsonElement element, string propertyName)
+    {
+        var value = GetAlphaDecimal(element, propertyName);
+        if (!value.HasValue)
+            return null;
+
+        var text = element.TryGetProperty(propertyName, out var prop) ? prop.GetString() : null;
+        if (string.IsNullOrWhiteSpace(text))
+            return value;
+
+        return text.TrimEnd('%').Contains('%')
+            ? value
+            : value;
+    }
+
+    private static long? GetAlphaLong(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var value) || value.ValueKind == JsonValueKind.Null)
+            return null;
+
+        var text = value.GetString();
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+
+        return long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+            ? parsed
+            : null;
+    }
+
+    private static DateTimeOffset? GetAlphaDate(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var value) || value.ValueKind == JsonValueKind.Null)
+            return null;
+
+        var text = value.GetString();
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+
+        return DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed)
+            ? parsed
+            : null;
     }
 }
