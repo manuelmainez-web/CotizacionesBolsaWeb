@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -11,6 +12,8 @@ namespace CotizacionesBolsaWeb.Services;
 /// </summary>
 public sealed class DataStore
 {
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> LocalFileLocks = new(StringComparer.OrdinalIgnoreCase);
+
     private readonly HttpClient? _httpClient;
     private readonly string? _restUrl;
     private readonly string _localFolder;
@@ -54,7 +57,7 @@ public sealed class DataStore
         else
         {
             var path = GetLocalPath(key);
-            json = File.Exists(path) ? await File.ReadAllTextAsync(path) : null;
+            json = await ReadLocalTextAsync(path);
         }
 
         if (string.IsNullOrWhiteSpace(json))
@@ -92,9 +95,52 @@ public sealed class DataStore
             }
         }
 
-        var localJson = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true });
-        await File.WriteAllTextAsync(GetLocalPath(key), localJson);
-        return true;
+        var localPath = GetLocalPath(key);
+        var semaphore = LocalFileLocks.GetOrAdd(localPath, _ => new SemaphoreSlim(1, 1));
+
+        await semaphore.WaitAsync();
+        try
+        {
+            var localJson = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true });
+            var directory = Path.GetDirectoryName(localPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            await using var stream = new FileStream(localPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+            await using var writer = new StreamWriter(stream, new UTF8Encoding(false));
+            await writer.WriteAsync(localJson);
+            await writer.FlushAsync();
+            return true;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
+
+    private static async Task<string?> ReadLocalTextAsync(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return null;
+        }
+
+        try
+        {
+            await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            return await reader.ReadToEndAsync();
+        }
+        catch (IOException)
+        {
+            return null;
+        }
     }
 
     private async Task<string?> GetRawAsync(string key)

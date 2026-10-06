@@ -1494,13 +1494,13 @@
             <input type="hidden" id="transaction-row-index-field" />
             <label>
                 Título de cartera
-                <input id="transaction-title-field" list="transaction-title-options" required placeholder="Ej. Aena S.M.E., S.A." />
-                <datalist id="transaction-title-options">
+                <select id="transaction-title-field" required>
+                    <option value="" selected disabled>Selecciona un título</option>
                     @foreach (var title in Model.AvailableTransactionTitles)
                     {
-                        <option value="@title"></option>
+                        <option value="@title">@title</option>
                     }
-                </datalist>
+                </select>
             </label>
             <label>
                 Tipo de operación
@@ -2128,19 +2128,40 @@
             function normalizeTitleFieldValue(title) {
                 var normalized = String(title || '').trim();
                 if (!normalized) {
+                    var select = document.getElementById('transaction-title-field');
+                    if (select) {
+                        select.value = '';
+                    }
                     return '';
                 }
 
-                var datalist = document.getElementById('transaction-title-options');
-                if (datalist) {
-                    var exists = Array.prototype.some.call(datalist.options, function (option) {
+                var select = document.getElementById('transaction-title-field');
+                if (select) {
+                    var exists = Array.prototype.some.call(select.options, function (option) {
                         return String(option.value || '').trim().toLowerCase() === normalized.toLowerCase();
                     });
 
                     if (!exists) {
                         var option = document.createElement('option');
                         option.value = normalized;
-                        datalist.appendChild(option);
+                        option.textContent = normalized;
+                        select.appendChild(option);
+                    }
+
+                    select.value = normalized;
+                    return normalized;
+                }
+
+                var datalist = document.getElementById('transaction-title-options');
+                if (datalist) {
+                    var existsInDatalist = Array.prototype.some.call(datalist.options, function (option) {
+                        return String(option.value || '').trim().toLowerCase() === normalized.toLowerCase();
+                    });
+
+                    if (!existsInDatalist) {
+                        var datalistOption = document.createElement('option');
+                        datalistOption.value = normalized;
+                        datalist.appendChild(datalistOption);
                     }
                 }
 
@@ -2267,9 +2288,9 @@
 
             function mergeUniqueRows(baseRows, incomingRows) {
                 var merged = [];
-                var seen = new Set();
+                var seen = new Map();
 
-                function pushRow(row) {
+                function pushRow(row, preferIncoming) {
                     if (!row || typeof row !== 'object') {
                         return;
                     }
@@ -2283,19 +2304,27 @@
                     ].join('||');
 
                     if (seen.has(signature)) {
+                        var index = seen.get(signature);
+                        if (preferIncoming) {
+                            merged[index] = row;
+                        }
                         return;
                     }
 
-                    seen.add(signature);
+                    seen.set(signature, merged.length);
                     merged.push(row);
                 }
 
                 if (Array.isArray(baseRows)) {
-                    baseRows.forEach(pushRow);
+                    baseRows.forEach(function (row) {
+                        pushRow(row, false);
+                    });
                 }
 
                 if (Array.isArray(incomingRows)) {
-                    incomingRows.forEach(pushRow);
+                    incomingRows.forEach(function (row) {
+                        pushRow(row, true);
+                    });
                 }
 
                 return merged;

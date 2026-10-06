@@ -107,14 +107,6 @@ public class IndexModel : PageModel
     {
         var titles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var plan in PensionPlans)
-        {
-            if (!string.IsNullOrWhiteSpace(plan.Name))
-            {
-                titles.Add(plan.Name.Trim());
-            }
-        }
-
         foreach (var holding in StockHoldings)
         {
             if (!string.IsNullOrWhiteSpace(holding.Name))
