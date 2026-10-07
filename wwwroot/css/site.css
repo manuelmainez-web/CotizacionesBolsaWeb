@@ -309,6 +309,21 @@ body.wco-active .topbar-datetime {
   flex-shrink: 0;
 }
 
+#accesos-tab-pane .quick-links-panel .quick-links .quick-link-button {
+  width: 118px;
+  min-width: 118px;
+}
+
+#accesos-tab-pane .quick-links-panel .quick-links .quick-link-button span {
+  font-size: 0.72rem;
+}
+
+#accesos-tab-pane .quick-links-panel .quick-link-text {
+  font-size: 0.9rem;
+  line-height: 1.35;
+  color: #ffffff;
+}
+
 .quick-link-inline {
   display: flex;
   align-items: center;
