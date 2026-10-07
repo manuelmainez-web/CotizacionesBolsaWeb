@@ -1584,6 +1584,14 @@ body.wco-active .topbar-datetime {
   min-width: 320px;
 }
 
+.add-entry-dialog[open] {
+  display: block;
+}
+
+.add-entry-dialog:not([open]) {
+  display: none;
+}
+
 .add-entry-dialog::backdrop {
   background: rgba(2, 6, 23, 0.6);
 }

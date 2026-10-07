@@ -2546,6 +2546,53 @@
                 }) || null;
             }
 
+            function openDialogSafely(dialog) {
+                if (!dialog) {
+                    return false;
+                }
+
+                if (typeof dialog.showModal === 'function') {
+                    dialog.showModal();
+                    return true;
+                }
+
+                if (typeof dialog.setAttribute === 'function') {
+                    dialog.setAttribute('open', 'open');
+                }
+
+                if (dialog.style) {
+                    dialog.style.display = 'block';
+                    dialog.style.position = 'fixed';
+                    dialog.style.inset = '0';
+                    dialog.style.zIndex = '1000';
+                    dialog.style.margin = 'auto';
+                }
+
+                return true;
+            }
+
+            function closeDialogSafely(dialog, form) {
+                if (!dialog) {
+                    return;
+                }
+
+                if (typeof dialog.close === 'function' && dialog.hasAttribute && dialog.hasAttribute('open')) {
+                    dialog.close();
+                }
+
+                if (dialog.removeAttribute) {
+                    dialog.removeAttribute('open');
+                }
+
+                if (dialog.style) {
+                    dialog.style.display = 'none';
+                }
+
+                if (form && form.reset) {
+                    form.reset();
+                }
+            }
+
             function openTransactionDialog(card, currentRow, rowIndex) {
                 var dialog = document.getElementById('transaction-entry-dialog');
                 var form = document.getElementById('transaction-entry-form');
@@ -2583,18 +2630,13 @@
                 importeField.value = currentRow ? formatDecimalInput(currentRow.importeTotal || 0) : '0.00';
                 fechaField.value = currentRow ? String(currentRow.fechaOperacion || '').substring(0, 10) : new Date().toISOString().substring(0, 10);
 
-                if (dialog && typeof dialog.showModal === 'function') {
-                    dialog.showModal();
-                }
+                openDialogSafely(dialog);
             }
 
             function closeTransactionDialog() {
                 var dialog = document.getElementById('transaction-entry-dialog');
                 var form = document.getElementById('transaction-entry-form');
-                if (dialog && dialog.close) {
-                    form.reset();
-                    dialog.close();
-                }
+                closeDialogSafely(dialog, form);
             }
 
             function attachCardHandlers(card) {
@@ -2726,10 +2768,16 @@
                 });
             }
 
-            document.addEventListener('DOMContentLoaded', function () {
+            function hydrateTransactionCards() {
                 document.querySelectorAll('.transaction-broker-card').forEach(function (card) {
                     bindCard(card);
                 });
+            }
+
+            document.addEventListener('DOMContentLoaded', hydrateTransactionCards);
+            window.addEventListener('pageshow', hydrateTransactionCards);
+            window.addEventListener('storage', function () {
+                hydrateTransactionCards();
             });
         })();
     </script>

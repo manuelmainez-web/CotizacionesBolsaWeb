@@ -182,3 +182,28 @@ test('las tarjetas de Trade Republic deben conservar siempre su resumen visible'
   assert.equal(result.textContent, '(Importe total compras: 358,00 €)');
   assert.equal(formatTransactionSummaryText('purchase', 358), '(Importe total compras: 358,00 €)');
 });
+
+test('el diálogo de compras y ventas usa un fallback para navegadores móviles sin showModal', () => {
+  const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml'), 'utf8');
+
+  assert.match(html, /function openDialogSafely\s*\(/);
+  assert.match(html, /setAttribute\(\s*['\"]open['\"],\s*['\"]open['\"]\s*\)/);
+  assert.match(html, /function closeDialogSafely\s*\(/);
+  assert.match(html, /removeAttribute\(\s*['\"]open['\"]\s*\)/);
+});
+
+test('los bloques de compra y venta se vuelven a hidratar al restaurar la página móvil', () => {
+  const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml'), 'utf8');
+
+  assert.match(html, /function hydrateTransactionCards\s*\(/);
+  assert.match(html, /window\.addEventListener\(\s*['\"]pageshow['\"]\s*,\s*hydrateTransactionCards\s*\)/);
+  assert.match(html, /window\.addEventListener\(\s*['\"]storage['\"]\s*,\s*function \(\)\s*\{\s*hydrateTransactionCards\(\);\s*\}\s*\)/);
+});
+
+test('el QR local se genera desde el host actual cuando no hay PublicUrl configurada', () => {
+  const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml.cs'), 'utf8');
+
+  assert.match(source, /ResolvePublicUrl\s*\(/);
+  assert.match(source, /HttpContext\?\.Request/);
+  assert.match(source, /scheme\s*==|request\.Scheme/);
+});

@@ -23,10 +23,12 @@ public class IndexModel : PageModel
     private readonly YahooFinanceService _service = new();
     private readonly PensionPlanQuoteService _pensionPlanQuoteService = new();
     private readonly DataStore _dataStore;
+    private readonly IConfiguration _configuration;
 
     public IndexModel(IWebHostEnvironment environment, IConfiguration configuration)
     {
         _dataStore = new DataStore(environment, configuration);
+        _configuration = configuration;
 
         var publicUrl = configuration["Portfolio:PublicUrl"];
         if (string.IsNullOrWhiteSpace(publicUrl))
@@ -37,7 +39,7 @@ public class IndexModel : PageModel
         PublicUrl = publicUrl ?? string.Empty;
     }
 
-    public string PublicUrl { get; }
+    public string PublicUrl { get; private set; }
 
     [TempData]
     public string? StockHoldingError { get; set; }
@@ -199,8 +201,39 @@ public class IndexModel : PageModel
     public decimal TrGainValue => TrCurrentValue - TrPurchaseValue;
     public decimal TrGainPercent => TrPurchaseValue == 0 ? 0m : (TrGainValue / TrPurchaseValue) * 100m;
 
+    private void ResolvePublicUrl()
+    {
+        if (!string.IsNullOrWhiteSpace(PublicUrl))
+        {
+            return;
+        }
+
+        var configuredUrl = _configuration["Portfolio:PublicUrl"];
+        if (string.IsNullOrWhiteSpace(configuredUrl))
+        {
+            configuredUrl = _configuration["RENDER_EXTERNAL_URL"];
+        }
+
+        if (!string.IsNullOrWhiteSpace(configuredUrl))
+        {
+            PublicUrl = configuredUrl.Trim();
+            return;
+        }
+
+        var request = HttpContext?.Request;
+        if (request is not null)
+        {
+            var host = request.Host.HasValue ? request.Host.Value : "localhost";
+            var scheme = request.Scheme;
+            var pathBase = string.IsNullOrWhiteSpace(request.PathBase.Value) ? string.Empty : request.PathBase.Value;
+            PublicUrl = $"{scheme}://{host}{pathBase}";
+        }
+    }
+
     public async Task OnGetAsync()
     {
+        ResolvePublicUrl();
+
         if (!await _dataStore.ExistsAsync(IndicesKey))
         {
             await _dataStore.SaveEntriesAsync(IndicesKey, new List<QuoteConfig>
