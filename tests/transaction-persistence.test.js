@@ -41,6 +41,12 @@ function ensureRowId(row, index) {
 }
 
 function mergeUniqueRows(baseRows, incomingRows) {
+  const currentRows = Array.isArray(incomingRows) ? incomingRows : Array.isArray(baseRows) ? baseRows : [];
+
+  if (currentRows.length === 0) {
+    return [];
+  }
+
   const merged = [];
   const seen = new Map();
 
@@ -68,9 +74,7 @@ function mergeUniqueRows(baseRows, incomingRows) {
     baseRows.forEach((row) => pushRow(row, false));
   }
 
-  if (Array.isArray(incomingRows)) {
-    incomingRows.forEach((row) => pushRow(row, true));
-  }
+  currentRows.forEach((row) => pushRow(row, true));
 
   return merged;
 }
@@ -130,6 +134,15 @@ test('las filas sin título pero con concepto válido no desaparecen al recargar
   assert.equal(normalized.length, 1);
   assert.equal(normalized[0].titulo, 'COMPRA');
   assert.equal(normalized[0].concept, 'COMPRA');
+});
+
+test('si se elimina la última fila, la lista actual queda vacía y no reaparece con el estado anterior', () => {
+  const baseRows = [{ id: 'tx-1', titulo: 'A', tipoOperacion: 'COMPRA', numeroTitulos: 1, importeTotal: 10, fechaOperacion: '2026-10-01' }];
+  const currentRows = [];
+
+  const result = mergeUniqueRows(baseRows, currentRows);
+
+  assert.deepStrictEqual(result, []);
 });
 
 test('las filas no relacionadas se mantienen separadas y no se eliminan', () => {
@@ -217,12 +230,16 @@ test('el diálogo de compras y ventas usa un fallback para navegadores móviles 
   assert.match(html, /removeAttribute\(\s*['\"]open['\"]\s*\)/);
 });
 
-test('los bloques de compra y venta se vuelven a hidratar al restaurar la página móvil', () => {
+test('los bloques de compra y venta se guardan y eliminan en el servidor como el resto de tablas', () => {
   const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml'), 'utf8');
+  const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml.cs'), 'utf8');
 
-  assert.match(html, /function hydrateTransactionCards\s*\(/);
-  assert.match(html, /window\.addEventListener\(\s*['\"]pageshow['\"]\s*,\s*function\s*\(\)\s*\{\s*(?:void\s*)?hydrateTransactionCards\(\);\s*\}\s*\)/);
-  assert.match(html, /window\.addEventListener\(\s*['\"]storage['\"]\s*,\s*function\s*\(\)\s*\{\s*(?:void\s*)?hydrateTransactionCards\(\);\s*\}\s*\)/);
+  assert.match(html, /asp-page-handler="SaveTransaction"/);
+  assert.match(html, /asp-page-handler="DeleteTransaction"/);
+  assert.match(source, /OnPostSaveTransactionAsync/);
+  assert.match(source, /OnPostDeleteTransactionAsync/);
+  assert.doesNotMatch(html, /localStorage/);
+  assert.doesNotMatch(html, /handler=SaveTransactionState|handler=TransactionState/);
 });
 
 test('el QR local se genera desde el host actual cuando no hay PublicUrl configurada', () => {
@@ -233,28 +250,15 @@ test('el QR local se genera desde el host actual cuando no hay PublicUrl configu
   assert.match(source, /scheme\s*==|request\.Scheme/);
 });
 
-test('las transacciones se sincronizan desde el servidor para que el QR muestre los mismos datos en cualquier dispositivo', () => {
-  const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml'), 'utf8');
-
-  assert.match(html, /fetch\s*\(\s*['\"]\?handler=TransactionState['\"]\s*|fetch\s*\(\s*['\"]\?handler=SaveTransactionState['\"]\s*/);
-  assert.match(html, /saveSharedTransactionState|loadSharedTransactionState/);
-});
-test('el estado compartido del servidor debe prevalecer sobre el almacenamiento local del navegador', () => {
-  const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml'), 'utf8');
-
-  assert.match(html, /readLocalStorageState\s*\(/);
-  assert.match(html, /var resolvedState = state && Object.keys\(state\)\.length > 0 \? state : localFallbackState/);
-  assert.match(html, /sharedTransactionState\s*=\s*resolvedState \|\| \{\}/);
-  assert.match(html, /if \(sharedRows\.length > 0\)\s*\{[\s\S]*?return mergedSharedRows;/);
-});
-
-test('las operaciones de compra y venta deben cargarse desde el estado compartido del servidor', () => {
+test('las operaciones de compra y venta se cargan una sola vez desde el estado del servidor y se limpian duplicados', () => {
   const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml.cs'), 'utf8');
 
-  assert.match(source, /BuildBrokerTransactionGroupsFromState/);
-  assert.match(source, /custom-transaction-state|TransactionStateKey/);
+  assert.match(source, /LoadTransactionStateAsync/);
+  assert.match(source, /_transactionState = await LoadTransactionStateAsync\(\)/);
+  assert.match(source, /seen\.Add\(signature\)/);
   assert.match(source, /cotizaciones\.transactions\./);
   assert.match(source, /LoadJsonAsync<Dictionary<string, List<BrokerTransactionRow>>>\(TransactionStateKey\)/);
+  assert.match(source, /rows\.RemoveAll\(r => r\.Id == id\)/);
 });
 
 test('el estado de transacciones debe serializarse y leerse con nombres de propiedad compatibles entre navegador y servidor', () => {
@@ -264,10 +268,9 @@ test('el estado de transacciones debe serializarse y leerse con nombres de propi
   assert.match(source, /PropertyNamingPolicy\s*\=\s*JsonNamingPolicy\.CamelCase/);
 });
 
-test('la autenticación externa debe permitir que el QR móvil cargue la página y los datos de transacciones', () => {
-  const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Program.cs'), 'utf8');
+test('las tablas de compra-venta se refrescan automáticamente junto al resto de tablas', () => {
+  const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml'), 'utf8');
 
-  assert.match(source, /handler=TransactionState/);
-  assert.match(source, /handler=SaveTransactionState/);
-  assert.match(source, /isPublicPageOrTransactionEndpoint/);
+  assert.match(html, /'transaction-broker-grid-ing'/);
+  assert.match(html, /'transaction-broker-grid-tr'/);
 });

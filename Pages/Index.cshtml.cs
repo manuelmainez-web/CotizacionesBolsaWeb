@@ -43,25 +43,152 @@ public class IndexModel : PageModel
 
     public string PublicUrl { get; private set; }
 
-    public async Task<JsonResult> OnGetTransactionStateAsync()
-    {
-        var state = await _dataStore.LoadJsonAsync<Dictionary<string, List<BrokerTransactionRow>>>(TransactionStateKey);
-        return new JsonResult(state ?? new Dictionary<string, List<BrokerTransactionRow>>());
-    }
+    private Dictionary<string, List<BrokerTransactionRow>> _transactionState = new(StringComparer.OrdinalIgnoreCase);
 
-    public async Task<JsonResult> OnPostSaveTransactionStateAsync([FromBody] Dictionary<string, List<BrokerTransactionRow>>? state)
+    private static string TransactionKey(bool sale, string broker) =>
+        $"cotizaciones.transactions.{(sale ? "sale" : "purchase")}.{broker}";
+
+    private static string TransactionSignature(BrokerTransactionRow row) =>
+        string.Join('|',
+            row.Titulo.Trim().ToLowerInvariant(),
+            row.TipoOperacion.Trim().ToUpperInvariant(),
+            row.FechaOperacion.ToString("yyyy-MM-dd"),
+            row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
+            row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.InvariantCulture));
+
+    private async Task<Dictionary<string, List<BrokerTransactionRow>>> LoadTransactionStateAsync()
     {
-        var normalized = state ?? new Dictionary<string, List<BrokerTransactionRow>>();
-        foreach (var key in normalized.Keys.ToList())
+        var raw = await _dataStore.LoadJsonAsync<Dictionary<string, List<BrokerTransactionRow>>>(TransactionStateKey)
+            ?? new Dictionary<string, List<BrokerTransactionRow>>();
+
+        var state = new Dictionary<string, List<BrokerTransactionRow>>(StringComparer.OrdinalIgnoreCase);
+        var changed = false;
+
+        foreach (var pair in raw)
         {
-            if (normalized[key] == null)
+            var rows = new List<BrokerTransactionRow>();
+            var seen = new HashSet<string>();
+
+            foreach (var row in pair.Value ?? new List<BrokerTransactionRow>())
             {
-                normalized[key] = new List<BrokerTransactionRow>();
+                if (row == null)
+                {
+                    changed = true;
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(row.Titulo))
+                {
+                    row.Titulo = string.IsNullOrWhiteSpace(row.Concept) ? row.TipoOperacion : row.Concept;
+                }
+
+                if (string.IsNullOrWhiteSpace(row.TipoOperacion))
+                {
+                    row.TipoOperacion = pair.Key.Contains(".sale.", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA";
+                }
+
+                var signature = TransactionSignature(row);
+                if (!seen.Add(signature))
+                {
+                    changed = true;
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(row.Id))
+                {
+                    var hash = System.Security.Cryptography.SHA1.HashData(System.Text.Encoding.UTF8.GetBytes(pair.Key + "|" + signature));
+                    row.Id = Convert.ToHexString(hash)[..16].ToLowerInvariant();
+                    changed = true;
+                }
+
+                rows.Add(row);
             }
+
+            state[pair.Key] = rows;
         }
 
-        await _dataStore.SaveJsonAsync(TransactionStateKey, normalized);
-        return new JsonResult(new { success = true });
+        if (changed)
+        {
+            await _dataStore.SaveJsonAsync(TransactionStateKey, state);
+        }
+
+        return state;
+    }
+
+    private static decimal ParseFormDecimal(string? value)
+    {
+        var text = (value ?? string.Empty).Replace("\u00A0", string.Empty).Replace("€", string.Empty).Replace(" ", string.Empty).Trim();
+        if (text.Length == 0)
+        {
+            return 0m;
+        }
+
+        text = text.Contains(',') ? text.Replace(".", string.Empty).Replace(',', '.') : text;
+        return decimal.TryParse(text, System.Globalization.NumberStyles.Number | System.Globalization.NumberStyles.AllowLeadingSign, System.Globalization.CultureInfo.InvariantCulture, out var parsed)
+            ? parsed
+            : 0m;
+    }
+
+    private static bool IsValidTransactionBroker(string? broker) =>
+        string.Equals(broker, "ING", StringComparison.OrdinalIgnoreCase) || string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase);
+
+    public async Task<IActionResult> OnPostSaveTransactionAsync(string type, string broker, string? id, string titulo, string numeroTitulos, string importeTotal, DateTime fechaOperacion)
+    {
+        if (!IsValidTransactionBroker(broker) || string.IsNullOrWhiteSpace(titulo))
+        {
+            return RedirectToPage();
+        }
+
+        var sale = string.Equals(type, "sale", StringComparison.OrdinalIgnoreCase);
+        var brokerCode = broker.Trim().ToUpperInvariant();
+        var key = TransactionKey(sale, brokerCode);
+        var operation = sale ? "VENTA" : "COMPRA";
+        var cleanTitle = titulo.Trim();
+        var amount = ParseFormDecimal(importeTotal);
+
+        var state = await LoadTransactionStateAsync();
+        if (!state.TryGetValue(key, out var rows))
+        {
+            rows = new List<BrokerTransactionRow>();
+            state[key] = rows;
+        }
+
+        var existing = string.IsNullOrWhiteSpace(id) ? null : rows.FirstOrDefault(r => r.Id == id);
+        if (existing == null)
+        {
+            existing = new BrokerTransactionRow { Id = Guid.NewGuid().ToString("N") };
+            rows.Add(existing);
+        }
+
+        existing.Titulo = cleanTitle;
+        existing.TipoOperacion = operation;
+        existing.NumeroTitulos = ParseFormDecimal(numeroTitulos);
+        existing.ImporteTotal = amount;
+        existing.FechaOperacion = fechaOperacion.Date;
+        existing.Concept = $"{operation} - {cleanTitle}";
+        existing.Valor = amount;
+
+        await _dataStore.SaveJsonAsync(TransactionStateKey, state);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostDeleteTransactionAsync(string type, string broker, string id)
+    {
+        if (!IsValidTransactionBroker(broker) || string.IsNullOrWhiteSpace(id))
+        {
+            return RedirectToPage();
+        }
+
+        var sale = string.Equals(type, "sale", StringComparison.OrdinalIgnoreCase);
+        var key = TransactionKey(sale, broker.Trim().ToUpperInvariant());
+
+        var state = await LoadTransactionStateAsync();
+        if (state.TryGetValue(key, out var rows) && rows.RemoveAll(r => r.Id == id) > 0)
+        {
+            await _dataStore.SaveJsonAsync(TransactionStateKey, state);
+        }
+
+        return RedirectToPage();
     }
 
     [TempData]
@@ -106,6 +233,7 @@ public class IndexModel : PageModel
 
     public sealed class BrokerTransactionRow
     {
+        public string Id { get; set; } = string.Empty;
         public string Titulo { get; set; } = string.Empty;
         public string TipoOperacion { get; set; } = string.Empty;
         public decimal NumeroTitulos { get; set; }
@@ -164,9 +292,7 @@ public class IndexModel : PageModel
     private List<BrokerTransactionGroup> BuildBrokerTransactionGroupsFromState(bool salesOnly)
     {
         var brokerCodes = new[] { "ING", "TR" };
-        var state = _dataStore.LoadJsonAsync<Dictionary<string, List<BrokerTransactionRow>>>(TransactionStateKey)
-            .GetAwaiter()
-            .GetResult() ?? new Dictionary<string, List<BrokerTransactionRow>>();
+        var state = _transactionState;
 
         return brokerCodes
             .Select(brokerCode => new BrokerTransactionGroup
@@ -263,6 +389,7 @@ public class IndexModel : PageModel
     public async Task OnGetAsync()
     {
         ResolvePublicUrl();
+        _transactionState = await LoadTransactionStateAsync();
 
         if (!await _dataStore.ExistsAsync(IndicesKey))
         {

@@ -1393,15 +1393,20 @@
                             {
                                 @foreach (var row in Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
                                 {
-                                    <tr data-row-key="@($"ING-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
+                                    <tr data-row-key="@row.Id">
                                         <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
                                         <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
                                         <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
                                         <td class="delete-cell">
-                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
-                                            <button type="button" class="icon-button-delete transaction-delete-row" title="Eliminar">✕</button>
+                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar" data-id="@row.Id" data-titulo="@row.Titulo" data-numero="@row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-importe="@row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-fecha="@row.FechaOperacion.ToString("yyyy-MM-dd")">✎</button>
+                                            <form method="post" asp-page-handler="DeleteTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
+                                                <input type="hidden" name="type" value="purchase" />
+                                                <input type="hidden" name="broker" value="ING" />
+                                                <input type="hidden" name="id" value="@row.Id" />
+                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                            </form>
                                         </td>
                                     </tr>
                                 }
@@ -1442,15 +1447,20 @@
                             {
                                 @foreach (var row in Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
                                 {
-                                    <tr data-row-key="@($"ING-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
+                                    <tr data-row-key="@row.Id">
                                         <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
                                         <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
                                         <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
                                         <td class="delete-cell">
-                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
-                                            <button type="button" class="icon-button-delete transaction-delete-row" title="Eliminar">✕</button>
+                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar" data-id="@row.Id" data-titulo="@row.Titulo" data-numero="@row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-importe="@row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-fecha="@row.FechaOperacion.ToString("yyyy-MM-dd")">✎</button>
+                                            <form method="post" asp-page-handler="DeleteTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
+                                                <input type="hidden" name="type" value="sale" />
+                                                <input type="hidden" name="broker" value="ING" />
+                                                <input type="hidden" name="id" value="@row.Id" />
+                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                            </form>
                                         </td>
                                     </tr>
                                 }
@@ -1505,15 +1515,20 @@
                             {
                                 @foreach (var row in Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
                                 {
-                                    <tr data-row-key="@($"TR-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
+                                    <tr data-row-key="@row.Id">
                                         <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
                                         <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
                                         <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
                                         <td class="delete-cell">
-                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
-                                            <button type="button" class="icon-button-delete transaction-delete-row" title="Eliminar">✕</button>
+                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar" data-id="@row.Id" data-titulo="@row.Titulo" data-numero="@row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-importe="@row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-fecha="@row.FechaOperacion.ToString("yyyy-MM-dd")">✎</button>
+                                            <form method="post" asp-page-handler="DeleteTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
+                                                <input type="hidden" name="type" value="purchase" />
+                                                <input type="hidden" name="broker" value="TR" />
+                                                <input type="hidden" name="id" value="@row.Id" />
+                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                            </form>
                                         </td>
                                     </tr>
                                 }
@@ -1554,15 +1569,20 @@
                             {
                                 @foreach (var row in Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
                                 {
-                                    <tr data-row-key="@($"TR-{row.Titulo}-{row.FechaOperacion:yyyyMMdd}-{row.ImporteTotal}")">
+                                    <tr data-row-key="@row.Id">
                                         <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
                                         <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
                                         <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
                                         <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
                                         <td class="delete-cell">
-                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>
-                                            <button type="button" class="icon-button-delete transaction-delete-row" title="Eliminar">✕</button>
+                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar" data-id="@row.Id" data-titulo="@row.Titulo" data-numero="@row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-importe="@row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-fecha="@row.FechaOperacion.ToString("yyyy-MM-dd")">✎</button>
+                                            <form method="post" asp-page-handler="DeleteTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
+                                                <input type="hidden" name="type" value="sale" />
+                                                <input type="hidden" name="broker" value="TR" />
+                                                <input type="hidden" name="id" value="@row.Id" />
+                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                            </form>
                                         </td>
                                     </tr>
                                 }
@@ -1575,15 +1595,14 @@
     </div>
 
     <dialog id="transaction-entry-dialog" class="add-entry-dialog">
-        <form id="transaction-entry-form" method="dialog">
+        <form id="transaction-entry-form" method="post" asp-page-handler="SaveTransaction">
             <h3 id="transaction-dialog-title">Añadir movimiento</h3>
-            <input type="hidden" id="transaction-type-field" />
-            <input type="hidden" id="transaction-broker-field" />
-            <input type="hidden" id="transaction-row-index-field" />
-            <input type="hidden" id="transaction-row-id-field" />
+            <input type="hidden" id="transaction-type-field" name="type" />
+            <input type="hidden" id="transaction-broker-field" name="broker" />
+            <input type="hidden" id="transaction-row-id-field" name="id" />
             <label>
                 Título de cartera
-                <select id="transaction-title-field" required>
+                <select id="transaction-title-field" name="titulo" required>
                     <option value="" selected disabled>Selecciona un título</option>
                     @foreach (var title in Model.AvailableTransactionTitles)
                     {
@@ -1597,15 +1616,15 @@
             </label>
             <label>
                 Número de títulos
-                <input id="transaction-quantity-field" type="text" inputmode="decimal" min="0.000001" step="0.000001" required placeholder="Ej. 10" />
+                <input id="transaction-quantity-field" name="numeroTitulos" type="text" inputmode="decimal" required placeholder="Ej. 10" />
             </label>
             <label>
                 Importe total de la operación
-                <input id="transaction-importe-field" type="text" inputmode="decimal" required step="0.01" placeholder="Ej. 1500.00" />
+                <input id="transaction-importe-field" name="importeTotal" type="text" inputmode="decimal" required placeholder="Ej. 1500,00" />
             </label>
             <label>
                 Fecha de la operación
-                <input id="transaction-fecha-field" type="date" required />
+                <input id="transaction-fecha-field" name="fechaOperacion" type="date" required />
             </label>
             <div class="dialog-actions">
                 <button type="button" id="transaction-cancel-button" class="mini-button mini-button-secondary">Cancelar</button>
@@ -2206,822 +2225,102 @@
                 });
             });
 
-            var sharedTransactionState = {};
-            var sharedTransactionStatePromise = null;
-
-            function getStorageKey(type, brokerCode) {
-                return 'cotizaciones.transactions.' + type + '.' + brokerCode;
-            }
-
-            async function loadSharedTransactionState() {
-                if (sharedTransactionStatePromise) {
-                    return sharedTransactionStatePromise;
-                }
-
-                var localFallbackState = readLocalStorageState();
-
-                sharedTransactionStatePromise = fetch('?handler=TransactionState', {
-                    cache: 'no-store',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                }).then(function (response) {
-                    if (!response.ok) {
-                        return localFallbackState;
-                    }
-
-                    return response.json().catch(function () {
-                        return localFallbackState;
-                    });
-                }).then(function (state) {
-                    var resolvedState = state && Object.keys(state).length > 0 ? state : localFallbackState;
-                    Object.keys(resolvedState || {}).forEach(function (key) {
-                        if (Array.isArray(resolvedState[key])) {
-                            resolvedState[key] = dedupeRows(sanitizeStoredRows(resolvedState[key]));
-                        }
-                    });
-
-                    sharedTransactionState = resolvedState || {};
-                    return sharedTransactionState;
-                }).catch(function () {
-                    sharedTransactionState = localFallbackState;
-                    return sharedTransactionState;
-                });
-
-                return sharedTransactionStatePromise;
-            }
-
-            async function saveSharedTransactionState() {
-                var state = {};
-                document.querySelectorAll('.transaction-broker-card').forEach(function (card) {
-                    var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
-                    state[key] = safeGetStoredRows(card);
-                });
-
-                sharedTransactionStatePromise = null;
-
-                try {
-                    await fetch('?handler=SaveTransactionState', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(state)
-                    });
-                    sharedTransactionState = state;
-                } catch (error) {
-                    sharedTransactionState = state;
-                }
-            }
-
-            function generateRowId() {
-                return 'tx-' + Date.now() + '-' + Math.random().toString(16).slice(2, 10);
-            }
-
-            function normalizeTitleFieldValue(title) {
-                var normalized = String(title || '').trim();
-                if (!normalized) {
-                    var select = document.getElementById('transaction-title-field');
-                    if (select) {
-                        select.value = '';
-                    }
-                    return '';
-                }
-
-                var select = document.getElementById('transaction-title-field');
-                if (select) {
-                    var exists = Array.prototype.some.call(select.options, function (option) {
-                        return String(option.value || '').trim().toLowerCase() === normalized.toLowerCase();
-                    });
-
-                    if (!exists) {
-                        var option = document.createElement('option');
-                        option.value = normalized;
-                        option.textContent = normalized;
-                        select.appendChild(option);
-                    }
-
-                    select.value = normalized;
-                    return normalized;
-                }
-
-                var datalist = document.getElementById('transaction-title-options');
-                if (datalist) {
-                    var existsInDatalist = Array.prototype.some.call(datalist.options, function (option) {
-                        return String(option.value || '').trim().toLowerCase() === normalized.toLowerCase();
-                    });
-
-                    if (!existsInDatalist) {
-                        var datalistOption = document.createElement('option');
-                        datalistOption.value = normalized;
-                        datalist.appendChild(datalistOption);
-                    }
-                }
-
-                var input = document.getElementById('transaction-title-field');
-                if (input) {
-                    input.value = normalized;
-                }
-
-                return normalized;
-            }
-
-            function normalizeRowText(value) {
-                return String(value === null || value === undefined ? '' : value).trim().toLowerCase();
-            }
-
-            function normalizeRowDate(value) {
-                var raw = String(value === null || value === undefined ? '' : value).trim();
-                if (!raw) {
-                    return '';
-                }
-
-                var asDate = new Date(raw);
-                if (Number.isNaN(asDate.getTime())) {
-                    return raw.toLowerCase();
-                }
-
-                return asDate.toISOString().slice(0, 10);
-            }
-
-            function buildLegacyRowIdentity(row) {
-                if (!row || typeof row !== 'object') {
-                    return '';
-                }
-
-                if (row.id && String(row.id).trim()) {
-                    return 'id:' + String(row.id).trim();
-                }
-
-                var title = normalizeRowText(row.titulo || row.concept || '');
-                var operation = normalizeRowText(row.tipoOperacion || '');
-                var date = normalizeRowDate(row.fechaOperacion);
-                var amount = Number(row.importeTotal !== undefined && row.importeTotal !== null ? row.importeTotal : (row.valor !== undefined && row.valor !== null ? row.valor : 0));
-                var concept = normalizeRowText(row.concept || '');
-                var quantity = Number(row.numeroTitulos !== undefined && row.numeroTitulos !== null ? row.numeroTitulos : (row.cantidad !== undefined && row.cantidad !== null ? row.cantidad : 0));
-
-                return ['legacy', title, operation, date, Number.isFinite(amount) ? amount.toFixed(2) : '0.00', Number.isFinite(quantity) ? quantity.toFixed(6) : '0.000000', concept].join('|');
-            }
-
-            function ensureRowId(row, index) {
-                if (!row || typeof row !== 'object') {
-                    return row;
-                }
-
-                if (row.id && String(row.id).trim()) {
-                    return row;
-                }
-
-                var seed = [
-                    String(row.titulo || row.concept || ''),
-                    String(row.tipoOperacion || ''),
-                    String(row.fechaOperacion || ''),
-                    String(row.concept || ''),
-                    String(row.importeTotal !== undefined && row.importeTotal !== null ? row.importeTotal : row.valor || 0),
-                    String(row.numeroTitulos !== undefined && row.numeroTitulos !== null ? row.numeroTitulos : row.cantidad || 0)
-                ].join('|');
-
-                var hash = Array.from(seed).reduce(function (total, character) {
-                    return total + character.charCodeAt(0);
-                }, 0).toString(16);
-
-                row.id = 'tx-' + (index !== undefined ? index + '-' : '') + hash;
-                return row;
-            }
-
-            function dedupeRows(rows) {
-                if (!Array.isArray(rows)) {
-                    return [];
-                }
-
-                var seen = new Map();
-                var uniqueRows = [];
-
-                rows.forEach(function (row, index) {
-                    if (!row || typeof row !== 'object') {
-                        return;
-                    }
-
-                    var normalizedRow = ensureRowId(row, index);
-                    var signature = buildLegacyRowIdentity(normalizedRow);
-                    if (!signature) {
-                        uniqueRows.push(normalizedRow);
-                        return;
-                    }
-
-                    if (!seen.has(signature)) {
-                        seen.set(signature, true);
-                        uniqueRows.push(normalizedRow);
-                    }
-                });
-
-                return uniqueRows;
-            }
-
-            function resolveRowTitle(row) {
-                if (!row || typeof row !== 'object') {
-                    return '';
-                }
-
-                var title = String(row.titulo || row.concept || '').trim();
-                if (title) {
-                    return title;
-                }
-
-                var operation = String(row.tipoOperacion || '').trim();
-                if (operation) {
-                    return operation;
-                }
-
-                return 'Movimiento';
-            }
-
-            function sanitizeStoredRows(rows) {
-                if (!Array.isArray(rows)) {
-                    return [];
-                }
-
-                return rows.filter(function (row) {
-                    if (!row || typeof row !== 'object') {
-                        return false;
-                    }
-
-                    var title = resolveRowTitle(row);
-                    if (!title) {
-                        return false;
-                    }
-
-                    row.titulo = title;
-                    row.concept = row.concept || title;
-
-                    return !/(PLAN\s*2030|Compra prueba|COMPRA PRUEBA|Amundi EURO STOXX 50 Daily|PRUEBA|compra prueba)/i.test(title);
-                }).map(function (row, index) {
-                    return ensureRowId(row, index);
-                });
-            }
-
-            function readExistingRows(card) {
-                var rows = [];
-                Array.prototype.forEach.call(card.querySelectorAll('tbody tr'), function (row, index) {
-                    if (row.querySelector('.empty-state-cell')) {
-                        return;
-                    }
-                    var cells = row.querySelectorAll('td');
-                    if (cells.length < 5) {
-                        return;
-                    }
-                    var title = cells[0].textContent.trim();
-                    var tipo = cells[1].textContent.trim();
-                    var cantidad = parseDecimalLocale(cells[2].textContent);
-                    var parsedRow = {
-                        id: row.getAttribute('data-row-id') || undefined,
-                        titulo: title,
-                        tipoOperacion: tipo,
-                        numeroTitulos: cantidad,
-                        importeTotal: parseMoney(cells[3].textContent),
-                        fechaOperacion: cells[4].textContent.trim(),
-                        concept: title,
-                        valor: parseMoney(cells[3].textContent)
-                    };
-                    rows.push(ensureRowId(parsedRow, index));
-                });
-                return rows;
-            }
-
-            function sortTransactionRows(rows) {
-                if (!Array.isArray(rows)) {
-                    return [];
-                }
-
-                return rows.slice().sort(function (left, right) {
-                    var leftDate = new Date(left && left.fechaOperacion ? left.fechaOperacion : 0);
-                    var rightDate = new Date(right && right.fechaOperacion ? right.fechaOperacion : 0);
-                    var leftValue = Number.isNaN(leftDate.getTime()) ? 0 : leftDate.getTime();
-                    var rightValue = Number.isNaN(rightDate.getTime()) ? 0 : rightDate.getTime();
-
-                    if (rightValue !== leftValue) {
-                        return rightValue - leftValue;
-                    }
-
-                    var leftImporte = Number(left && left.importeTotal !== undefined ? left.importeTotal : 0);
-                    var rightImporte = Number(right && right.importeTotal !== undefined ? right.importeTotal : 0);
-                    if (rightImporte !== leftImporte) {
-                        return rightImporte - leftImporte;
-                    }
-
-                    return String(left && left.titulo ? left.titulo : '').localeCompare(String(right && right.titulo ? right.titulo : ''), 'es', { sensitivity: 'base' });
-                });
-            }
-
-            function renderTable(card, rows) {
-                var tbody = card.querySelector('tbody');
-                if (!tbody) {
-                    return;
-                }
-
-                var sortedRows = sortTransactionRows(rows);
-                var summaryApi = window.TransactionSummary;
-
-                if (!sortedRows || sortedRows.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="empty-state-cell">No hay movimientos registrados para este broker.</td></tr>';
-                    if (summaryApi && summaryApi.ensureTransactionSummary) {
-                        summaryApi.ensureTransactionSummary(card, sortedRows);
-                    } else {
-                        var fallbackSummary = card.querySelector('.transaction-total-summary');
-                        if (!fallbackSummary) {
-                            var summaryName = card.querySelector('.transaction-broker-name');
-                            if (summaryName) {
-                                fallbackSummary = document.createElement('span');
-                                fallbackSummary.className = 'transaction-total-summary';
-                                summaryName.appendChild(fallbackSummary);
-                            }
-                        }
-                        if (fallbackSummary) {
-                            var fallbackType = card.getAttribute('data-transaction-type');
-                            var fallbackLabel = fallbackType === 'purchase' ? 'Importe total compras: ' : 'Importe total ventas: ';
-                            fallbackSummary.textContent = '(' + fallbackLabel + formatCurrency(0) + ')';
-                        }
-                    }
-                    return;
-                }
-
-                tbody.innerHTML = sortedRows.map(function (row, index) {
-                    var rowId = row.id || ((row.titulo || row.concept || 'row') + '-' + index);
-                    var title = row.titulo || row.concept || '';
-                    var operation = row.tipoOperacion || getOperationFromRow(row, card);
-                    var quantity = row.numeroTitulos !== undefined && row.numeroTitulos !== null ? row.numeroTitulos : (row.cantidad !== undefined ? row.cantidad : 0);
-                    return '<tr data-row-id="' + rowId + '">' +
-                        '<td>' + title + '</td>' +
-                        '<td>' + operation + '</td>' +
-                        '<td class="text-align-right">' + formatNumber(quantity) + '</td>' +
-                        '<td class="text-align-right price-cell">' + formatCurrency(row.importeTotal) + '</td>' +
-                        '<td class="text-align-right">' + formatDate(row.fechaOperacion) + '</td>' +
-                        '<td class="delete-cell">' +
-                        '<button type="button" class="icon-button-edit transaction-edit-row" title="Editar">✎</button>' +
-                        '<button type="button" class="icon-button-delete transaction-delete-row" title="Eliminar">✕</button>' +
-                        '</td>' +
-                        '</tr>';
-                }).join('');
-
-                if (summaryApi && summaryApi.ensureTransactionSummary) {
-                    summaryApi.ensureTransactionSummary(card, sortedRows);
-                    return;
-                }
-
-                if (card.getAttribute('data-broker-code') === 'ING' && card.getAttribute('data-transaction-type') === 'purchase') {
-                    var summaryText = card.querySelector('.transaction-total-summary');
-                    if (summaryText) {
-                        var totalValue = sortedRows.reduce(function (accumulator, row) {
-                            var value = Number(row && row.importeTotal !== undefined && row.importeTotal !== null ? row.importeTotal : 0);
-                            return accumulator + (Number.isFinite(value) ? value : 0);
-                        }, 0);
-                        summaryText.textContent = '(Importe total compras: ' + formatCurrency(totalValue) + ')';
-                    }
-                }
-
-                if (card.getAttribute('data-broker-code') === 'ING' && card.getAttribute('data-transaction-type') === 'sale') {
-                    var saleSummaryText = card.querySelector('.transaction-total-summary');
-                    if (saleSummaryText) {
-                        var saleTotalValue = sortedRows.reduce(function (accumulator, row) {
-                            var value = Number(row && row.importeTotal !== undefined && row.importeTotal !== null ? row.importeTotal : 0);
-                            return accumulator + (Number.isFinite(value) ? value : 0);
-                        }, 0);
-                        saleSummaryText.textContent = '(Importe total ventas: ' + formatCurrency(saleTotalValue) + ')';
-                    }
-                }
-
-                if (card.getAttribute('data-broker-code') === 'TR') {
-                    var trSummaryText = card.querySelector('.transaction-total-summary');
-                    if (trSummaryText) {
-                        var trTotalValue = sortedRows.reduce(function (accumulator, row) {
-                            var value = Number(row && row.importeTotal !== undefined && row.importeTotal !== null ? row.importeTotal : 0);
-                            return accumulator + (Number.isFinite(value) ? value : 0);
-                        }, 0);
-                        var trLabel = card.getAttribute('data-transaction-type') === 'purchase' ? 'Importe total compras: ' : 'Importe total ventas: ';
-                        trSummaryText.textContent = '(' + trLabel + formatCurrency(trTotalValue) + ')';
-                    }
-                }
-            }
-
-            function readLocalStorageState() {
-                var snapshot = {};
-
-                try {
-                    for (var i = 0; i < localStorage.length; i++) {
-                        var key = localStorage.key(i);
-                        if (!key || key.indexOf('cotizaciones.transactions.') !== 0) {
-                            continue;
-                        }
-
-                        var parsed = JSON.parse(localStorage.getItem(key) || '[]');
-                        var rows = Array.isArray(parsed) ? sanitizeStoredRows(parsed) : [];
-                        snapshot[key] = dedupeRows(rows);
-                    }
-                } catch (error) {
-                    return snapshot;
-                }
-
-                return snapshot;
-            }
-
-            function safeGetStoredRows(card) {
-                var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
-                var sharedRows = Array.isArray(sharedTransactionState[key]) ? sanitizeStoredRows(sharedTransactionState[key]) : [];
-                var localRows = [];
-
-                try {
-                    var parsed = JSON.parse(localStorage.getItem(key) || '[]');
-                    localRows = dedupeRows(sanitizeStoredRows(Array.isArray(parsed) ? parsed : []));
-                } catch (error) {
-                    localRows = [];
-                }
-
-                if (sharedRows.length > 0) {
-                    var mergedSharedRows = dedupeRows(sharedRows.concat(localRows));
-                    if (JSON.stringify(localRows) !== JSON.stringify(mergedSharedRows)) {
-                        try {
-                            localStorage.setItem(key, JSON.stringify(mergedSharedRows));
-                        } catch (error) {
-                        }
-                    }
-                    return mergedSharedRows;
-                }
-
-                if (localRows.length > 0) {
-                    return localRows;
-                }
-
-                return [];
-            }
-
-            function mergeUniqueRows(baseRows, incomingRows) {
-                var merged = [];
-                var seen = new Map();
-
-                function pushRow(row, preferIncoming) {
-                    if (!row || typeof row !== 'object') {
-                        return;
-                    }
-
-                    ensureRowId(row, merged.length);
-                    var signature = buildLegacyRowIdentity(row);
-
-                    if (seen.has(signature)) {
-                        var index = seen.get(signature);
-                        if (preferIncoming) {
-                            merged[index] = row;
-                        }
-                        return;
-                    }
-
-                    seen.set(signature, merged.length);
-                    merged.push(row);
-                }
-
-                if (Array.isArray(baseRows)) {
-                    baseRows.forEach(function (row) {
-                        pushRow(row, false);
-                    });
-                }
-
-                if (Array.isArray(incomingRows)) {
-                    incomingRows.forEach(function (row) {
-                        pushRow(row, true);
-                    });
-                }
-
-                return dedupeRows(merged);
-            }
-
-            function saveRows(card, rows) {
-                var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
-                var sharedRows = Array.isArray(sharedTransactionState[key]) ? sanitizeStoredRows(sharedTransactionState[key]) : [];
-                var mergedRows = mergeUniqueRows(sharedRows, rows);
-                var sortedRows = sortTransactionRows(mergedRows);
-                var dedupedRows = dedupeRows(sortedRows);
-
-                sharedTransactionState[key] = dedupedRows;
-                try {
-                    localStorage.setItem(key, JSON.stringify(dedupedRows));
-                } catch (error) {
-                }
-
-                saveSharedTransactionState();
-            }
-
-            var activeTransactionCard = null;
-
-            function getTransactionConcept(type, title) {
-                var label = type === 'purchase' ? 'COMPRA' : 'VENTA';
-                return title ? label + ' - ' + title : label;
-            }
-
-            function resolveTitleFromConcept(concept) {
-                if (!concept) {
-                    return '';
-                }
-                var parts = String(concept).split(' - ');
-                return parts.length > 1 ? parts.slice(1).join(' - ') : '';
-            }
-
-            function getOperationFromRow(row, card) {
-                if (row && row.tipoOperacion) {
-                    return row.tipoOperacion;
-                }
-                if (row && row.concept) {
-                    var concept = String(row.concept).toUpperCase();
-                    if (concept.indexOf('VENTA') === 0) {
-                        return 'VENTA';
-                    }
-                    if (concept.indexOf('COMPRA') === 0) {
-                        return 'COMPRA';
-                    }
-                }
-                return card && card.getAttribute('data-transaction-type') === 'sale' ? 'VENTA' : 'COMPRA';
-            }
-
-            function findRowByIdentity(allRows, row) {
-                if (!Array.isArray(allRows) || !row) {
-                    return null;
-                }
-
-                var rowId = row.getAttribute('data-row-id');
-                if (rowId) {
-                    return allRows.find(function (item) {
-                        return item && item.id && String(item.id) === String(rowId);
-                    }) || null;
-                }
-
-                var cells = row.querySelectorAll('td');
-                if (cells.length < 5) {
-                    return null;
-                }
-
-                var title = cells[0].textContent.trim();
-                var amount = parseMoney(cells[3].textContent);
-                var date = cells[4].textContent.trim();
-
-                return allRows.find(function (item) {
-                    if (!item) {
-                        return false;
-                    }
-
-                    var itemTitle = String(item.titulo || item.concept || '').trim();
-                    var itemDate = String(item.fechaOperacion || '').trim();
-                    var itemAmount = Number(item.importeTotal || 0);
-
-                    return itemTitle === title && Math.abs(itemAmount - amount) < 0.01 && String(itemDate).slice(0, 10) === String(date).slice(0, 10);
-                }) || null;
-            }
-
             function openDialogSafely(dialog) {
-                if (!dialog) {
-                    return false;
-                }
-
                 if (typeof dialog.showModal === 'function') {
                     dialog.showModal();
-                    return true;
-                }
-
-                if (typeof dialog.setAttribute === 'function') {
-                    dialog.setAttribute('open', 'open');
-                }
-
-                if (dialog.style) {
-                    dialog.style.display = 'block';
-                    dialog.style.position = 'fixed';
-                    dialog.style.inset = '0';
-                    dialog.style.zIndex = '1000';
-                    dialog.style.margin = 'auto';
-                }
-
-                return true;
-            }
-
-            function closeDialogSafely(dialog, form) {
-                if (!dialog) {
                     return;
                 }
 
-                if (typeof dialog.close === 'function' && dialog.hasAttribute && dialog.hasAttribute('open')) {
+                dialog.setAttribute('open', 'open');
+                dialog.style.display = 'block';
+                dialog.style.position = 'fixed';
+                dialog.style.inset = '0';
+                dialog.style.zIndex = '1000';
+                dialog.style.margin = 'auto';
+            }
+
+            function closeDialogSafely(dialog) {
+                if (typeof dialog.close === 'function' && dialog.hasAttribute('open')) {
                     dialog.close();
                 }
 
-                if (dialog.removeAttribute) {
-                    dialog.removeAttribute('open');
-                }
-
-                if (dialog.style) {
-                    dialog.style.display = 'none';
-                }
-
-                if (form && form.reset) {
-                    form.reset();
-                }
+                dialog.removeAttribute('open');
+                dialog.style.display = '';
             }
 
-            function openTransactionDialog(card, currentRow, rowIndex) {
+            function todayLocalIso() {
+                var now = new Date();
+                var month = String(now.getMonth() + 1).padStart(2, '0');
+                var day = String(now.getDate()).padStart(2, '0');
+                return now.getFullYear() + '-' + month + '-' + day;
+            }
+
+            function openTransactionDialog(card, editButton) {
                 var dialog = document.getElementById('transaction-entry-dialog');
-                var form = document.getElementById('transaction-entry-form');
+                if (!dialog || !card) {
+                    return;
+                }
+
                 var type = card.getAttribute('data-transaction-type');
-                var brokerCode = card.getAttribute('data-broker-code');
-                var formTitle = document.getElementById('transaction-dialog-title');
+                var editing = !!editButton;
                 var titleField = document.getElementById('transaction-title-field');
-                var operationField = document.getElementById('transaction-operation-field');
-                var quantityField = document.getElementById('transaction-quantity-field');
-                var importeField = document.getElementById('transaction-importe-field');
-                var fechaField = document.getElementById('transaction-fecha-field');
-                var typeField = document.getElementById('transaction-type-field');
-                var brokerField = document.getElementById('transaction-broker-field');
-                var rowIndexField = document.getElementById('transaction-row-index-field');
-                var rowIdField = document.getElementById('transaction-row-id-field');
+                var title = editing ? (editButton.getAttribute('data-titulo') || '') : '';
 
-                activeTransactionCard = card;
-                typeField.value = type;
-                brokerField.value = brokerCode;
-                rowIndexField.value = rowIndex === null || rowIndex === undefined ? '' : String(rowIndex);
-                rowIdField.value = currentRow && currentRow.id ? String(currentRow.id) : '';
+                document.getElementById('transaction-type-field').value = type;
+                document.getElementById('transaction-broker-field').value = card.getAttribute('data-broker-code');
+                document.getElementById('transaction-row-id-field').value = editing ? (editButton.getAttribute('data-id') || '') : '';
+                document.getElementById('transaction-dialog-title').textContent = (editing ? 'Editar ' : 'Añadir ') + (type === 'purchase' ? 'compra' : 'venta');
+                document.getElementById('transaction-operation-field').value = type === 'purchase' ? 'COMPRA' : 'VENTA';
 
-                var operationValue = type === 'purchase' ? 'COMPRA' : 'VENTA';
-                formTitle.textContent = currentRow ? 'Editar ' + (type === 'purchase' ? 'compra' : 'venta') : 'Añadir ' + (type === 'purchase' ? 'compra' : 'venta');
-                if (operationField) {
-                    operationField.value = operationValue;
+                if (title) {
+                    var exists = Array.prototype.some.call(titleField.options, function (option) {
+                        return option.value === title;
+                    });
+                    if (!exists) {
+                        var extraOption = document.createElement('option');
+                        extraOption.value = title;
+                        extraOption.textContent = title;
+                        titleField.appendChild(extraOption);
+                    }
                 }
+                titleField.value = title;
 
-                var defaultTitle = titleField && titleField.value ? String(titleField.value).trim() : '';
-                var selectedTitle = currentRow ? (currentRow.titulo || resolveTitleFromConcept(currentRow.concept)) : defaultTitle;
-                if (titleField) {
-                    titleField.value = normalizeTitleFieldValue(selectedTitle || defaultTitle);
-                }
-                quantityField.value = currentRow ? String(currentRow.numeroTitulos || currentRow.cantidad || 1) : '1';
-                importeField.value = currentRow ? formatDecimalInput(currentRow.importeTotal || 0) : '0.00';
-                fechaField.value = currentRow ? String(currentRow.fechaOperacion || '').substring(0, 10) : new Date().toISOString().substring(0, 10);
+                document.getElementById('transaction-quantity-field').value = editing ? (editButton.getAttribute('data-numero') || '') : '';
+                document.getElementById('transaction-importe-field').value = editing ? (editButton.getAttribute('data-importe') || '') : '';
+                document.getElementById('transaction-fecha-field').value = editing ? (editButton.getAttribute('data-fecha') || todayLocalIso()) : todayLocalIso();
 
                 openDialogSafely(dialog);
             }
 
-            function closeTransactionDialog() {
-                var dialog = document.getElementById('transaction-entry-dialog');
-                var form = document.getElementById('transaction-entry-form');
-                closeDialogSafely(dialog, form);
-            }
-
-            function attachCardHandlers(card) {
-                var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
-
-                var addButton = card.querySelector('.transaction-add-button');
-                if (addButton) {
-                    addButton.onclick = function () {
-                        openTransactionDialog(card, null, null);
-                    };
-                }
-
-                card.querySelectorAll('.transaction-edit-row').forEach(function (button) {
-                    button.onclick = function () {
-                        var row = button.closest('tr');
-                        var allRows = safeGetStoredRows(card);
-                        var current = findRowByIdentity(allRows, row);
-                        var index = Array.prototype.indexOf.call(row.parentNode.children, row);
-
-                        if (!current) {
-                            current = allRows[index] || readExistingRows(card)[index] || null;
-                        }
-
-                        var resolvedIndex = current && current.id
-                            ? allRows.findIndex(function (item) {
-                                return item && item.id && String(item.id) === String(current.id);
-                            })
-                            : index;
-
-                        if (resolvedIndex < 0) {
-                            resolvedIndex = index;
-                        }
-
-                        openTransactionDialog(card, current, resolvedIndex);
-                    };
-                });
-
-                card.querySelectorAll('.transaction-delete-row').forEach(function (button) {
-                    button.onclick = function () {
-                        var row = button.closest('tr');
-                        var allRows = safeGetStoredRows(card);
-                        var index = Array.prototype.indexOf.call(row.parentNode.children, row);
-                        allRows.splice(index, 1);
-                        saveRows(card, allRows);
-                        renderTable(card, allRows);
-                        attachCardHandlers(card);
-                    };
-                });
-            }
-
-            function bindCard(card) {
-                var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
-                var storedRows = safeGetStoredRows(card);
-                var domRows = readExistingRows(card);
-                var mergedRows = mergeUniqueRows(storedRows, domRows);
-
-                if (Array.isArray(storedRows) && storedRows.length === 0 && localStorage.getItem(key) !== null) {
-                    localStorage.removeItem(key);
-                }
-
-                var sanitizedRows = sanitizeStoredRows(mergedRows);
-                var sortedRows = sortTransactionRows(sanitizedRows);
-
-                if (sortedRows.length > 0) {
-                    saveRows(card, sortedRows);
-                }
-
-                renderTable(card, sortedRows);
-                attachCardHandlers(card);
-            }
-
-            var transactionForm = document.getElementById('transaction-entry-form');
-            if (transactionForm) {
-                transactionForm.addEventListener('submit', function (event) {
-                    event.preventDefault();
-                    if (!activeTransactionCard) {
-                        closeTransactionDialog();
-                        return;
-                    }
-
-                    var key = getStorageKey(activeTransactionCard.getAttribute('data-transaction-type'), activeTransactionCard.getAttribute('data-broker-code'));
-                    var rows = safeGetStoredRows(activeTransactionCard);
-                    var rowIndexField = document.getElementById('transaction-row-index-field');
-                    var rowIdField = document.getElementById('transaction-row-id-field');
-                    var rowIndex = rowIndexField.value === '' ? null : Number(rowIndexField.value);
-                    var rowId = rowIdField && rowIdField.value ? String(rowIdField.value).trim() : '';
-
-                    if (rowId) {
-                        var rowMatchIndex = rows.findIndex(function (item) {
-                            return item && item.id && String(item.id) === rowId;
-                        });
-                        if (rowMatchIndex >= 0) {
-                            rowIndex = rowMatchIndex;
-                        }
-                    }
-
-                    var selectedTitle = normalizeTitleFieldValue(document.getElementById('transaction-title-field').value);
-                    var operationType = activeTransactionCard.getAttribute('data-transaction-type') === 'purchase' ? 'COMPRA' : 'VENTA';
-                    var fallbackTitle = selectedTitle || operationType;
-                    var row = {
-                        titulo: fallbackTitle,
-                        tipoOperacion: operationType,
-                        numeroTitulos: parseDecimalLocale(document.getElementById('transaction-quantity-field').value || '0'),
-                        importeTotal: parseMoney(document.getElementById('transaction-importe-field').value),
-                        fechaOperacion: document.getElementById('transaction-fecha-field').value,
-                        concept: getTransactionConcept(activeTransactionCard.getAttribute('data-transaction-type'), fallbackTitle),
-                        valor: parseMoney(document.getElementById('transaction-importe-field').value)
-                    };
-
-                    if (rowIndex === null || Number.isNaN(rowIndex)) {
-                        row.id = generateRowId();
-                        rows.push(row);
-                    } else {
-                        row.id = rows[rowIndex] && rows[rowIndex].id ? rows[rowIndex].id : (rowId || generateRowId());
-                        rows[rowIndex] = row;
-                    }
-
-                    var sortedRows = sortTransactionRows(rows);
-                    saveRows(activeTransactionCard, sortedRows);
-                    renderTable(activeTransactionCard, sortedRows);
-                    attachCardHandlers(activeTransactionCard);
-                    closeTransactionDialog();
-                });
-            }
-
-            var transactionCancelButton = document.getElementById('transaction-cancel-button');
-            if (transactionCancelButton) {
-                transactionCancelButton.addEventListener('click', function () {
-                    closeTransactionDialog();
-                });
-            }
-
-            async function hydrateTransactionCards() {
-                await loadSharedTransactionState();
-                document.querySelectorAll('.transaction-broker-card').forEach(function (card) {
-                    bindCard(card);
-                });
-            }
-
-            function initializeTransactionStateHydration() {
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function () {
-                        void hydrateTransactionCards();
-                    }, { once: true });
+            document.addEventListener('click', function (event) {
+                var target = event.target;
+                if (!target || !target.closest) {
                     return;
                 }
 
-                void hydrateTransactionCards();
-            }
+                var addButton = target.closest('.transaction-add-button');
+                if (addButton) {
+                    openTransactionDialog(addButton.closest('.transaction-broker-card'), null);
+                    return;
+                }
 
-            initializeTransactionStateHydration();
-            window.addEventListener('pageshow', function () {
-                void hydrateTransactionCards();
+                var editButton = target.closest('.transaction-edit-row');
+                if (editButton) {
+                    openTransactionDialog(editButton.closest('.transaction-broker-card'), editButton);
+                    return;
+                }
+
+                if (target.closest('#transaction-cancel-button')) {
+                    closeDialogSafely(document.getElementById('transaction-entry-dialog'));
+                }
             });
-            window.addEventListener('storage', function () {
-                void hydrateTransactionCards();
-            });
+
+            // El formulario de compra-venta envia los numeros tal cual (coma decimal); el servidor los interpreta.
+            document.addEventListener('submit', function (event) {
+                if (event.target && event.target.id === 'transaction-entry-form') {
+                    event.stopPropagation();
+                }
+            }, true);
         })();
     </script>
     <script>
@@ -3074,7 +2373,9 @@
                 'tbody-pensionplans',
                 'tbody-checkingaccounts',
                 'tbody-cash',
-                'tbody-portfolio-stocks'
+                'tbody-portfolio-stocks',
+                'transaction-broker-grid-ing',
+                'transaction-broker-grid-tr'
             ];
 
             function actualizarDatos() {
