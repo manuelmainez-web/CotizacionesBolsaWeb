@@ -220,3 +220,11 @@ test('el estado compartido del servidor debe prevalecer sobre el almacenamiento 
   assert.match(html, /if \(sharedRows\.length > 0\)\s*\{[\s\S]*?return sanitizeStoredRows\(sharedRows\);/);
   assert.match(html, /sharedTransactionState\[key\]\s*=\s*sortedRows/);
 });
+
+test('las operaciones de compra y venta deben cargarse desde el estado compartido del servidor', () => {
+  const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml.cs'), 'utf8');
+
+  assert.match(source, /BuildBrokerTransactionGroupsFromState/);
+  assert.match(source, /custom-transaction-state|TransactionStateKey/);
+  assert.match(source, /cotizaciones\.transactions\./);
+});

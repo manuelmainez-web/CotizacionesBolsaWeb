@@ -123,8 +123,8 @@ public class IndexModel : PageModel
         public List<BrokerTransactionRow> Rows { get; set; } = new();
     }
 
-    public List<BrokerTransactionGroup> PurchaseTransactionsByBroker => BuildBrokerTransactionGroups(PensionPlans, false);
-    public List<BrokerTransactionGroup> SaleTransactionsByBroker => BuildBrokerTransactionGroups(PensionPlans, true);
+    public List<BrokerTransactionGroup> PurchaseTransactionsByBroker => BuildBrokerTransactionGroupsFromState(false);
+    public List<BrokerTransactionGroup> SaleTransactionsByBroker => BuildBrokerTransactionGroupsFromState(true);
 
     public List<string> AvailableTransactionTitles => BuildAvailableTransactionTitles();
 
@@ -161,16 +161,23 @@ public class IndexModel : PageModel
             .ToList();
     }
 
-    private static List<BrokerTransactionGroup> BuildBrokerTransactionGroups(IEnumerable<PensionPlanHolding> plans, bool salesOnly)
+    private List<BrokerTransactionGroup> BuildBrokerTransactionGroupsFromState(bool salesOnly)
     {
         var brokerCodes = new[] { "ING", "TR" };
+        var state = _dataStore.LoadJsonAsync<Dictionary<string, List<BrokerTransactionRow>>>(TransactionStateKey)
+            .GetAwaiter()
+            .GetResult() ?? new Dictionary<string, List<BrokerTransactionRow>>();
 
         return brokerCodes
             .Select(brokerCode => new BrokerTransactionGroup
             {
                 Broker = brokerCode,
                 BrokerName = ResolveBrokerDisplayName(brokerCode),
-                Rows = new List<BrokerTransactionRow>()
+                Rows = state
+                    .Where(pair => string.Equals(pair.Key, $"cotizaciones.transactions.{(salesOnly ? "sale" : "purchase")}.{brokerCode}", StringComparison.OrdinalIgnoreCase))
+                    .SelectMany(pair => pair.Value ?? new List<BrokerTransactionRow>())
+                    .OrderByDescending(row => row.FechaOperacion)
+                    .ToList()
             })
             .ToList();
     }
