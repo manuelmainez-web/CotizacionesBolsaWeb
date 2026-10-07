@@ -75,6 +75,81 @@ public sealed class DataStore
         }
     }
 
+    public async Task<T?> LoadJsonAsync<T>(string key)
+    {
+        string? json;
+        if (_httpClient != null)
+        {
+            json = await GetRawAsync(key);
+        }
+        else
+        {
+            var path = GetLocalPath(key);
+            json = await ReadLocalTextAsync(path);
+        }
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return default;
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<T>(json);
+        }
+        catch (JsonException)
+        {
+            return default;
+        }
+    }
+
+    public async Task<bool> SaveJsonAsync<T>(string key, T payload)
+    {
+        var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+
+        if (_httpClient != null)
+        {
+            try
+            {
+                var url = $"{_restUrl!.TrimEnd('/')}/set/{Uri.EscapeDataString(key)}";
+                using var content = new StringContent(json, Encoding.UTF8, "text/plain");
+                using var response = await _httpClient.PostAsync(url, content);
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        var localPath = GetLocalPath(key);
+        var semaphore = LocalFileLocks.GetOrAdd(localPath, _ => new SemaphoreSlim(1, 1));
+
+        await semaphore.WaitAsync();
+        try
+        {
+            var directory = Path.GetDirectoryName(localPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            await using var stream = new FileStream(localPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+            await using var writer = new StreamWriter(stream, new UTF8Encoding(false));
+            await writer.WriteAsync(json);
+            await writer.FlushAsync();
+            return true;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
+
     public async Task<bool> SaveEntriesAsync<T>(string key, List<T> entries)
     {
         if (_httpClient != null)

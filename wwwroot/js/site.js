@@ -204,8 +204,13 @@ document.addEventListener('click', function (event) {
     }
 
     bindPrintButton('btn-print-cartera', 'print-all');
+    bindPrintButton('btn-print-page', 'print-all');
     bindPrintButton('btn-print-ing', 'print-broker-ing');
     bindPrintButton('btn-print-tr', 'print-broker-tr');
+    bindPrintButton('btn-print-cartera-tab', 'print-all');
+    bindPrintButton('btn-print-page-tab', 'print-all');
+    bindPrintButton('btn-print-ing-tab', 'print-broker-ing');
+    bindPrintButton('btn-print-tr-tab', 'print-broker-tr');
 })();
 
 // La fila de botones de impresión se mantiene dentro de su contenedor y no

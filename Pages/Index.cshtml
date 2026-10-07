@@ -121,6 +121,9 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="accesos-tab" data-bs-toggle="tab" data-bs-target="#accesos-tab-pane" type="button" role="tab" aria-controls="accesos-tab-pane" aria-selected="false">Accesos</button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="imprimir-tab" data-bs-toggle="tab" data-bs-target="#imprimir-tab-pane" type="button" role="tab" aria-controls="imprimir-tab-pane" aria-selected="false">Imprimir</button>
+            </li>
         </ul>
 
         <div class="tab-content">
@@ -318,6 +321,46 @@
                                     <span translate="no" class="notranslate">Noticias</span>
                                 </a>
                                 <span class="quick-link-text">Acceso a noticias bursátiles.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="imprimir-tab-pane" role="tabpanel" aria-labelledby="imprimir-tab">
+                <div class="market-panel mt-4 market-panel-watchlist">
+                    <div class="panel-head panel-head-row">
+                        <span>Imprimir</span>
+                    </div>
+                    <div class="quick-links-panel">
+                        <div class="quick-links" translate="no">
+                            <div class="quick-link-inline">
+                                <button type="button" class="mini-button quick-link-button notranslate" id="btn-print-cartera-tab" title="Imprime solo la cartera, cuenta corriente y efectivo con las casillas de resumen">
+                                    <span aria-hidden="true">🖨️</span>
+                                    <span translate="no" class="notranslate">Imprimir</span>
+                                </button>
+                                <span translate="no" class="notranslate">Imprimir cartera</span>
+                            </div>
+                            <div class="quick-link-inline">
+                                <button type="button" class="mini-button quick-link-button notranslate" id="btn-print-page-tab" title="Imprime toda la página">
+                                    <span aria-hidden="true">🖨️</span>
+                                    <span translate="no" class="notranslate">Imprimir</span>
+                                </button>
+                                <span translate="no" class="notranslate">Imprimir todo</span>
+                            </div>
+                            <div class="quick-link-inline">
+                                <button type="button" class="mini-button quick-link-button notranslate" id="btn-print-ing-tab" title="Imprime la cartera de ING Direct con el resumen total de las posiciones">
+                                    <span aria-hidden="true">🖨️</span>
+                                    <span translate="no" class="notranslate">Imprimir</span>
+                                </button>
+                                <span translate="no" class="notranslate">INGDIRECT (Resumen total de las posiciones)</span>
+                            </div>
+                            <div class="quick-link-inline">
+                                <button type="button" class="mini-button quick-link-button notranslate" id="btn-print-tr-tab" title="Imprime la cartera de Trade Republic con el resumen total de las posiciones">
+                                    <span aria-hidden="true">🖨️</span>
+                                    <span translate="no" class="notranslate">Imprimir</span>
+                                </button>
+                                <span translate="no" class="notranslate">TRADE REPUBLIC (Resumen total de las posiciones)</span>
                             </div>
                         </div>
                     </div>
@@ -674,7 +717,6 @@
             <span class="broker-label-text">
                 <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" /> <span translate="no" class="notranslate">INGDIRECT (Resumen total de las posiciones)</span>
             </span>
-            <button type="button" class="mini-button btn-print-broker" id="btn-print-ing" title="Imprime solo la cartera de ING Direct">🖨️ Imprimir</button>
         </div>
         <div class="summary-strip is-collapsed" id="summary-strip-ing">
             <div class="summary-box invested">
@@ -696,7 +738,6 @@
             <span class="broker-label-text">
                 <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" /> <span translate="no" class="notranslate">TRADE REPUBLIC (Resumen total de las posiciones)</span>
             </span>
-            <button type="button" class="mini-button btn-print-broker" id="btn-print-tr" title="Imprime solo la cartera de Trade Republic">🖨️ Imprimir</button>
         </div>
         <div class="summary-strip is-collapsed" id="summary-strip-tr">
             <div class="summary-box invested">
@@ -2165,8 +2206,63 @@
                 });
             });
 
+            var sharedTransactionState = {};
+            var sharedTransactionStatePromise = null;
+
             function getStorageKey(type, brokerCode) {
                 return 'cotizaciones.transactions.' + type + '.' + brokerCode;
+            }
+
+            async function loadSharedTransactionState() {
+                if (sharedTransactionStatePromise) {
+                    return sharedTransactionStatePromise;
+                }
+
+                sharedTransactionStatePromise = fetch('?handler=TransactionState', {
+                    cache: 'no-store',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }).then(function (response) {
+                    if (!response.ok) {
+                        return {};
+                    }
+
+                    return response.json().catch(function () {
+                        return {};
+                    });
+                }).then(function (state) {
+                    sharedTransactionState = state || {};
+                    return sharedTransactionState;
+                }).catch(function () {
+                    sharedTransactionState = {};
+                    return sharedTransactionState;
+                });
+
+                return sharedTransactionStatePromise;
+            }
+
+            async function saveSharedTransactionState() {
+                var state = {};
+                document.querySelectorAll('.transaction-broker-card').forEach(function (card) {
+                    var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
+                    state[key] = safeGetStoredRows(card);
+                });
+
+                sharedTransactionStatePromise = null;
+
+                try {
+                    await fetch('?handler=SaveTransactionState', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(state)
+                    });
+                    sharedTransactionState = state;
+                } catch (error) {
+                    sharedTransactionState = state;
+                }
             }
 
             function generateRowId() {
@@ -2428,12 +2524,22 @@
 
             function safeGetStoredRows(card) {
                 var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
+                var localRows = [];
+
                 try {
                     var parsed = JSON.parse(localStorage.getItem(key) || '[]');
-                    return sanitizeStoredRows(Array.isArray(parsed) ? parsed : []);
+                    localRows = sanitizeStoredRows(Array.isArray(parsed) ? parsed : []);
                 } catch (error) {
-                    return [];
+                    localRows = [];
                 }
+
+                var sharedRows = Array.isArray(sharedTransactionState[key]) ? sharedTransactionState[key] : [];
+                if (localRows.length === 0 && sharedRows.length > 0) {
+                    localStorage.setItem(key, JSON.stringify(sharedRows));
+                    return sanitizeStoredRows(sharedRows);
+                }
+
+                return sanitizeStoredRows(mergeUniqueRows(localRows, sharedRows));
             }
 
             function mergeUniqueRows(baseRows, incomingRows) {
@@ -2479,6 +2585,7 @@
                 var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
                 var mergedRows = mergeUniqueRows(safeGetStoredRows(card), rows);
                 localStorage.setItem(key, JSON.stringify(sortTransactionRows(mergedRows)));
+                saveSharedTransactionState();
             }
 
             var activeTransactionCard = null;
@@ -2768,16 +2875,30 @@
                 });
             }
 
-            function hydrateTransactionCards() {
+            async function hydrateTransactionCards() {
+                await loadSharedTransactionState();
                 document.querySelectorAll('.transaction-broker-card').forEach(function (card) {
                     bindCard(card);
                 });
             }
 
-            document.addEventListener('DOMContentLoaded', hydrateTransactionCards);
-            window.addEventListener('pageshow', hydrateTransactionCards);
+            function initializeTransactionStateHydration() {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function () {
+                        void hydrateTransactionCards();
+                    }, { once: true });
+                    return;
+                }
+
+                void hydrateTransactionCards();
+            }
+
+            initializeTransactionStateHydration();
+            window.addEventListener('pageshow', function () {
+                void hydrateTransactionCards();
+            });
             window.addEventListener('storage', function () {
-                hydrateTransactionCards();
+                void hydrateTransactionCards();
             });
         })();
     </script>

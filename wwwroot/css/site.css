@@ -303,8 +303,8 @@ body.wco-active .topbar-datetime {
 }
 
 .quick-links-panel .quick-links .quick-link-button {
-  width: 120px;
-  min-width: 120px;
+  width: 81px;
+  min-width: 81px;
   justify-content: flex-start;
   flex-shrink: 0;
 }
@@ -396,14 +396,29 @@ body.wco-active .topbar-datetime {
   margin-bottom: 0;
 }
 
+#print-actions,
+.summary-strip-label .print-actions {
+  display: none !important;
+}
+
+#print-actions button,
+.summary-strip-label .print-actions button {
+  display: none !important;
+}
+
+#btn-print-ing,
+#btn-print-tr {
+  display: none !important;
+}
+
 .print-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
   gap: 8px;
   align-items: center;
-  width: 260px;
-  min-width: 260px;
-  max-width: 260px;
+  width: 340px;
+  min-width: 340px;
+  max-width: 340px;
   justify-items: stretch;
   flex-shrink: 0;
   white-space: nowrap;
@@ -412,26 +427,30 @@ body.wco-active .topbar-datetime {
 
 .print-actions .quick-link-button {
   justify-content: center;
-  white-space: nowrap;
+  white-space: normal;
   flex-shrink: 0;
-  width: 120px;
-  min-width: 120px;
-  max-width: 120px;
+  width: 100%;
+  min-width: 150px;
+  max-width: none;
   display: inline-flex;
 }
 
 .print-actions .quick-link-button span {
-  white-space: nowrap;
+  white-space: normal;
   display: inline-block;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .quick-link-button.mini-button {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 0.38rem 0.65rem;
-  font-size: 0.76rem;
+  gap: 4px;
+  padding: 0.34rem 0.5rem;
+  font-size: 0.64rem;
   border-radius: 8px;
+  min-width: 81px;
+  line-height: 1.2;
 }
 
 .quick-link-icon {

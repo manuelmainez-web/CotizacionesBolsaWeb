@@ -196,8 +196,8 @@ test('los bloques de compra y venta se vuelven a hidratar al restaurar la págin
   const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml'), 'utf8');
 
   assert.match(html, /function hydrateTransactionCards\s*\(/);
-  assert.match(html, /window\.addEventListener\(\s*['\"]pageshow['\"]\s*,\s*hydrateTransactionCards\s*\)/);
-  assert.match(html, /window\.addEventListener\(\s*['\"]storage['\"]\s*,\s*function \(\)\s*\{\s*hydrateTransactionCards\(\);\s*\}\s*\)/);
+  assert.match(html, /window\.addEventListener\(\s*['\"]pageshow['\"]\s*,\s*function\s*\(\)\s*\{\s*(?:void\s*)?hydrateTransactionCards\(\);\s*\}\s*\)/);
+  assert.match(html, /window\.addEventListener\(\s*['\"]storage['\"]\s*,\s*function\s*\(\)\s*\{\s*(?:void\s*)?hydrateTransactionCards\(\);\s*\}\s*\)/);
 });
 
 test('el QR local se genera desde el host actual cuando no hay PublicUrl configurada', () => {
@@ -206,4 +206,11 @@ test('el QR local se genera desde el host actual cuando no hay PublicUrl configu
   assert.match(source, /ResolvePublicUrl\s*\(/);
   assert.match(source, /HttpContext\?\.Request/);
   assert.match(source, /scheme\s*==|request\.Scheme/);
+});
+
+test('las transacciones se sincronizan desde el servidor para que el QR muestre los mismos datos en cualquier dispositivo', () => {
+  const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml'), 'utf8');
+
+  assert.match(html, /fetch\s*\(\s*['\"]\?handler=TransactionState['\"]\s*|fetch\s*\(\s*['\"]\?handler=SaveTransactionState['\"]\s*/);
+  assert.match(html, /saveSharedTransactionState|loadSharedTransactionState/);
 });

@@ -6,8 +6,10 @@ using System.Text.Json;
 
 namespace CotizacionesBolsaWeb.Pages;
 
+[IgnoreAntiforgeryToken]
 public class IndexModel : PageModel
 {
+    private const string TransactionStateKey = "custom-transaction-state";
     private const string IndicesKey = "custom-indices";
     private const string StocksKey = "custom-stocks";
     private const string EtfsKey = "custom-etfs";
@@ -40,6 +42,27 @@ public class IndexModel : PageModel
     }
 
     public string PublicUrl { get; private set; }
+
+    public async Task<JsonResult> OnGetTransactionStateAsync()
+    {
+        var state = await _dataStore.LoadJsonAsync<Dictionary<string, List<BrokerTransactionRow>>>(TransactionStateKey);
+        return new JsonResult(state ?? new Dictionary<string, List<BrokerTransactionRow>>());
+    }
+
+    public async Task<JsonResult> OnPostSaveTransactionStateAsync([FromBody] Dictionary<string, List<BrokerTransactionRow>>? state)
+    {
+        var normalized = state ?? new Dictionary<string, List<BrokerTransactionRow>>();
+        foreach (var key in normalized.Keys.ToList())
+        {
+            if (normalized[key] == null)
+            {
+                normalized[key] = new List<BrokerTransactionRow>();
+            }
+        }
+
+        await _dataStore.SaveJsonAsync(TransactionStateKey, normalized);
+        return new JsonResult(new { success = true });
+    }
 
     [TempData]
     public string? StockHoldingError { get; set; }
