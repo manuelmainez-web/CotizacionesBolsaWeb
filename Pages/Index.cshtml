@@ -2218,6 +2218,8 @@
                     return sharedTransactionStatePromise;
                 }
 
+                var localFallbackState = readLocalStorageState();
+
                 sharedTransactionStatePromise = fetch('?handler=TransactionState', {
                     cache: 'no-store',
                     headers: {
@@ -2225,17 +2227,24 @@
                     }
                 }).then(function (response) {
                     if (!response.ok) {
-                        return {};
+                        return localFallbackState;
                     }
 
                     return response.json().catch(function () {
-                        return {};
+                        return localFallbackState;
                     });
                 }).then(function (state) {
-                    sharedTransactionState = state || {};
+                    var resolvedState = state && Object.keys(state).length > 0 ? state : localFallbackState;
+                    Object.keys(resolvedState || {}).forEach(function (key) {
+                        if (Array.isArray(resolvedState[key])) {
+                            resolvedState[key] = dedupeRows(sanitizeStoredRows(resolvedState[key]));
+                        }
+                    });
+
+                    sharedTransactionState = resolvedState || {};
                     return sharedTransactionState;
                 }).catch(function () {
-                    sharedTransactionState = {};
+                    sharedTransactionState = localFallbackState;
                     return sharedTransactionState;
                 });
 
@@ -2317,6 +2326,24 @@
                 return normalized;
             }
 
+            function normalizeRowText(value) {
+                return String(value === null || value === undefined ? '' : value).trim().toLowerCase();
+            }
+
+            function normalizeRowDate(value) {
+                var raw = String(value === null || value === undefined ? '' : value).trim();
+                if (!raw) {
+                    return '';
+                }
+
+                var asDate = new Date(raw);
+                if (Number.isNaN(asDate.getTime())) {
+                    return raw.toLowerCase();
+                }
+
+                return asDate.toISOString().slice(0, 10);
+            }
+
             function buildLegacyRowIdentity(row) {
                 if (!row || typeof row !== 'object') {
                     return '';
@@ -2326,12 +2353,14 @@
                     return 'id:' + String(row.id).trim();
                 }
 
-                var title = String(row.titulo || row.concept || '').trim().toLowerCase();
-                var operation = String(row.tipoOperacion || '').trim().toUpperCase();
-                var date = String(row.fechaOperacion || '').trim();
-                var concept = String(row.concept || '').trim().toLowerCase();
+                var title = normalizeRowText(row.titulo || row.concept || '');
+                var operation = normalizeRowText(row.tipoOperacion || '');
+                var date = normalizeRowDate(row.fechaOperacion);
+                var amount = Number(row.importeTotal !== undefined && row.importeTotal !== null ? row.importeTotal : (row.valor !== undefined && row.valor !== null ? row.valor : 0));
+                var concept = normalizeRowText(row.concept || '');
+                var quantity = Number(row.numeroTitulos !== undefined && row.numeroTitulos !== null ? row.numeroTitulos : (row.cantidad !== undefined && row.cantidad !== null ? row.cantidad : 0));
 
-                return ['legacy', title, operation, date, concept].join('|');
+                return ['legacy', title, operation, date, Number.isFinite(amount) ? amount.toFixed(2) : '0.00', Number.isFinite(quantity) ? quantity.toFixed(6) : '0.000000', concept].join('|');
             }
 
             function ensureRowId(row, index) {
@@ -2347,15 +2376,64 @@
                     String(row.titulo || row.concept || ''),
                     String(row.tipoOperacion || ''),
                     String(row.fechaOperacion || ''),
-                    String(row.concept || '')
+                    String(row.concept || ''),
+                    String(row.importeTotal !== undefined && row.importeTotal !== null ? row.importeTotal : row.valor || 0),
+                    String(row.numeroTitulos !== undefined && row.numeroTitulos !== null ? row.numeroTitulos : row.cantidad || 0)
                 ].join('|');
 
                 var hash = Array.from(seed).reduce(function (total, character) {
                     return total + character.charCodeAt(0);
                 }, 0).toString(16);
 
-                row.id = 'tx-' + hash;
+                row.id = 'tx-' + (index !== undefined ? index + '-' : '') + hash;
                 return row;
+            }
+
+            function dedupeRows(rows) {
+                if (!Array.isArray(rows)) {
+                    return [];
+                }
+
+                var seen = new Map();
+                var uniqueRows = [];
+
+                rows.forEach(function (row, index) {
+                    if (!row || typeof row !== 'object') {
+                        return;
+                    }
+
+                    var normalizedRow = ensureRowId(row, index);
+                    var signature = buildLegacyRowIdentity(normalizedRow);
+                    if (!signature) {
+                        uniqueRows.push(normalizedRow);
+                        return;
+                    }
+
+                    if (!seen.has(signature)) {
+                        seen.set(signature, true);
+                        uniqueRows.push(normalizedRow);
+                    }
+                });
+
+                return uniqueRows;
+            }
+
+            function resolveRowTitle(row) {
+                if (!row || typeof row !== 'object') {
+                    return '';
+                }
+
+                var title = String(row.titulo || row.concept || '').trim();
+                if (title) {
+                    return title;
+                }
+
+                var operation = String(row.tipoOperacion || '').trim();
+                if (operation) {
+                    return operation;
+                }
+
+                return 'Movimiento';
             }
 
             function sanitizeStoredRows(rows) {
@@ -2368,10 +2446,13 @@
                         return false;
                     }
 
-                    var title = String(row.titulo || row.concept || '').trim();
+                    var title = resolveRowTitle(row);
                     if (!title) {
                         return false;
                     }
+
+                    row.titulo = title;
+                    row.concept = row.concept || title;
 
                     return !/(PLAN\s*2030|Compra prueba|COMPRA PRUEBA|Amundi EURO STOXX 50 Daily|PRUEBA|compra prueba)/i.test(title);
                 }).map(function (row, index) {
@@ -2522,30 +2603,52 @@
                 }
             }
 
+            function readLocalStorageState() {
+                var snapshot = {};
+
+                try {
+                    for (var i = 0; i < localStorage.length; i++) {
+                        var key = localStorage.key(i);
+                        if (!key || key.indexOf('cotizaciones.transactions.') !== 0) {
+                            continue;
+                        }
+
+                        var parsed = JSON.parse(localStorage.getItem(key) || '[]');
+                        var rows = Array.isArray(parsed) ? sanitizeStoredRows(parsed) : [];
+                        snapshot[key] = dedupeRows(rows);
+                    }
+                } catch (error) {
+                    return snapshot;
+                }
+
+                return snapshot;
+            }
+
             function safeGetStoredRows(card) {
                 var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
-                var sharedRows = Array.isArray(sharedTransactionState[key]) ? sharedTransactionState[key] : [];
+                var sharedRows = Array.isArray(sharedTransactionState[key]) ? sanitizeStoredRows(sharedTransactionState[key]) : [];
                 var localRows = [];
 
                 try {
                     var parsed = JSON.parse(localStorage.getItem(key) || '[]');
-                    localRows = sanitizeStoredRows(Array.isArray(parsed) ? parsed : []);
+                    localRows = dedupeRows(sanitizeStoredRows(Array.isArray(parsed) ? parsed : []));
                 } catch (error) {
                     localRows = [];
                 }
 
                 if (sharedRows.length > 0) {
-                    if (localRows.length === 0 || JSON.stringify(localRows) !== JSON.stringify(sharedRows)) {
+                    var mergedSharedRows = dedupeRows(sharedRows.concat(localRows));
+                    if (JSON.stringify(localRows) !== JSON.stringify(mergedSharedRows)) {
                         try {
-                            localStorage.setItem(key, JSON.stringify(sharedRows));
+                            localStorage.setItem(key, JSON.stringify(mergedSharedRows));
                         } catch (error) {
                         }
                     }
-                    return sanitizeStoredRows(sharedRows);
+                    return mergedSharedRows;
                 }
 
                 if (localRows.length > 0) {
-                    return sanitizeStoredRows(localRows);
+                    return localRows;
                 }
 
                 return [];
@@ -2587,18 +2690,19 @@
                     });
                 }
 
-                return merged;
+                return dedupeRows(merged);
             }
 
             function saveRows(card, rows) {
                 var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
-                var sharedRows = Array.isArray(sharedTransactionState[key]) ? sharedTransactionState[key] : [];
+                var sharedRows = Array.isArray(sharedTransactionState[key]) ? sanitizeStoredRows(sharedTransactionState[key]) : [];
                 var mergedRows = mergeUniqueRows(sharedRows, rows);
                 var sortedRows = sortTransactionRows(mergedRows);
+                var dedupedRows = dedupeRows(sortedRows);
 
-                sharedTransactionState[key] = sortedRows;
+                sharedTransactionState[key] = dedupedRows;
                 try {
-                    localStorage.setItem(key, JSON.stringify(sortedRows));
+                    localStorage.setItem(key, JSON.stringify(dedupedRows));
                 } catch (error) {
                 }
 
@@ -2859,13 +2963,14 @@
 
                     var selectedTitle = normalizeTitleFieldValue(document.getElementById('transaction-title-field').value);
                     var operationType = activeTransactionCard.getAttribute('data-transaction-type') === 'purchase' ? 'COMPRA' : 'VENTA';
+                    var fallbackTitle = selectedTitle || operationType;
                     var row = {
-                        titulo: selectedTitle,
+                        titulo: fallbackTitle,
                         tipoOperacion: operationType,
                         numeroTitulos: parseDecimalLocale(document.getElementById('transaction-quantity-field').value || '0'),
                         importeTotal: parseMoney(document.getElementById('transaction-importe-field').value),
                         fechaOperacion: document.getElementById('transaction-fecha-field').value,
-                        concept: getTransactionConcept(activeTransactionCard.getAttribute('data-transaction-type'), selectedTitle),
+                        concept: getTransactionConcept(activeTransactionCard.getAttribute('data-transaction-type'), fallbackTitle),
                         valor: parseMoney(document.getElementById('transaction-importe-field').value)
                     };
 

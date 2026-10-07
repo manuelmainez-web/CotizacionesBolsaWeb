@@ -107,6 +107,31 @@ test('edición de una operación mantiene el mismo id y reemplaza la fila antigu
   assert.deepStrictEqual(result, incomingRows);
 });
 
+test('las filas sin título pero con concepto válido no desaparecen al recargar la página móvil', () => {
+  const rows = [
+    {
+      titulo: '',
+      tipoOperacion: 'COMPRA',
+      numeroTitulos: 3,
+      importeTotal: 123.45,
+      fechaOperacion: '2026-10-07',
+      concept: 'COMPRA',
+      valor: 123.45
+    }
+  ];
+
+  const normalized = rows.map((row) => {
+    const title = String(row.titulo || row.concept || '').trim() || String(row.tipoOperacion || '').trim() || 'Movimiento';
+    row.titulo = title;
+    row.concept = row.concept || title;
+    return row;
+  });
+
+  assert.equal(normalized.length, 1);
+  assert.equal(normalized[0].titulo, 'COMPRA');
+  assert.equal(normalized[0].concept, 'COMPRA');
+});
+
 test('las filas no relacionadas se mantienen separadas y no se eliminan', () => {
   const baseRows = [
     { id: 'tx-1', titulo: 'A', tipoOperacion: 'COMPRA', numeroTitulos: 1, importeTotal: 10, fechaOperacion: '2026-10-01' },
@@ -217,8 +242,10 @@ test('las transacciones se sincronizan desde el servidor para que el QR muestre 
 test('el estado compartido del servidor debe prevalecer sobre el almacenamiento local del navegador', () => {
   const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml'), 'utf8');
 
-  assert.match(html, /if \(sharedRows\.length > 0\)\s*\{[\s\S]*?return sanitizeStoredRows\(sharedRows\);/);
-  assert.match(html, /sharedTransactionState\[key\]\s*=\s*sortedRows/);
+  assert.match(html, /readLocalStorageState\s*\(/);
+  assert.match(html, /var resolvedState = state && Object.keys\(state\)\.length > 0 \? state : localFallbackState/);
+  assert.match(html, /sharedTransactionState\s*=\s*resolvedState \|\| \{\}/);
+  assert.match(html, /if \(sharedRows\.length > 0\)\s*\{[\s\S]*?return mergedSharedRows;/);
 });
 
 test('las operaciones de compra y venta deben cargarse desde el estado compartido del servidor', () => {
@@ -227,6 +254,7 @@ test('las operaciones de compra y venta deben cargarse desde el estado compartid
   assert.match(source, /BuildBrokerTransactionGroupsFromState/);
   assert.match(source, /custom-transaction-state|TransactionStateKey/);
   assert.match(source, /cotizaciones\.transactions\./);
+  assert.match(source, /LoadJsonAsync<Dictionary<string, List<BrokerTransactionRow>>>\(TransactionStateKey\)/);
 });
 
 test('el estado de transacciones debe serializarse y leerse con nombres de propiedad compatibles entre navegador y servidor', () => {

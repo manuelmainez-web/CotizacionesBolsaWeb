@@ -29,6 +29,11 @@ public sealed class DataStore
         {
             _httpClient = new HttpClient();
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", restToken);
+            Console.WriteLine("DataStore: using Upstash Redis remote storage.");
+        }
+        else
+        {
+            Console.WriteLine("DataStore: Upstash not configured; falling back to local App_Data storage.");
         }
 
         _localFolder = ResolveLocalFolder(environment);

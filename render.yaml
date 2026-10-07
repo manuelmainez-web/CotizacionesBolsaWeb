@@ -15,3 +15,7 @@ services:
         value: http://0.0.0.0:${PORT}
       - key: DisableHttpsRedirection
         value: "true"
+      - key: Upstash__RestUrl
+        sync: false
+      - key: Upstash__RestToken
+        sync: false
