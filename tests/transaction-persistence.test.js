@@ -228,3 +228,18 @@ test('las operaciones de compra y venta deben cargarse desde el estado compartid
   assert.match(source, /custom-transaction-state|TransactionStateKey/);
   assert.match(source, /cotizaciones\.transactions\./);
 });
+
+test('el estado de transacciones debe serializarse y leerse con nombres de propiedad compatibles entre navegador y servidor', () => {
+  const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Services', 'DataStore.cs'), 'utf8');
+
+  assert.match(source, /PropertyNameCaseInsensitive\s*\=\s*true/);
+  assert.match(source, /PropertyNamingPolicy\s*\=\s*JsonNamingPolicy\.CamelCase/);
+});
+
+test('la autenticación externa debe permitir que el QR móvil cargue la página y los datos de transacciones', () => {
+  const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Program.cs'), 'utf8');
+
+  assert.match(source, /handler=TransactionState/);
+  assert.match(source, /handler=SaveTransactionState/);
+  assert.match(source, /isPublicPageOrTransactionEndpoint/);
+});

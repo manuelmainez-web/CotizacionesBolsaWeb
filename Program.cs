@@ -74,8 +74,15 @@ app.Use(async (context, next) =>
     var requireExternalBasicAuth = app.Configuration.GetValue<bool>("BasicAuth:RequireExternalAccess");
     var expectedUser = app.Configuration["BasicAuth:Username"];
     var expectedPassword = app.Configuration["BasicAuth:Password"];
+    var requestPath = context.Request.Path.Value ?? string.Empty;
+    var queryString = context.Request.QueryString.Value ?? string.Empty;
+    var isPublicPageOrTransactionEndpoint =
+        string.Equals(requestPath, "/", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(requestPath, "/Index", StringComparison.OrdinalIgnoreCase) ||
+        queryString.Contains("handler=TransactionState", StringComparison.OrdinalIgnoreCase) ||
+        queryString.Contains("handler=SaveTransactionState", StringComparison.OrdinalIgnoreCase);
 
-    if (!requireExternalBasicAuth)
+    if (!requireExternalBasicAuth || isPublicPageOrTransactionEndpoint)
     {
         await next();
         return;

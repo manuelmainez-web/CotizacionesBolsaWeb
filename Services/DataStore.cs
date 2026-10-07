@@ -13,6 +13,8 @@ namespace CotizacionesBolsaWeb.Services;
 public sealed class DataStore
 {
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> LocalFileLocks = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly JsonSerializerOptions JsonWriteOptions = new() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    private static readonly JsonSerializerOptions JsonReadOptions = new() { PropertyNameCaseInsensitive = true };
 
     private readonly HttpClient? _httpClient;
     private readonly string? _restUrl;
@@ -67,7 +69,7 @@ public sealed class DataStore
 
         try
         {
-            return JsonSerializer.Deserialize<List<T>>(json) ?? new List<T>();
+            return JsonSerializer.Deserialize<List<T>>(json, JsonReadOptions) ?? new List<T>();
         }
         catch (JsonException)
         {
@@ -95,7 +97,7 @@ public sealed class DataStore
 
         try
         {
-            return JsonSerializer.Deserialize<T>(json);
+            return JsonSerializer.Deserialize<T>(json, JsonReadOptions);
         }
         catch (JsonException)
         {
@@ -105,7 +107,7 @@ public sealed class DataStore
 
     public async Task<bool> SaveJsonAsync<T>(string key, T payload)
     {
-        var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(payload, JsonWriteOptions);
 
         if (_httpClient != null)
         {
@@ -176,7 +178,7 @@ public sealed class DataStore
         await semaphore.WaitAsync();
         try
         {
-            var localJson = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true });
+            var localJson = JsonSerializer.Serialize(entries, JsonWriteOptions);
             var directory = Path.GetDirectoryName(localPath);
             if (!string.IsNullOrWhiteSpace(directory))
             {
