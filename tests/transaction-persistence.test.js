@@ -214,3 +214,9 @@ test('las transacciones se sincronizan desde el servidor para que el QR muestre 
   assert.match(html, /fetch\s*\(\s*['\"]\?handler=TransactionState['\"]\s*|fetch\s*\(\s*['\"]\?handler=SaveTransactionState['\"]\s*/);
   assert.match(html, /saveSharedTransactionState|loadSharedTransactionState/);
 });
+test('el estado compartido del servidor debe prevalecer sobre el almacenamiento local del navegador', () => {
+  const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'Pages', 'Index.cshtml'), 'utf8');
+
+  assert.match(html, /if \(sharedRows\.length > 0\)\s*\{[\s\S]*?return sanitizeStoredRows\(sharedRows\);/);
+  assert.match(html, /sharedTransactionState\[key\]\s*=\s*sortedRows/);
+});

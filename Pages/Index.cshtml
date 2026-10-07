@@ -2524,6 +2524,7 @@
 
             function safeGetStoredRows(card) {
                 var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
+                var sharedRows = Array.isArray(sharedTransactionState[key]) ? sharedTransactionState[key] : [];
                 var localRows = [];
 
                 try {
@@ -2533,13 +2534,21 @@
                     localRows = [];
                 }
 
-                var sharedRows = Array.isArray(sharedTransactionState[key]) ? sharedTransactionState[key] : [];
-                if (localRows.length === 0 && sharedRows.length > 0) {
-                    localStorage.setItem(key, JSON.stringify(sharedRows));
+                if (sharedRows.length > 0) {
+                    if (localRows.length === 0 || JSON.stringify(localRows) !== JSON.stringify(sharedRows)) {
+                        try {
+                            localStorage.setItem(key, JSON.stringify(sharedRows));
+                        } catch (error) {
+                        }
+                    }
                     return sanitizeStoredRows(sharedRows);
                 }
 
-                return sanitizeStoredRows(mergeUniqueRows(localRows, sharedRows));
+                if (localRows.length > 0) {
+                    return sanitizeStoredRows(localRows);
+                }
+
+                return [];
             }
 
             function mergeUniqueRows(baseRows, incomingRows) {
@@ -2583,8 +2592,16 @@
 
             function saveRows(card, rows) {
                 var key = getStorageKey(card.getAttribute('data-transaction-type'), card.getAttribute('data-broker-code'));
-                var mergedRows = mergeUniqueRows(safeGetStoredRows(card), rows);
-                localStorage.setItem(key, JSON.stringify(sortTransactionRows(mergedRows)));
+                var sharedRows = Array.isArray(sharedTransactionState[key]) ? sharedTransactionState[key] : [];
+                var mergedRows = mergeUniqueRows(sharedRows, rows);
+                var sortedRows = sortTransactionRows(mergedRows);
+
+                sharedTransactionState[key] = sortedRows;
+                try {
+                    localStorage.setItem(key, JSON.stringify(sortedRows));
+                } catch (error) {
+                }
+
                 saveSharedTransactionState();
             }
 
