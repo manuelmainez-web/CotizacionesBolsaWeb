@@ -1421,10 +1421,10 @@
                 Operaciones de compra y venta ING DIRECT
             </span>
             <div class="panel-head-actions">
-                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-ing" data-toggle-name="operaciones de compra y venta ING DIRECT" title="Mostrar/ocultar" aria-label="Ocultar operaciones de compra y venta ING DIRECT" aria-expanded="true"></button>
+                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-ing" data-toggle-name="operaciones de compra y venta ING DIRECT" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta ING DIRECT" aria-expanded="false"></button>
             </div>
         </div>
-        <div id="transaction-broker-grid-ing" class="transaction-broker-grid">
+        <div id="transaction-broker-grid-ing" class="transaction-broker-grid is-collapsed">
             @{ var ingPurchaseTotal = Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
             <div class="transaction-broker-card" data-broker-code="ING" data-transaction-type="purchase">
                 <div class="transaction-broker-header">
@@ -1543,10 +1543,10 @@
                 Operaciones de compra y venta Trade Republic
             </span>
             <div class="panel-head-actions">
-                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-tr" data-toggle-name="operaciones de compra y venta Trade Republic" title="Mostrar/ocultar" aria-label="Ocultar operaciones de compra y venta Trade Republic" aria-expanded="true"></button>
+                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-tr" data-toggle-name="operaciones de compra y venta Trade Republic" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta Trade Republic" aria-expanded="false"></button>
             </div>
         </div>
-        <div id="transaction-broker-grid-tr" class="transaction-broker-grid">
+        <div id="transaction-broker-grid-tr" class="transaction-broker-grid is-collapsed">
             @{ var trPurchaseTotal = Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
             <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="purchase">
                 <div class="transaction-broker-header">
