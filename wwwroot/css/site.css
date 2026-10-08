@@ -366,6 +366,17 @@ body.wco-active .topbar-datetime {
   overflow: visible;
 }
 
+.summary-panel.summary-panel--fit {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.summary-panel.summary-panel--fit:not(.summary-panel--expanded) .summary-strip-label {
+  margin-bottom: 0;
+}
+
 .summary-panel .summary-strip-label {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

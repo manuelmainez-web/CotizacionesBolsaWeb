@@ -119,6 +119,15 @@
                 <button class="nav-link" id="futures-tab" data-bs-toggle="tab" data-bs-target="#futures-tab-pane" type="button" role="tab" aria-controls="futures-tab-pane" aria-selected="false">Futuros</button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="control-acciones-tab" data-bs-toggle="tab" data-bs-target="#control-acciones-tab-pane" type="button" role="tab" aria-controls="control-acciones-tab-pane" aria-selected="false">Acciones</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="control-etf-tab" data-bs-toggle="tab" data-bs-target="#control-etf-tab-pane" type="button" role="tab" aria-controls="control-etf-tab-pane" aria-selected="false">ETF</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="control-materias-tab" data-bs-toggle="tab" data-bs-target="#control-materias-tab-pane" type="button" role="tab" aria-controls="control-materias-tab-pane" aria-selected="false">Materias primas</button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="accesos-tab" data-bs-toggle="tab" data-bs-target="#accesos-tab-pane" type="button" role="tab" aria-controls="accesos-tab-pane" aria-selected="false">Accesos</button>
             </li>
             <li class="nav-item" role="presentation">
@@ -366,8 +375,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+
+            <div class="tab-pane fade" id="control-acciones-tab-pane" role="tabpanel" aria-labelledby="control-acciones-tab">
 
     <div class="market-panel mt-4 market-panel-watchlist">
         <div class="panel-head panel-head-row">
@@ -480,6 +489,9 @@
             </div>
         </form>
     </dialog>
+            </div>
+
+            <div class="tab-pane fade" id="control-etf-tab-pane" role="tabpanel" aria-labelledby="control-etf-tab">
 
     <div class="market-panel mt-4 market-panel-watchlist">
         <div class="panel-head panel-head-row">
@@ -605,6 +617,9 @@
             </div>
         </form>
     </dialog>
+            </div>
+
+            <div class="tab-pane fade" id="control-materias-tab-pane" role="tabpanel" aria-labelledby="control-materias-tab">
 
     <div class="market-panel mt-4 notranslate market-panel-watchlist" translate="no">
         <div class="panel-head panel-head-row">
@@ -708,6 +723,9 @@
             </div>
         </form>
     </dialog>
+            </div>
+        </div>
+    </div>
 
     <div class="blank-lines-2"></div>
 
@@ -755,12 +773,30 @@
         </div>
     </div>
 
+    <div class="market-tab-shell mt-4">
+        <ul class="nav nav-tabs market-tabs" id="cartera-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="cartera-etf-tab" data-bs-toggle="tab" data-bs-target="#cartera-etf-tab-pane" type="button" role="tab" aria-controls="cartera-etf-tab-pane" aria-selected="true">ETF (Cartera)</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="cartera-fondos-tab" data-bs-toggle="tab" data-bs-target="#cartera-fondos-tab-pane" type="button" role="tab" aria-controls="cartera-fondos-tab-pane" aria-selected="false">Fondos (Cartera)</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="cartera-acciones-tab" data-bs-toggle="tab" data-bs-target="#cartera-acciones-tab-pane" type="button" role="tab" aria-controls="cartera-acciones-tab-pane" aria-selected="false">Acciones (Cartera)</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="cartera-planes-tab" data-bs-toggle="tab" data-bs-target="#cartera-planes-tab-pane" type="button" role="tab" aria-controls="cartera-planes-tab-pane" aria-selected="false">Planes de Pensiones (Cartera)</button>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="cartera-etf-tab-pane" role="tabpanel" aria-labelledby="cartera-etf-tab">
+
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>ETF <span class="panel-head-subtitle">(Cartera)</span></span>
             <button type="button" class="mini-button" data-dialog-target="add-etf-dialog">+ Añadir ETF</button>
         </div>
-        <div class="table-wrap is-collapsed">
+        <div class="table-wrap">
             <table class="market-table market-table-grid market-table-cartera market-table-etf-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
@@ -925,6 +961,8 @@
             </div>
         </form>
     </dialog>
+            </div>
+            <div class="tab-pane fade" id="cartera-fondos-tab-pane" role="tabpanel" aria-labelledby="cartera-fondos-tab">
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
@@ -935,7 +973,7 @@
         {
             <div class="form-error-banner">@Model.FundError</div>
         }
-        <div class="table-wrap is-collapsed">
+        <div class="table-wrap">
             <table class="market-table market-table-grid market-table-cartera market-table-fondos-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
@@ -1082,6 +1120,8 @@
             </div>
         </form>
     </dialog>
+            </div>
+            <div class="tab-pane fade" id="cartera-acciones-tab-pane" role="tabpanel" aria-labelledby="cartera-acciones-tab">
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
@@ -1092,7 +1132,7 @@
         {
             <div class="form-error-banner">@Model.StockHoldingError</div>
         }
-        <div class="table-wrap is-collapsed">
+        <div class="table-wrap">
             <table class="market-table market-table-grid market-table-cartera market-table-acciones-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
@@ -1181,6 +1221,8 @@
             </table>
         </div>
     </div>
+            </div>
+            <div class="tab-pane fade" id="cartera-planes-tab-pane" role="tabpanel" aria-labelledby="cartera-planes-tab">
 
     @foreach (var item in Model.PensionPlans)
     {
@@ -1268,7 +1310,7 @@
         {
             <div class="form-error-banner">@Model.PensionPlanError</div>
         }
-        <div class="table-wrap is-collapsed">
+        <div class="table-wrap">
             <table class="market-table market-table-grid market-table-cartera market-table-planes-cartera" style="table-layout: fixed;">
                 <thead>
                     <tr>
@@ -1349,6 +1391,11 @@
             </table>
         </div>
     </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="blank-lines-2"></div>
 
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
@@ -1721,7 +1768,7 @@
 
     <div class="blank-lines-2"></div>
 
-    <div class="summary-panel">
+    <div class="summary-panel summary-panel--fit">
         <div class="summary-strip-label" id="summary-strip-label-checkingaccounts">
             <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-checkingaccounts" data-toggle-name="cuenta corriente" title="Mostrar/ocultar">Mostrar</button>
             <span translate="no" class="notranslate">🏦 Cuenta Corriente (Resumen Total)</span>
