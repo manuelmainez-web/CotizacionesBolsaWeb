@@ -1100,7 +1100,7 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass) {
     var grupoIng = construirGrupoBroker(paneles, 'ING', origen + '/images/brokers/ing-direct-logo.png', 'ING Direct', resumenIng, 'INGDIRECT (Resumen total de las posiciones)');
     var grupoTr = construirGrupoBroker(paneles, 'TR', origen + '/images/brokers/logotipo-trade-republic.png', 'Trade Republic', resumenTr, 'TRADE REPUBLIC (Resumen total de las posiciones)');
 
-    var elementosAEliminar = ['.summary-panel', '.blank-line-1', '.blank-lines-2', '.market-panel-watchlist'];
+    var elementosAEliminar = ['.summary-panel', '.blank-line-1', '.blank-lines-2', '.control-cotizaciones-title', '.market-panel-watchlist'];
     if (bodyClass !== 'print-all') {
         elementosAEliminar.push('.market-panel-non-cartera');
     }

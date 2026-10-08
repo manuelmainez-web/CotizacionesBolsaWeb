@@ -997,6 +997,26 @@ body.wco-active .topbar-datetime {
   width: 80px;
 }
 
+.control-cotizaciones-title {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.control-cotizaciones-title-text {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #e8eef6;
+}
+
+.control-cotizaciones-title-line {
+  width: 100%;
+  height: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.75);
+  margin-bottom: 8px;
+}
+
 .market-tab-shell {
   margin-top: 8px;
 }
