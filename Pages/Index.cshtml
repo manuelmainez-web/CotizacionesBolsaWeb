@@ -765,7 +765,8 @@
                 <span>Importe total</span>
                 <strong>@((Model.IngPurchaseValue + Model.IngGainValue).ToString("#,##0.00 €"))</strong>
             </div>
-            <div class="rendimiento-ref-panel" id="rendimiento-ref-ing" data-total="@((Model.IngPurchaseValue + Model.IngGainValue).ToString("0.####", System.Globalization.CultureInfo.InvariantCulture))">
+            <div class="rendimiento-ref-panel" id="rendimiento-ref-ing" data-valor="@Model.RendimientoReferenciaIng" data-total="@((Model.IngPurchaseValue + Model.IngGainValue).ToString("0.####", System.Globalization.CultureInfo.InvariantCulture))">
+                @Html.AntiForgeryToken()
                 <label class="rendimiento-ref-label" for="rendimiento-ref-ing-input">Importe de referencia para Rendimiento temporal:</label>
                 <input type="text" inputmode="decimal" autocomplete="off" class="rendimiento-ref-input" id="rendimiento-ref-ing-input" />
                 <span class="rendimiento-ref-total notranslate" translate="no">@((Model.IngPurchaseValue + Model.IngGainValue).ToString("#,##0.00 €")) =</span>

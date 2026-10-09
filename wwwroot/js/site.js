@@ -1303,9 +1303,35 @@ function imprimirConNumeracion(bodyClass, opciones) {
         entrada.select();
     }
 
+    // El importe se guarda en el servidor (así no depende del navegador/dispositivo/dirección
+    // desde la que se abre la página); localStorage queda como respaldo.
+    function guardarEnServidor(referencia) {
+        var tokenInput = panel.querySelector('input[name="__RequestVerificationToken"]');
+        if (!tokenInput || !window.fetch) {
+            return;
+        }
+
+        fetch(window.location.pathname + '?handler=RendimientoRef', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': tokenInput.value
+            },
+            body: 'valor=' + encodeURIComponent(referencia === null ? '' : String(referencia))
+        }).catch(function () { });
+    }
+
+    var valorServidor = panel.getAttribute('data-valor') || '';
+    var valorLocal = '';
     try {
-        entrada.value = window.localStorage.getItem(claveAlmacen) || '';
+        valorLocal = window.localStorage.getItem(claveAlmacen) || '';
     } catch (e) { }
+
+    entrada.value = valorServidor || valorLocal;
+    if (!valorServidor && valorLocal) {
+        // Primer uso tras esta mejora: se pasa al servidor el valor que había en este navegador.
+        guardarEnServidor(leerImporte(valorLocal));
+    }
 
     entrada.addEventListener('focus', mostrarParaEditar);
     entrada.addEventListener('blur', function () {
@@ -1313,6 +1339,7 @@ function imprimirConNumeracion(bodyClass, opciones) {
         try {
             window.localStorage.setItem(claveAlmacen, referencia === null ? '' : String(referencia));
         } catch (e) { }
+        guardarEnServidor(referencia);
         mostrarComoMoneda();
         recalcular();
     });

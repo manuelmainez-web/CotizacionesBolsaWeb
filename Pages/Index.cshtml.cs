@@ -43,6 +43,30 @@ public class IndexModel : PageModel
 
     public string PublicUrl { get; private set; }
 
+    private const string RendimientoRefKey = "custom-rendimiento-ref-ing";
+
+    public string RendimientoReferenciaIng { get; private set; } = string.Empty;
+
+    private sealed class RendimientoRefState
+    {
+        public string Valor { get; set; } = string.Empty;
+    }
+
+    public async Task<IActionResult> OnPostRendimientoRefAsync(string? valor)
+    {
+        var texto = (valor ?? string.Empty).Trim();
+        if (!decimal.TryParse(texto, System.Globalization.NumberStyles.Number | System.Globalization.NumberStyles.AllowLeadingSign, System.Globalization.CultureInfo.InvariantCulture, out var importe))
+        {
+            texto = string.Empty;
+        }
+        else
+        {
+            texto = importe.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        var guardado = await _dataStore.SaveJsonAsync(RendimientoRefKey, new RendimientoRefState { Valor = texto });
+        return new JsonResult(new { ok = guardado });
+    }
     private Dictionary<string, List<BrokerTransactionRow>> _transactionState = new(StringComparer.OrdinalIgnoreCase);
 
     private static string TransactionKey(bool sale, string broker) =>
@@ -390,6 +414,7 @@ public class IndexModel : PageModel
     {
         ResolvePublicUrl();
         _transactionState = await LoadTransactionStateAsync();
+        RendimientoReferenciaIng = (await _dataStore.LoadJsonAsync<RendimientoRefState>(RendimientoRefKey))?.Valor ?? string.Empty;
 
         if (!await _dataStore.ExistsAsync(IndicesKey))
         {
