@@ -754,6 +754,12 @@
                 <span>Importe total</span>
                 <strong>@((Model.IngPurchaseValue + Model.IngGainValue).ToString("#,##0.00 €"))</strong>
             </div>
+            <div class="rendimiento-ref-panel" id="rendimiento-ref-ing" data-total="@((Model.IngPurchaseValue + Model.IngGainValue).ToString("0.####", System.Globalization.CultureInfo.InvariantCulture))">
+                <label class="rendimiento-ref-label" for="rendimiento-ref-ing-input">Importe de referencia para Rendimiento temporal:</label>
+                <input type="text" inputmode="decimal" autocomplete="off" class="rendimiento-ref-input" id="rendimiento-ref-ing-input" />
+                <span class="rendimiento-ref-total notranslate" translate="no">@((Model.IngPurchaseValue + Model.IngGainValue).ToString("#,##0.00 €")) =</span>
+                <input type="text" readonly tabindex="-1" class="rendimiento-ref-input rendimiento-ref-result" id="rendimiento-ref-ing-result" aria-label="Importe total ING Direct menos importe de referencia" />
+            </div>
         </div>
 
         <div class="summary-strip-label" id="summary-strip-label-tr">
@@ -2458,7 +2464,32 @@
                             var actual = document.getElementById(id);
                             var nuevo = docNuevo.getElementById(id);
                             if (actual && nuevo) {
-                                actual.innerHTML = nuevo.innerHTML;
+                                var panelRef = actual.querySelector('#rendimiento-ref-ing');
+                                var panelRefNuevo = nuevo.querySelector('#rendimiento-ref-ing');
+
+                                if (panelRef && panelRefNuevo) {
+                                    // El panel "Importe de referencia" conserva sus cajas de texto (y el foco):
+                                    // solo se renuevan las demás cajas del resumen y el importe total.
+                                    Array.prototype.slice.call(actual.children).forEach(function (hijo) {
+                                        if (hijo !== panelRef) {
+                                            actual.removeChild(hijo);
+                                        }
+                                    });
+                                    Array.prototype.slice.call(nuevo.children).forEach(function (hijo) {
+                                        if (hijo.id !== 'rendimiento-ref-ing') {
+                                            actual.insertBefore(document.importNode(hijo, true), panelRef);
+                                        }
+                                    });
+                                    panelRef.setAttribute('data-total', panelRefNuevo.getAttribute('data-total'));
+                                    var totalActual = panelRef.querySelector('.rendimiento-ref-total');
+                                    var totalNuevo = panelRefNuevo.querySelector('.rendimiento-ref-total');
+                                    if (totalActual && totalNuevo) {
+                                        totalActual.textContent = totalNuevo.textContent;
+                                    }
+                                    panelRef.dispatchEvent(new CustomEvent('rendimiento-ref-actualizar'));
+                                } else {
+                                    actual.innerHTML = nuevo.innerHTML;
+                                }
                             }
                         });
                     })

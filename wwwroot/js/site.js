@@ -1100,6 +1100,20 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass) {
     var grupoIng = construirGrupoBroker(paneles, 'ING', origen + '/images/brokers/ing-direct-logo.png', 'ING Direct', resumenIng, 'INGDIRECT (Resumen total de las posiciones)');
     var grupoTr = construirGrupoBroker(paneles, 'TR', origen + '/images/brokers/logotipo-trade-republic.png', 'Trade Republic', resumenTr, 'TRADE REPUBLIC (Resumen total de las posiciones)');
 
+    // En "Imprimir todo" se conservan las tablas de cotizaciones de Índices y
+    // Materias primas (en ese orden) y se colocan justo antes del bloque
+    // "RESUMEN TOTAL DE LAS POSICIONES".
+    var panelesCotizaciones = [];
+    if (bodyClass === 'print-all') {
+        ['#indices-tab-pane', '#control-materias-tab-pane'].forEach(function (selectorPane) {
+            var panelCotizaciones = shellClone.querySelector(selectorPane + ' .market-panel-watchlist');
+            if (panelCotizaciones) {
+                panelCotizaciones.parentNode.removeChild(panelCotizaciones);
+                panelesCotizaciones.push(panelCotizaciones);
+            }
+        });
+    }
+
     var elementosAEliminar = ['.summary-panel', '.blank-line-1', '.blank-lines-2', '.control-cotizaciones-title', '.market-panel-watchlist'];
     if (bodyClass !== 'print-all') {
         elementosAEliminar.push('.market-panel-non-cartera');
@@ -1112,6 +1126,11 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass) {
     if (resumenGlobal) {
         primerPanel.parentNode.insertBefore(resumenGlobal, primerPanel);
     }
+
+    panelesCotizaciones.forEach(function (panelCotizaciones) {
+        panelCotizaciones.classList.add('mb-4');
+        primerPanel.parentNode.insertBefore(panelCotizaciones, resumenGlobal || primerPanel);
+    });
 
     var cuentaCorrienteIng = shellClone.querySelector('.market-panel-non-cartera');
     grupoTr.classList.add('print-broker-group-break');
@@ -1228,3 +1247,65 @@ function imprimirConNumeracion(bodyClass) {
     };
     ventana.document.head.appendChild(scriptPaged);
 }
+
+// Panel "Importe de referencia para Rendimiento temporal" (resumen INGDIRECT):
+// resultado = importe total de ING Direct - importe de referencia.
+(function () {
+    var panel = document.getElementById('rendimiento-ref-ing');
+    var entrada = document.getElementById('rendimiento-ref-ing-input');
+    var resultado = document.getElementById('rendimiento-ref-ing-result');
+    if (!panel || !entrada || !resultado) {
+        return;
+    }
+
+    var formato = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+    var claveAlmacen = 'rendimiento-ref-ing';
+
+    function leerImporte(valorTexto) {
+        var texto = (valorTexto || '').replace(/[€\s]/g, '');
+        if (texto.indexOf(',') !== -1) {
+            texto = texto.replace(/\./g, '').replace(',', '.');
+        }
+        var numero = parseFloat(texto);
+        return (texto === '' || isNaN(numero)) ? null : numero;
+    }
+
+    function recalcular() {
+        var total = parseFloat(panel.getAttribute('data-total'));
+        var referencia = leerImporte(entrada.value);
+        var diferencia = (referencia === null || isNaN(total)) ? null : total - referencia;
+        resultado.value = diferencia === null ? '' : formato.format(diferencia);
+        resultado.classList.toggle('rendimiento-ref-positivo', diferencia !== null && diferencia > 0);
+        resultado.classList.toggle('rendimiento-ref-negativo', diferencia !== null && diferencia < 0);
+    }
+
+    function mostrarComoMoneda() {
+        var referencia = leerImporte(entrada.value);
+        entrada.value = referencia === null ? '' : formato.format(referencia);
+    }
+
+    function mostrarParaEditar() {
+        var referencia = leerImporte(entrada.value);
+        entrada.value = referencia === null ? '' : String(referencia).replace('.', ',');
+        entrada.select();
+    }
+
+    try {
+        entrada.value = window.localStorage.getItem(claveAlmacen) || '';
+    } catch (e) { }
+
+    entrada.addEventListener('focus', mostrarParaEditar);
+    entrada.addEventListener('blur', function () {
+        var referencia = leerImporte(entrada.value);
+        try {
+            window.localStorage.setItem(claveAlmacen, referencia === null ? '' : String(referencia));
+        } catch (e) { }
+        mostrarComoMoneda();
+        recalcular();
+    });
+    entrada.addEventListener('input', recalcular);
+    panel.addEventListener('rendimiento-ref-actualizar', recalcular);
+
+    mostrarComoMoneda();
+    recalcular();
+})();

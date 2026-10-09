@@ -648,6 +648,52 @@ body.wco-active .topbar-datetime {
   display: none;
 }
 
+.rendimiento-ref-panel {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.5);
+  color: #d8e5f6;
+  font-size: 0.85rem;
+}
+
+.rendimiento-ref-label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.rendimiento-ref-input {
+  width: 150px;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  background: #0f1d2b;
+  color: #eff9ff;
+  text-align: right;
+}
+
+.rendimiento-ref-result {
+  font-weight: 700;
+}
+
+.rendimiento-ref-result.rendimiento-ref-positivo {
+  color: #22c55e;
+}
+
+.rendimiento-ref-result.rendimiento-ref-negativo {
+  color: #ef4444;
+}
+
+.rendimiento-ref-total {
+  margin-left: 12px;
+  font-weight: 700;
+}
+
 .btn-toggle-summary {
   margin-left: auto;
   min-width: 26px;
@@ -1368,6 +1414,11 @@ body.wco-active .topbar-datetime {
   }
 
   body.print-broker-tr tr[data-broker]:not([data-broker="TR"]) {
+    display: none !important;
+  }
+
+  body.print-broker-ing .control-cotizaciones-title:not(.cartera-valores-title):not(.operaciones-compra-venta-title),
+  body.print-broker-tr .control-cotizaciones-title:not(.cartera-valores-title):not(.operaciones-compra-venta-title) {
     display: none !important;
   }
 
@@ -2128,6 +2179,8 @@ body.wco-active .topbar-datetime {
   }
 
   .topbar,
+  .market-tabs,
+  .rendimiento-ref-panel,
   .panel-head-row button,
   .mini-button,
   .btn-toggle-summary,
@@ -2272,6 +2325,9 @@ body.wco-active .topbar-datetime {
     margin: 0 0 18px;
   }
 
+  body.print-all .print-summary-global {
+    padding-top: 3.6em;
+  }
   .print-summary-global-title,
   .print-broker-summary-title {
     color: #000000 !important;
