@@ -192,22 +192,24 @@ document.addEventListener('click', function (event) {
 // y solo ajusta el formato visual mediante la plantilla de impresión ya
 // definida para cartera y brókeres.
 (function () {
-    function bindPrintButton(id, bodyClass) {
+    function bindPrintButton(id, bodyClass, opciones) {
         var boton = document.getElementById(id);
         if (!boton) {
             return;
         }
 
         boton.addEventListener('click', function () {
-            imprimirConNumeracion(bodyClass);
+            imprimirConNumeracion(bodyClass, opciones);
         });
     }
 
-    bindPrintButton('btn-print-cartera', 'print-all');
+    // "Imprimir cartera" no incluye las tablas de cotizaciones (Índices, Materias primas);
+    // solo "Imprimir todo" las incluye.
+    bindPrintButton('btn-print-cartera', 'print-all', { sinCotizaciones: true });
     bindPrintButton('btn-print-page', 'print-all');
     bindPrintButton('btn-print-ing', 'print-broker-ing');
     bindPrintButton('btn-print-tr', 'print-broker-tr');
-    bindPrintButton('btn-print-cartera-tab', 'print-all');
+    bindPrintButton('btn-print-cartera-tab', 'print-all', { sinCotizaciones: true });
     bindPrintButton('btn-print-page-tab', 'print-all');
     bindPrintButton('btn-print-ing-tab', 'print-broker-ing');
     bindPrintButton('btn-print-tr-tab', 'print-broker-tr');
@@ -964,7 +966,7 @@ function eliminarPanelesVaciosEnImpresion(shellClone) {
     });
 }
 
-function reorganizarCarteraPorBroker(shellClone, bodyClass) {
+function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
     var origen = window.location.origin;
 
     function filtrarFilasPorBroker(tabla, broker) {
@@ -1104,7 +1106,7 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass) {
     // Materias primas (en ese orden) y se colocan justo antes del bloque
     // "RESUMEN TOTAL DE LAS POSICIONES".
     var panelesCotizaciones = [];
-    if (bodyClass === 'print-all') {
+    if (bodyClass === 'print-all' && !(opciones && opciones.sinCotizaciones)) {
         ['#indices-tab-pane', '#control-materias-tab-pane'].forEach(function (selectorPane) {
             var panelCotizaciones = shellClone.querySelector(selectorPane + ' .market-panel-watchlist');
             if (panelCotizaciones) {
@@ -1156,7 +1158,7 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass) {
 // dentro de un <iframe> oculto (no se abre ninguna ventana/pestaña visible)
 // y se invoca la impresión de ese iframe. El iframe se elimina solo al
 // terminar de imprimir (o cancelar).
-function imprimirConNumeracion(bodyClass) {
+function imprimirConNumeracion(bodyClass, opciones) {
     if (bodyClass) {
         document.body.classList.add(bodyClass);
     }
@@ -1170,7 +1172,7 @@ function imprimirConNumeracion(bodyClass) {
     }
 
     if (bodyClass === 'print-cartera-only' || bodyClass === 'print-all') {
-        reorganizarCarteraPorBroker(copiaContenido, bodyClass);
+        reorganizarCarteraPorBroker(copiaContenido, bodyClass, opciones);
         eliminarPanelesVaciosEnImpresion(copiaContenido);
     }
 
@@ -1308,4 +1310,101 @@ function imprimirConNumeracion(bodyClass) {
 
     mostrarComoMoneda();
     recalcular();
+})();
+
+// Control del tiempo (bajo el código QR): tiempo actual, temperatura y
+// previsión de los próximos días con Open-Meteo (sin clave). Usa la ubicación
+// del navegador si el usuario la permite; si no, la ciudad por defecto.
+(function () {
+    var caja = document.getElementById('weather-box');
+    if (!caja) {
+        return;
+    }
+
+    var latDefecto = parseFloat(caja.getAttribute('data-lat'));
+    var lonDefecto = parseFloat(caja.getAttribute('data-lon'));
+    var ciudadDefecto = caja.getAttribute('data-city') || '';
+    var posicion = { lat: latDefecto, lon: lonDefecto, nombre: ciudadDefecto };
+
+    var codigos = {
+        0: ['☀️', 'Despejado'], 1: ['🌤️', 'Mayormente despejado'], 2: ['⛅', 'Parcialmente nuboso'], 3: ['☁️', 'Nublado'],
+        45: ['🌫️', 'Niebla'], 48: ['🌫️', 'Niebla con escarcha'],
+        51: ['🌦️', 'Llovizna débil'], 53: ['🌦️', 'Llovizna'], 55: ['🌦️', 'Llovizna intensa'],
+        56: ['🌧️', 'Llovizna helada'], 57: ['🌧️', 'Llovizna helada'],
+        61: ['🌧️', 'Lluvia débil'], 63: ['🌧️', 'Lluvia'], 65: ['🌧️', 'Lluvia intensa'],
+        66: ['🌧️', 'Lluvia helada'], 67: ['🌧️', 'Lluvia helada'],
+        71: ['🌨️', 'Nieve débil'], 73: ['🌨️', 'Nieve'], 75: ['❄️', 'Nieve intensa'], 77: ['🌨️', 'Granizo fino'],
+        80: ['🌦️', 'Chubascos débiles'], 81: ['🌧️', 'Chubascos'], 82: ['⛈️', 'Chubascos fuertes'],
+        85: ['🌨️', 'Chubascos de nieve'], 86: ['🌨️', 'Chubascos de nieve'],
+        95: ['⛈️', 'Tormenta'], 96: ['⛈️', 'Tormenta con granizo'], 99: ['⛈️', 'Tormenta con granizo']
+    };
+
+    function describir(codigo) {
+        return codigos[codigo] || ['🌡️', 'Sin datos'];
+    }
+
+    function redondear(valor) {
+        return Math.round(valor) + '°';
+    }
+
+    function pintar(datos) {
+        var actual = datos.current;
+        var diario = datos.daily;
+        var info = describir(actual.weather_code);
+
+        document.getElementById('weather-place').textContent = posicion.nombre || 'Tiempo';
+        document.getElementById('weather-icon').textContent = info[0];
+        document.getElementById('weather-temp').textContent = redondear(actual.temperature_2m) + 'C';
+        document.getElementById('weather-desc').textContent = info[1];
+
+        var lista = document.getElementById('weather-forecast');
+        lista.innerHTML = '';
+        for (var i = 1; i < diario.time.length; i++) {
+            var fecha = new Date(diario.time[i] + 'T12:00:00');
+            var dia = fecha.toLocaleDateString('es-ES', { weekday: 'short' });
+            var infoDia = describir(diario.weather_code[i]);
+            var li = document.createElement('li');
+            li.title = infoDia[1];
+
+            var nombreDia = document.createElement('span');
+            nombreDia.textContent = dia.charAt(0).toUpperCase() + dia.slice(1);
+            var icono = document.createElement('span');
+            icono.textContent = infoDia[0];
+            var temps = document.createElement('span');
+            temps.className = 'weather-forecast-temps';
+            temps.textContent = redondear(diario.temperature_2m_min[i]) + ' / ' + redondear(diario.temperature_2m_max[i]);
+
+            li.appendChild(nombreDia);
+            li.appendChild(icono);
+            li.appendChild(temps);
+            lista.appendChild(li);
+        }
+    }
+
+    function cargar() {
+        var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + posicion.lat + '&longitude=' + posicion.lon +
+            '&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min' +
+            '&timezone=auto&forecast_days=4';
+
+        fetch(url)
+            .then(function (respuesta) { return respuesta.json(); })
+            .then(pintar)
+            .catch(function () {
+                document.getElementById('weather-desc').textContent = 'Tiempo no disponible';
+            });
+    }
+
+    function iniciar() {
+        cargar();
+        setInterval(cargar, 15 * 60 * 1000);
+    }
+
+    if (navigator.geolocation && window.isSecureContext) {
+        navigator.geolocation.getCurrentPosition(function (pos) {
+            posicion = { lat: pos.coords.latitude.toFixed(3), lon: pos.coords.longitude.toFixed(3), nombre: 'Mi ubicación' };
+            iniciar();
+        }, iniciar, { timeout: 5000, maximumAge: 3600000 });
+    } else {
+        iniciar();
+    }
 })();

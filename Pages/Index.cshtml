@@ -53,13 +53,24 @@
             <p class="print-only" id="print-datetime"></p>
             <div class="blank-line-1"></div>
         </div>
-        @if (!string.IsNullOrWhiteSpace(Model.PublicUrl))
-        {
-            <div class="qr-box">
-                <img class="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=@Uri.EscapeDataString(Model.PublicUrl)" alt="Código QR de acceso" />
-                <span class="qr-label">Escanea para abrir<br />desde el móvil</span>
+        <div class="header-side-column">
+            <div class="weather-box notranslate" id="weather-box" translate="no" data-lat="40.4168" data-lon="-3.7038" data-city="Madrid">
+                <div class="weather-place" id="weather-place">Tiempo</div>
+                <div class="weather-current">
+                    <span class="weather-icon" id="weather-icon">…</span>
+                    <span class="weather-temp" id="weather-temp">--</span>
+                </div>
+                <div class="weather-desc" id="weather-desc">Cargando…</div>
+                <ul class="weather-forecast" id="weather-forecast"></ul>
             </div>
-        }
+            @if (!string.IsNullOrWhiteSpace(Model.PublicUrl))
+            {
+                <div class="qr-box">
+                    <img class="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=@Uri.EscapeDataString(Model.PublicUrl)" alt="Código QR de acceso" />
+                    <span class="qr-label">Escanea para abrir<br />desde el móvil</span>
+                </div>
+            }
+        </div>
     </div>
 
     <div class="summary-panel">
