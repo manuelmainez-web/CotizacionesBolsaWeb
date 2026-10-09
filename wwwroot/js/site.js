@@ -207,12 +207,12 @@ document.addEventListener('click', function (event) {
     // solo "Imprimir todo" las incluye.
     bindPrintButton('btn-print-cartera', 'print-all', { sinCotizaciones: true });
     bindPrintButton('btn-print-page', 'print-all');
-    bindPrintButton('btn-print-ing', 'print-broker-ing');
-    bindPrintButton('btn-print-tr', 'print-broker-tr');
+    bindPrintButton('btn-print-ing', 'print-broker-ing', { broker: 'ING' });
+    bindPrintButton('btn-print-tr', 'print-broker-tr', { broker: 'TR' });
     bindPrintButton('btn-print-cartera-tab', 'print-all', { sinCotizaciones: true });
     bindPrintButton('btn-print-page-tab', 'print-all');
-    bindPrintButton('btn-print-ing-tab', 'print-broker-ing');
-    bindPrintButton('btn-print-tr-tab', 'print-broker-tr');
+    bindPrintButton('btn-print-ing-tab', 'print-broker-ing', { broker: 'ING' });
+    bindPrintButton('btn-print-tr-tab', 'print-broker-tr', { broker: 'TR' });
 })();
 
 // La fila de botones de impresión se mantiene dentro de su contenedor y no
@@ -953,6 +953,12 @@ document.addEventListener('click', function (event) {
 // omiten (igual que el resto de casos de "tabla vacía").
 function eliminarPanelesVaciosEnImpresion(shellClone) {
     shellClone.querySelectorAll('.market-panel, .market-panel-watchlist, .market-panel-non-cartera').forEach(function (panel) {
+        // Las operaciones de compra-venta se imprimen siempre (aunque no haya ninguna, se muestra "No hay ... registradas").
+        var textoCabecera = ((panel.querySelector('.panel-head') || panel).textContent || '').replace(/\s+/g, ' ');
+        if (/Operaciones de compra y venta/i.test(textoCabecera)) {
+            return;
+        }
+
         var filas = Array.prototype.filter.call(panel.querySelectorAll('tbody tr'), function (fila) {
             var visible = fila.style.display !== 'none';
             var tieneTexto = (fila.textContent || '').replace(/\s+/g, ' ').trim().length > 0;
@@ -1095,7 +1101,8 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
         return;
     }
 
-    var resumenGlobal = crearResumenGlobal();
+    var brokerUnico = opciones && opciones.broker ? opciones.broker : null;
+    var resumenGlobal = brokerUnico ? null : crearResumenGlobal();
     var primerPanel = paneles[0];
     var resumenIng = shellClone.querySelector('#summary-strip-ing');
     var resumenTr = shellClone.querySelector('#summary-strip-tr');
@@ -1135,12 +1142,16 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
     });
 
     var cuentaCorrienteIng = shellClone.querySelector('.market-panel-non-cartera');
-    grupoTr.classList.add('print-broker-group-break');
 
-    if (cuentaCorrienteIng) {
+    if (brokerUnico) {
+        // Impresión de un solo bróker: solo su grupo (resumen, cartera y operaciones de compra-venta).
+        primerPanel.parentNode.insertBefore(brokerUnico === 'ING' ? grupoIng : grupoTr, primerPanel);
+    } else if (cuentaCorrienteIng) {
+        grupoTr.classList.add('print-broker-group-break');
         cuentaCorrienteIng.parentNode.insertBefore(grupoIng, cuentaCorrienteIng.nextSibling);
         cuentaCorrienteIng.parentNode.insertBefore(grupoTr, grupoIng.nextSibling || cuentaCorrienteIng.nextSibling);
     } else {
+        grupoTr.classList.add('print-broker-group-break');
         primerPanel.parentNode.insertBefore(grupoIng, primerPanel);
         primerPanel.parentNode.insertBefore(grupoTr, grupoIng.nextSibling || primerPanel);
     }
@@ -1171,7 +1182,7 @@ function imprimirConNumeracion(bodyClass, opciones) {
         document.body.classList.remove(bodyClass);
     }
 
-    if (bodyClass === 'print-cartera-only' || bodyClass === 'print-all') {
+    if (bodyClass === 'print-cartera-only' || bodyClass === 'print-all' || (opciones && opciones.broker)) {
         reorganizarCarteraPorBroker(copiaContenido, bodyClass, opciones);
         eliminarPanelesVaciosEnImpresion(copiaContenido);
     }

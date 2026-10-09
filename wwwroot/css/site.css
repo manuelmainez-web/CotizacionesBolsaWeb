@@ -1398,6 +1398,25 @@ body.wco-active .topbar-datetime {
     opacity: 1 !important;
   }
 
+  /* Las operaciones de compra-venta (colapsadas en pantalla) se imprimen siempre. */
+  .transaction-broker-grid.is-collapsed {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Impresión de un solo bróker (ING Direct / Trade Republic): se muestran los
+     paneles del grupo generado (cartera y operaciones de compra-venta). */
+  body.print-broker-ing .print-broker-group .market-panel,
+  body.print-broker-tr .print-broker-group .market-panel {
+    display: block !important;
+  }
+
+  body.print-broker-ing .print-broker-group-logo,
+  body.print-broker-tr .print-broker-group-logo {
+    display: none !important;
+  }
+
   .summary-strip-label {
     margin-bottom: 12px !important;
   }
