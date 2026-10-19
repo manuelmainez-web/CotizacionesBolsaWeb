@@ -2435,7 +2435,8 @@ body.wco-active .topbar-datetime {
     margin-top: 0;
   }
 
-  .print-broker-group-break {
+  .print-broker-group-break,
+  .print-summary-global-break {
     break-before: page;
     page-break-before: always;
   }

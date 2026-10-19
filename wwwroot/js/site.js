@@ -1109,12 +1109,12 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
     var grupoIng = construirGrupoBroker(paneles, 'ING', origen + '/images/brokers/ing-direct-logo.png', 'ING Direct', resumenIng, 'INGDIRECT (Resumen total de las posiciones)');
     var grupoTr = construirGrupoBroker(paneles, 'TR', origen + '/images/brokers/logotipo-trade-republic.png', 'Trade Republic', resumenTr, 'TRADE REPUBLIC (Resumen total de las posiciones)');
 
-    // En "Imprimir todo" se conservan las tablas de cotizaciones de Índices y
-    // Materias primas (en ese orden) y se colocan justo antes del bloque
+    // En "Imprimir todo" se conservan las tablas de cotizaciones de Índices,
+    // Materias primas y ETF (en ese orden) y se colocan justo antes del bloque
     // "RESUMEN TOTAL DE LAS POSICIONES".
     var panelesCotizaciones = [];
     if (bodyClass === 'print-all' && !(opciones && opciones.sinCotizaciones)) {
-        ['#indices-tab-pane', '#control-materias-tab-pane'].forEach(function (selectorPane) {
+        ['#indices-tab-pane', '#control-materias-tab-pane', '#control-etf-tab-pane'].forEach(function (selectorPane) {
             var panelCotizaciones = shellClone.querySelector(selectorPane + ' .market-panel-watchlist');
             if (panelCotizaciones) {
                 panelCotizaciones.parentNode.removeChild(panelCotizaciones);
@@ -1133,6 +1133,11 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
     });
 
     if (resumenGlobal) {
+        // En "Imprimir todo" la primera página queda solo para las tablas de
+        // Control de cotizaciones; el resumen total empieza en la página siguiente.
+        if (panelesCotizaciones.length > 0) {
+            resumenGlobal.classList.add('print-summary-global-break');
+        }
         primerPanel.parentNode.insertBefore(resumenGlobal, primerPanel);
     }
 
