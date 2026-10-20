@@ -1110,11 +1110,11 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
     var grupoTr = construirGrupoBroker(paneles, 'TR', origen + '/images/brokers/logotipo-trade-republic.png', 'Trade Republic', resumenTr, 'TRADE REPUBLIC (Resumen total de las posiciones)');
 
     // En "Imprimir todo" se conservan las tablas de cotizaciones de Índices,
-    // Materias primas y ETF (en ese orden) y se colocan justo antes del bloque
+    // Materias primas, ETF y Acciones (en ese orden) y se colocan justo antes del bloque
     // "RESUMEN TOTAL DE LAS POSICIONES".
     var panelesCotizaciones = [];
     if (bodyClass === 'print-all' && !(opciones && opciones.sinCotizaciones)) {
-        ['#indices-tab-pane', '#control-materias-tab-pane', '#control-etf-tab-pane'].forEach(function (selectorPane) {
+        ['#indices-tab-pane', '#control-materias-tab-pane', '#control-etf-tab-pane', '#control-acciones-tab-pane'].forEach(function (selectorPane) {
             var panelCotizaciones = shellClone.querySelector(selectorPane + ' .market-panel-watchlist');
             if (panelCotizaciones) {
                 panelCotizaciones.parentNode.removeChild(panelCotizaciones);

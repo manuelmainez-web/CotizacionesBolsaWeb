@@ -2845,6 +2845,14 @@ body.wco-active .topbar-datetime {
     display: none !important;
   }
 
+  /* "Imprimir todo": fuente más pequeña en la columna Actualización
+     (fecha-hora) de la tabla Materias primas (Control de cotizaciones). */
+  body.print-all #tbody-commodities td.time-cell-compact,
+  body.print-all #tbody-commodities td.time-cell-compact .commodity-updated-content,
+  body.print-all #tbody-commodities td.time-cell-compact .commodity-updated-text {
+    font-size: 0.6rem !important;
+  }
+
   /* Mismo criterio (máximo 2 líneas en las cabeceras) para la tabla Planes
      de pensiones (Cartera), que tiene sus propias columnas. Suman ~695px. */
   :is(body.print-cartera-only, body.print-broker-ing, body.print-broker-tr, body.print-all) .market-table.market-table-planes-cartera th.col-nombre-cartera,
