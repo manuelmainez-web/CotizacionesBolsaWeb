@@ -1160,6 +1160,73 @@ body.wco-active .topbar-datetime {
   border-color: rgba(250, 204, 21, 0.45);
 }
 
+.hacienda-gain {
+  color: #4ade80;
+}
+
+.market-table.transaction-table tbody tr.hacienda-lot-row td {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.05);
+  padding-left: 24px;
+}
+
+.market-table.transaction-table tbody tr.hacienda-lot-row td:not(:first-child) {
+  padding-left: 12px;
+}
+
+.market-table.transaction-table tbody tr.hacienda-lot-row-warn td {
+  color: #fde68a;
+}
+
+.hacienda-loss {
+  color: #f87171;
+}
+
+.hacienda-inputs-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 12px 16px 16px;
+}
+
+.hacienda-inputs-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.hacienda-inputs-form input {
+  min-width: 180px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.9);
+  color: #e2e8f0;
+}
+
+.hacienda-notices-note {
+  padding: 10px 16px 14px;
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.hacienda-notices {
+  margin: 0;
+  padding: 12px 16px 16px 32px;
+  display: grid;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.hacienda-notices .hacienda-notice-warn {
+  color: #fde68a;
+}
+
 .transaction-row-actions {
   white-space: nowrap;
   width: 70px;

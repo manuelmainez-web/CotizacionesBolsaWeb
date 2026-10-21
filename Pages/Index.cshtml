@@ -1839,7 +1839,10 @@
 
     <div class="market-panel mt-4 market-panel-non-cartera">
         <div class="panel-head panel-head-row">
-            <span>CUENTA CORRIENTE</span>
+            <span>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/cuenta-corriente.png" style="border-radius: 4px;" alt="Cuenta corriente" title="Cuenta corriente" />
+                CUENTA CORRIENTE
+            </span>
             <button type="button" class="mini-button" data-dialog-target="add-checkingaccount-dialog">+ Añadir Cuenta</button>
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.CheckingAccountError))
@@ -1951,7 +1954,10 @@
     <img src="/images/imagen-efectivo.jpg" alt="" class="print-all-cash-image" />
     <div class="market-panel mt-4 market-panel-non-cartera">
         <div class="panel-head panel-head-row">
-            <span>EFECTIVO</span>
+            <span>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/dinero-en-efectivo.png" style="width: 34px; border-radius: 4px;" alt="Efectivo" title="Efectivo" />
+                EFECTIVO
+            </span>
             <div class="panel-head-actions">
                 <button type="button" class="mini-button" data-dialog-target="add-cash-dialog">+ Añadir Efectivo</button>
                 <button type="button" class="btn-toggle-summary btn-toggle-summary-cash" data-toggle-target="cash-panel-body" data-toggle-name="efectivo" title="Mostrar/ocultar" aria-label="Ocultar efectivo" aria-expanded="true"></button>
@@ -2015,7 +2021,10 @@
     }
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
-            <span>Operaciones de compra y venta</span>
+            <span>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                Operaciones de compra y venta
+            </span>
             <div class="panel-head-actions">
                 <form method="post" enctype="multipart/form-data" asp-page-handler="ImportExcelTransactions" style="display: inline-block; margin: 0;">
                     <label class="mini-button" style="cursor: pointer; margin: 0;" title="Cargar operaciones desde un fichero Excel (.xlsx o .xls)">
@@ -2140,6 +2149,260 @@
                     }
                 </div>
             }
+        </div>
+    </div>
+
+    @{
+        var summaryRows = Model.ExcelTransactions
+            .GroupBy(r =>
+            {
+                var parts = Model.GetTransactionTitleParts(r);
+                return string.IsNullOrWhiteSpace(parts.Isin) ? "t:" + parts.Nombre.Trim().ToLowerInvariant() : "i:" + parts.Isin;
+            })
+            .Select(g =>
+            {
+                var parts = Model.GetTransactionTitleParts(g.First());
+                var buys = g.Where(r => !(r.TipoOperacion != null && r.TipoOperacion.StartsWith("VEN", StringComparison.OrdinalIgnoreCase))).ToList();
+                var sells = g.Where(r => r.TipoOperacion != null && r.TipoOperacion.StartsWith("VEN", StringComparison.OrdinalIgnoreCase)).ToList();
+                var buyAmount = buys.Sum(r => Math.Abs(r.ImporteTotal));
+                var sellAmount = sells.Sum(r => Math.Abs(r.ImporteTotal));
+                var buyShares = buys.Sum(r => r.NumeroTitulos);
+                var sellShares = sells.Sum(r => r.NumeroTitulos);
+                return new
+                {
+                    Isin = parts.Isin,
+                    Nombre = parts.Nombre,
+                    Label = string.IsNullOrWhiteSpace(parts.Nombre) ? parts.Isin : parts.Nombre,
+                    BuyShares = buyShares,
+                    BuyAmount = buyAmount,
+                    SellShares = sellShares,
+                    SellAmount = sellAmount,
+                    Result = sellAmount - buyAmount,
+                    Held = buyShares - sellShares
+                };
+            })
+            .OrderBy(s => s.Label, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var summaryResultTotal = summaryRows.Sum(s => s.Result);
+    }
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                Resumen por título <span class="panel-head-subtitle">(compras y ventas regularizadas)</span>
+            </span>
+            <div class="panel-head-actions">
+                <span class="transaction-total-summary">Resultado total: <strong class="@(summaryResultTotal >= 0 ? "hacienda-gain" : "hacienda-loss")">@summaryResultTotal.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €", esCulture)</strong></span>
+                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="title-summary-panel-body" data-toggle-name="resumen por título" title="Mostrar/ocultar" aria-label="Mostrar resumen por título" aria-expanded="false"></button>
+            </div>
+        </div>
+        <div id="title-summary-panel-body" class="transaction-broker-grid is-collapsed">
+            <div class="transaction-broker-card">
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th class="text-align-right">Títulos comprados</th>
+                                <th class="text-align-right">Importe compras</th>
+                                <th class="text-align-right">Títulos vendidos</th>
+                                <th class="text-align-right">Importe ventas</th>
+                                <th class="text-align-right">Resultado (ventas − compras)</th>
+                                <th class="text-align-right">En cartera</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (summaryRows.Count == 0)
+                            {
+                                <tr><td colspan="7" class="empty-state-cell">No hay operaciones cargadas.</td></tr>
+                            }
+                            @foreach (var s in summaryRows)
+                            {
+                                <tr>
+                                    <td><span class="transaction-title-isin">@(string.IsNullOrWhiteSpace(s.Isin) ? "—" : s.Isin)</span>@if (!string.IsNullOrWhiteSpace(s.Nombre)) {<br /><span class="transaction-title-name">@s.Nombre</span>}</td>
+                                    <td class="text-align-right">@s.BuyShares.ToString("#,##0.######", esCulture)</td>
+                                    <td class="text-align-right">@s.BuyAmount.ToString("#,##0.00 €", esCulture)</td>
+                                    <td class="text-align-right">@s.SellShares.ToString("#,##0.######", esCulture)</td>
+                                    <td class="text-align-right">@s.SellAmount.ToString("#,##0.00 €", esCulture)</td>
+                                    <td class="text-align-right price-cell @(s.Result >= 0 ? "hacienda-gain" : "hacienda-loss")">@s.Result.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €", esCulture)</td>
+                                    <td class="text-align-right">@(s.Held == 0 ? "Regularizado" : s.Held.ToString("#,##0.######", esCulture) + " títulos")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        @if (summaryRows.Count > 0)
+                        {
+                            <tfoot>
+                                <tr>
+                                    <td><strong>Total</strong></td>
+                                    <td class="text-align-right"><strong>@summaryRows.Sum(s => s.BuyShares).ToString("#,##0.######", esCulture)</strong></td>
+                                    <td class="text-align-right"><strong>@summaryRows.Sum(s => s.BuyAmount).ToString("#,##0.00 €", esCulture)</strong></td>
+                                    <td class="text-align-right"><strong>@summaryRows.Sum(s => s.SellShares).ToString("#,##0.######", esCulture)</strong></td>
+                                    <td class="text-align-right"><strong>@summaryRows.Sum(s => s.SellAmount).ToString("#,##0.00 €", esCulture)</strong></td>
+                                    <td class="text-align-right price-cell @(summaryResultTotal >= 0 ? "hacienda-gain" : "hacienda-loss")"><strong>@summaryResultTotal.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €", esCulture)</strong></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        }
+                    </table>
+                </div>
+                <div class="hacienda-notices-note">Resultado = importe de ventas − importe de compras. Si un título aún tiene títulos en cartera, el resultado es parcial (aún no está regularizado).</div>
+            </div>
+        </div>
+    </div>
+
+    @{
+        var hac = Model.Hacienda;
+        var eurSigned = "+#,##0.00 €;-#,##0.00 €;0.00 €";
+        var eurPlain = "#,##0.00 €;-#,##0.00 €;0.00 €";
+    }
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
+                Hacienda <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
+            </span>
+            <div class="panel-head-actions">
+                <span class="transaction-total-summary">@(hac.ToPay >= 0 ? "A pagar" : "A devolver"): <strong>@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong> · tramo @((hac.MarginalRate * 100m).ToString("0.##", esCulture)) %</span>
+                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="hacienda-panel-body" data-toggle-name="hacienda" title="Mostrar/ocultar" aria-label="Mostrar hacienda" aria-expanded="false"></button>
+            </div>
+        </div>
+        <div id="hacienda-panel-body" class="transaction-broker-grid is-collapsed">
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Resumen y cuota estimada</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <tbody>
+                            <tr><td>Ganancias patrimoniales de @hac.Year</td><td class="text-align-right price-cell">@hac.Gains.ToString(eurSigned, esCulture)</td></tr>
+                            <tr><td>Pérdidas patrimoniales computables</td><td class="text-align-right price-cell">@hac.Losses.ToString(eurSigned, esCulture)</td></tr>
+                            @if (hac.DeferredLosses > 0)
+                            {
+                                <tr><td>Pérdidas diferidas por recompra (no computan, norma 2 meses / 1 año)</td><td class="text-align-right price-cell">@((-hac.DeferredLosses).ToString(eurSigned, esCulture))</td></tr>
+                            }
+                            <tr><td><strong>Saldo neto de transmisiones</strong></td><td class="text-align-right price-cell"><strong>@hac.NetResult.ToString(eurSigned, esCulture)</strong></td></tr>
+                            @if (hac.PriorLossesApplied > 0)
+                            {
+                                <tr><td>Pérdidas de ejercicios anteriores compensadas</td><td class="text-align-right price-cell">@((-hac.PriorLossesApplied).ToString(eurSigned, esCulture))</td></tr>
+                            }
+                            <tr><td>Otros rendimientos del ahorro (dividendos, intereses…)</td><td class="text-align-right price-cell">@hac.OtherIncome.ToString(eurSigned, esCulture)</td></tr>
+                            @if (hac.OtherIncomeCompensation > 0)
+                            {
+                                <tr><td>Compensación de pérdidas con esos rendimientos (máx. 25 %)</td><td class="text-align-right price-cell">@((-hac.OtherIncomeCompensation).ToString(eurSigned, esCulture))</td></tr>
+                            }
+                            <tr><td><strong>Base liquidable del ahorro</strong></td><td class="text-align-right price-cell"><strong>@hac.SavingsBase.ToString(eurPlain, esCulture)</strong></td></tr>
+                            <tr><td><strong>Cuota estimada</strong> (tipo medio @((hac.AverageRate * 100m).ToString("0.##", esCulture)) %)</td><td class="text-align-right price-cell"><strong>@hac.Tax.ToString(eurPlain, esCulture)</strong></td></tr>
+                            <tr><td>Retenciones ya practicadas</td><td class="text-align-right price-cell">@((-hac.Withholdings).ToString(eurSigned, esCulture))</td></tr>
+                            <tr class="@(hac.ToPay > 0 ? "transaction-row-current-year" : "")"><td><strong>@(hac.ToPay >= 0 ? "Resultado: a pagar a Hacienda" : "Resultado: a devolver")</strong></td><td class="text-align-right price-cell"><strong>@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <form method="post" asp-page-handler="SaveHacienda" class="hacienda-inputs-form">
+                    <label>Otros rendimientos del ahorro @hac.Year (€)
+                        <input type="text" name="otrosRendimientos" inputmode="decimal" value="@Model.HaciendaState.OtrosRendimientos.ToString("0.##", esCulture)" />
+                    </label>
+                    <label>Retenciones / pagos a cuenta (€)
+                        <input type="text" name="retenciones" inputmode="decimal" value="@Model.HaciendaState.Retenciones.ToString("0.##", esCulture)" />
+                    </label>
+                    <button type="submit" class="mini-button">Guardar y recalcular</button>
+                </form>
+            </div>
+
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Tramos de la base del ahorro</span><span class="transaction-total-summary">(en qué tramo caes: @((hac.MarginalRate * 100m).ToString("0.##", esCulture)) %)</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Tramo</th>
+                                <th class="text-align-right">Tipo</th>
+                                <th class="text-align-right">Tu base en el tramo</th>
+                                <th class="text-align-right">Cuota</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var b in hac.Brackets)
+                            {
+                                <tr class="@(b.IsMarginal ? "transaction-row-current-year" : "")">
+                                    <td>@b.From.ToString("#,##0", esCulture) € @(b.To.HasValue ? "– " + b.To.Value.ToString("#,##0", esCulture) + " €" : "en adelante")@(b.IsMarginal ? "  ◀ estás aquí" : "")</td>
+                                    <td class="text-align-right">@((b.Rate * 100m).ToString("0.##", esCulture)) %</td>
+                                    <td class="text-align-right">@b.AmountInBracket.ToString(eurPlain, esCulture)</td>
+                                    <td class="text-align-right price-cell">@b.Tax.ToString(eurPlain, esCulture)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Ventas de @hac.Year y compras que se descuentan (FIFO)</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th class="text-align-right">Fecha</th>
+                                <th class="text-align-right">N.º títulos</th>
+                                <th class="text-align-right">Transmisión (Valor de venta)</th>
+                                <th class="text-align-right">Coste fijo (Valor de compra)</th>
+                                <th class="text-align-right">Resultado</th>
+                                <th class="text-align-right">Computa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (hac.Sales.Count == 0)
+                            {
+                                <tr><td colspan="7" class="empty-state-cell">No hay ventas en @hac.Year.</td></tr>
+                            }
+                            @foreach (var s in hac.Sales)
+                            {
+                                <tr>
+                                    <td><span class="transaction-title-isin">@(string.IsNullOrWhiteSpace(s.Isin) ? "—" : s.Isin)</span><br /><span class="transaction-title-name">@s.Label</span></td>
+                                    <td class="text-align-right">@s.Date.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-align-right">@s.Shares.ToString("#,##0.######", esCulture)@(s.UnmatchedShares > 0 ? " (sin compra: " + s.UnmatchedShares.ToString("#,##0.######", esCulture) + ")" : "")</td>
+                                    <td class="text-align-right">@s.Proceeds.ToString(eurPlain, esCulture)</td>
+                                    <td class="text-align-right">@s.Cost.ToString(eurPlain, esCulture)</td>
+                                    <td class="text-align-right price-cell @(s.Gain >= 0 ? "hacienda-gain" : "hacienda-loss")">@s.Gain.ToString(eurSigned, esCulture)</td>
+                                    <td class="text-align-right price-cell">@s.Computable.ToString(eurSigned, esCulture)@(s.Gain < 0 && s.DeferredLoss > 0 ? " (diferida " + s.DeferredLoss.ToString(eurPlain, esCulture) + ")" : "")</td>
+                                </tr>
+                                foreach (var lot in s.Lots)
+                                {
+                                    <tr class="hacienda-lot-row">
+                                        <td>↳ Compra que se descuenta (FIFO)</td>
+                                        <td class="text-align-right">@lot.Date.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-align-right">@lot.SharesUsed.ToString("#,##0.######", esCulture)@(lot.SharesUsed < lot.SharesBought ? " de " + lot.SharesBought.ToString("#,##0.######", esCulture) : "")</td>
+                                        <td></td>
+                                        <td class="text-align-right">@lot.Cost.ToString(eurPlain, esCulture)</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                }
+                                foreach (var wp in s.WindowPurchases)
+                                {
+                                    <tr class="hacienda-lot-row hacienda-lot-row-warn">
+                                        <td>↳ Recompra en ±@(s.WashMonths == 12 ? "1 año" : s.WashMonths + " meses") de la venta con pérdida (puede diferirla)</td>
+                                        <td class="text-align-right">@wp.Date.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-align-right">@wp.Shares.ToString("#,##0.######", esCulture)</td>
+                                        <td></td>
+                                        <td class="text-align-right">@wp.Amount.ToString(eurPlain, esCulture)</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Avisos y aspectos a tener en cuenta</span></div></div>
+                <ul class="hacienda-notices">
+                    @foreach (var notice in Model.HaciendaNotices)
+                    {
+                        <li class="@(notice.Level == "warn" ? "hacienda-notice-warn" : "hacienda-notice-info")">@notice.Text</li>
+                    }
+                </ul>
+            </div>
         </div>
     </div>
 

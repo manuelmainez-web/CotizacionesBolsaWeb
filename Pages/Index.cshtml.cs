@@ -11,6 +11,7 @@ public class IndexModel : PageModel
 {
     private const string TransactionStateKey = "custom-transaction-state";
     private const string ExcelTransactionsKey = "custom-excel-transactions";
+    private const string HaciendaKey = "custom-hacienda";
     private const long MaxExcelUploadBytes = 5 * 1024 * 1024;
     private const string IndicesKey = "custom-indices";
     private const string StocksKey = "custom-stocks";
@@ -528,6 +529,116 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
+    public sealed class HaciendaInputs
+    {
+        public decimal OtrosRendimientos { get; set; }
+        public decimal Retenciones { get; set; }
+    }
+
+    public HaciendaInputs HaciendaState { get; private set; } = new();
+
+    private TaxResult? _hacienda;
+
+    public TaxResult Hacienda => _hacienda ??= BuildHacienda();
+
+    private HashSet<string> FundIsins => FundHoldings
+        .Select(f => f.Isin?.Trim().ToUpperInvariant() ?? string.Empty)
+        .Where(i => i.Length > 0)
+        .ToHashSet();
+
+    private TaxResult BuildHacienda()
+    {
+        var funds = FundIsins;
+        var transactions = ExcelTransactions.Select((row, index) =>
+        {
+            var parts = GetTransactionTitleParts(row);
+            var key = string.IsNullOrWhiteSpace(parts.Isin) ? "t:" + parts.Nombre.Trim().ToLowerInvariant() : "i:" + parts.Isin;
+            var label = string.IsNullOrWhiteSpace(parts.Nombre) ? parts.Isin : parts.Nombre;
+            return new TaxTransaction(key, parts.Isin, label, IsSaleOperation(row.TipoOperacion), row.NumeroTitulos, Math.Abs(row.ImporteTotal), row.FechaOperacion.Date, index);
+        }).ToList();
+
+        // Recompra de valores homogéneos: 2 meses en valores cotizados (ETF, acciones) y 1 año en fondos no cotizados.
+        return TaxCalculator.Compute(transactions, DateTime.Now.Year,
+            isin => !string.IsNullOrWhiteSpace(isin) && funds.Contains(isin.Trim().ToUpperInvariant()) ? 12 : 2,
+            HaciendaState.OtrosRendimientos, HaciendaState.Retenciones);
+    }
+
+    public async Task<IActionResult> OnPostSaveHaciendaAsync(string? otrosRendimientos, string? retenciones)
+    {
+        await _dataStore.SaveJsonAsync(HaciendaKey, new HaciendaInputs
+        {
+            OtrosRendimientos = Math.Max(0m, ParseFormDecimal(otrosRendimientos)),
+            Retenciones = Math.Max(0m, ParseFormDecimal(retenciones))
+        });
+        return RedirectToPage();
+    }
+
+    public List<(string Level, string Text)> HaciendaNotices
+    {
+        get
+        {
+            var es = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+            string Eur(decimal v) => v.ToString("#,##0.00 €", es);
+            var h = Hacienda;
+            var notices = new List<(string, string)>();
+
+            if (ExcelTransactions.Count == 0)
+            {
+                notices.Add(("info", "No hay operaciones cargadas: carga el Excel en el panel de operaciones para calcular el impuesto."));
+            }
+
+            if (h.UnmatchedShares > 0)
+            {
+                notices.Add(("warn", $"Hay ventas de {h.UnmatchedShares.ToString("#,##0.######", es)} títulos sin compras anteriores cargadas: esa parte no se ha podido calcular. Carga o incluye las compras originales para obtener el coste real (FIFO)."));
+            }
+
+            if (h.DeferredLosses > 0)
+            {
+                notices.Add(("warn", $"{Eur(h.DeferredLosses)} de pérdidas NO computan este año por la norma antiaplicación (art. 33.5 f/g LIRPF): recompraste títulos del mismo valor en los 2 meses anteriores o posteriores a la venta con pérdida (1 año si es un fondo no cotizado). La pérdida se recupera cuando vendas los títulos recomprados; aquí se añade a su coste."));
+            }
+
+            foreach (var sale in h.OpenWindowSales)
+            {
+                var pending = -sale.Gain - sale.DeferredLoss;
+                notices.Add(("warn", $"Venta de {sale.Label} del {sale.Date:dd/MM/yyyy} con pérdida: si recompras el mismo valor antes del {sale.OpenWindowUntil:dd/MM/yyyy}, se diferirán hasta {Eur(pending)} de esa pérdida."));
+            }
+
+            if (h.PriorLossesApplied > 0)
+            {
+                notices.Add(("info", $"Se han compensado {Eur(h.PriorLossesApplied)} de pérdidas netas de los 4 ejercicios anteriores (deben constar en tus declaraciones de esos años). Quedan sin aplicar {Eur(h.PriorLossesPending)}."));
+            }
+            else if (h.PriorLossesPending > 0)
+            {
+                notices.Add(("info", $"Tienes {Eur(h.PriorLossesPending)} de pérdidas netas de años anteriores (hasta 4 años) pendientes de compensar con ganancias futuras."));
+            }
+
+            if (h.CarryForwardLoss > 0)
+            {
+                notices.Add(("info", $"El saldo del ejercicio es negativo: {Eur(h.CarryForwardLoss)} se podrán compensar con ganancias patrimoniales de los 4 años siguientes. Además, hasta el 25 % de dividendos/intereses del año se puede compensar con pérdidas."));
+            }
+
+            if (TrCurrentValue > 50_000m)
+            {
+                notices.Add(("warn", $"Tu cartera en Trade Republic vale {Eur(TrCurrentValue)}: si los valores están custodiados fuera de España, supera los 50.000 € del Modelo 720 (declaración informativa de bienes en el extranjero, del 1 de enero al 31 de marzo)."));
+            }
+            else
+            {
+                notices.Add(("info", "Modelo 720: si los valores custodiados en el extranjero (p. ej. Trade Republic) superan 50.000 € a 31 de diciembre, hay que presentarlo (1 enero–31 marzo)."));
+            }
+
+            if (TotalGeneralConCuentasYEfectivo > 700_000m)
+            {
+                notices.Add(("warn", $"Tu patrimonio supera 700.000 €: puede estar sujeto al Impuesto sobre el Patrimonio (según tu comunidad autónoma; hay bonificaciones, p. ej. Madrid) y, por encima de 3 millones, al Impuesto de Solidaridad de las Grandes Fortunas."));
+            }
+
+            notices.Add(("info", "No están incluidos si no los indicas abajo: dividendos, intereses de cuentas (Trade Republic, ING), cupones y plan de pensiones. Tributan en la misma base del ahorro y a los mismos tipos."));
+            notices.Add(("info", "Los ETF de acumulación no tributan hasta que se venden. Los traspasos entre fondos de inversión no tributan, pero los ETF no pueden traspasarse (vender y comprar sí tributa). El reembolso de fondos españoles lleva retención del 19 %: indícala en 'Retenciones'."));
+            notices.Add(("info", "El importe total de cada operación se toma tal cual (si incluye comisiones, ya cuentan como mayor coste o menor transmisión). Solo se consideran las operaciones cargadas. Cálculo orientativo con la escala estatal + autonómica general del ahorro (19–30 %): no sustituye a tu declaración ni a un asesor fiscal."));
+
+            return notices;
+        }
+    }
+
     private static List<BrokerTransactionRow> ReadTransactionsFromExcel(Stream input)
     {
         var spanish = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
@@ -876,7 +987,7 @@ public class IndexModel : PageModel
         ResolvePublicUrl();
         _transactionState = await LoadTransactionStateAsync();
         ExcelTransactions = await _dataStore.LoadEntriesAsync<BrokerTransactionRow>(ExcelTransactionsKey);
-        RendimientoReferenciaIng = (await _dataStore.LoadJsonAsync<RendimientoRefState>(RendimientoRefKey))?.Valor ?? string.Empty;
+        HaciendaState = await _dataStore.LoadJsonAsync<HaciendaInputs>(HaciendaKey) ?? new HaciendaInputs();        RendimientoReferenciaIng = (await _dataStore.LoadJsonAsync<RendimientoRefState>(RendimientoRefKey))?.Valor ?? string.Empty;
 
         if (!await _dataStore.ExistsAsync(IndicesKey))
         {
