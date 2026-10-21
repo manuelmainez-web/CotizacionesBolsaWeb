@@ -1584,7 +1584,7 @@
         <div class="panel-head panel-head-row">
             <span>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/cuenta-corriente.png" style="border-radius: 4px;" alt="Cuenta corriente" title="Cuenta corriente" />
-                CUENTA CORRIENTE
+                Cuenta corriente
                 @{
                     var checkingTotal = Model.CheckingAccounts.Sum(a => a.Balance);
                     var checkingTotalClass = checkingTotal > 0 ? "hacienda-gain" : (checkingTotal < 0 ? "hacienda-loss" : "");
@@ -1704,7 +1704,7 @@
         <div class="panel-head panel-head-row">
             <span>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/dinero-en-efectivo.png" style="width: 34px; border-radius: 4px;" alt="Efectivo" title="Efectivo" />
-                EFECTIVO
+                Efectivo
                 @{
                     var cashTotal = Model.CashTotalValue;
                     var cashTotalClass = cashTotal > 0 ? "hacienda-gain" : (cashTotal < 0 ? "hacienda-loss" : "");
