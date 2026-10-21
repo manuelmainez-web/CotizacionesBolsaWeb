@@ -1448,255 +1448,6 @@
 
     <div class="blank-lines-2"></div>
 
-    <div class="control-cotizaciones-title operaciones-compra-venta-title">
-        <h2 class="control-cotizaciones-title-text">Operaciones de compra-venta</h2>
-        <div class="control-cotizaciones-title-line"></div>
-    </div>
-
-    <div class="market-panel mt-4">
-        <div class="panel-head panel-head-row">
-            <span>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
-                Operaciones de compra y venta ING DIRECT
-            </span>
-            <div class="panel-head-actions">
-                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-ing" data-toggle-name="operaciones de compra y venta ING DIRECT" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta ING DIRECT" aria-expanded="false"></button>
-            </div>
-        </div>
-        <div id="transaction-broker-grid-ing" class="transaction-broker-grid is-collapsed">
-            @{ var ingPurchaseTotal = Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
-            <div class="transaction-broker-card" data-broker-code="ING" data-transaction-type="purchase">
-                <div class="transaction-broker-header">
-                    <div class="transaction-broker-name">
-                        <span>Compras</span>
-                        <span class="transaction-total-summary">(@("Importe total compras: " + ingPurchaseTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))))</span>
-                    </div>
-                    <button type="button" class="mini-button transaction-add-button">+ Incluir compra</button>
-                </div>
-                <div class="table-wrap">
-                    <table class="market-table market-table-grid transaction-table">
-                        <thead>
-                            <tr>
-                                <th>Título</th>
-                                <th>Tipo operación</th>
-                                <th class="text-align-right">N.º títulos</th>
-                                <th class="text-align-right">Importe total</th>
-                                <th class="text-align-right">Fecha de la operación</th>
-                                <th style="width: 96px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="6" class="empty-state-cell">No hay compras registradas para ING DIRECT.</td>
-                                </tr>
-                            }
-                            else
-                            {
-                                @foreach (var row in Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
-                                {
-                                    <tr data-row-key="@row.Id">
-                                        <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
-                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
-                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
-                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
-                                        <td class="delete-cell">
-                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar" data-id="@row.Id" data-titulo="@row.Titulo" data-numero="@row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-importe="@row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-fecha="@row.FechaOperacion.ToString("yyyy-MM-dd")">✎</button>
-                                            <form method="post" asp-page-handler="DeleteTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
-                                                <input type="hidden" name="type" value="purchase" />
-                                                <input type="hidden" name="broker" value="ING" />
-                                                <input type="hidden" name="id" value="@row.Id" />
-                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            @{ var ingSaleTotal = Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
-            <div class="transaction-broker-card" data-broker-code="ING" data-transaction-type="sale">
-                <div class="transaction-broker-header">
-                    <div class="transaction-broker-name">
-                        <span>Ventas</span>
-                        <span class="transaction-total-summary">(Importe total ventas: @ingSaleTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES")))</span>
-                    </div>
-                    <button type="button" class="mini-button transaction-add-button">+ Incluir venta</button>
-                </div>
-                <div class="table-wrap">
-                    <table class="market-table market-table-grid transaction-table">
-                        <thead>
-                            <tr>
-                                <th>Título</th>
-                                <th>Tipo operación</th>
-                                <th class="text-align-right">N.º títulos</th>
-                                <th class="text-align-right">Importe total</th>
-                                <th class="text-align-right">Fecha de la operación</th>
-                                <th style="width: 96px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="6" class="empty-state-cell">No hay ventas registradas para ING DIRECT.</td>
-                                </tr>
-                            }
-                            else
-                            {
-                                @foreach (var row in Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "ING")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
-                                {
-                                    <tr data-row-key="@row.Id">
-                                        <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
-                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
-                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
-                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
-                                        <td class="delete-cell">
-                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar" data-id="@row.Id" data-titulo="@row.Titulo" data-numero="@row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-importe="@row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-fecha="@row.FechaOperacion.ToString("yyyy-MM-dd")">✎</button>
-                                            <form method="post" asp-page-handler="DeleteTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
-                                                <input type="hidden" name="type" value="sale" />
-                                                <input type="hidden" name="broker" value="ING" />
-                                                <input type="hidden" name="id" value="@row.Id" />
-                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="market-panel mt-4">
-        <div class="panel-head panel-head-row">
-            <span>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
-                Operaciones de compra y venta Trade Republic
-            </span>
-            <div class="panel-head-actions">
-                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-tr" data-toggle-name="operaciones de compra y venta Trade Republic" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta Trade Republic" aria-expanded="false"></button>
-            </div>
-        </div>
-        <div id="transaction-broker-grid-tr" class="transaction-broker-grid is-collapsed">
-            @{ var trPurchaseTotal = Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
-            <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="purchase">
-                <div class="transaction-broker-header">
-                    <div class="transaction-broker-name">
-                        <span>Compras</span>
-                        <span class="transaction-total-summary">(Importe total compras: @trPurchaseTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES")))</span>
-                    </div>
-                    <button type="button" class="mini-button transaction-add-button">+ Incluir compra</button>
-                </div>
-                <div class="table-wrap">
-                    <table class="market-table market-table-grid transaction-table">
-                        <thead>
-                            <tr>
-                                <th>Título</th>
-                                <th>Tipo operación</th>
-                                <th class="text-align-right">N.º títulos</th>
-                                <th class="text-align-right">Importe total</th>
-                                <th class="text-align-right">Fecha de la operación</th>
-                                <th style="width: 96px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="6" class="empty-state-cell">No hay compras registradas para Trade Republic.</td>
-                                </tr>
-                            }
-                            else
-                            {
-                                @foreach (var row in Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
-                                {
-                                    <tr data-row-key="@row.Id">
-                                        <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
-                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
-                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
-                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
-                                        <td class="delete-cell">
-                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar" data-id="@row.Id" data-titulo="@row.Titulo" data-numero="@row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-importe="@row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-fecha="@row.FechaOperacion.ToString("yyyy-MM-dd")">✎</button>
-                                            <form method="post" asp-page-handler="DeleteTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
-                                                <input type="hidden" name="type" value="purchase" />
-                                                <input type="hidden" name="broker" value="TR" />
-                                                <input type="hidden" name="id" value="@row.Id" />
-                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            @{ var trSaleTotal = Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
-            <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="sale">
-                <div class="transaction-broker-header">
-                    <div class="transaction-broker-name">
-                        <span>Ventas</span>
-                        <span class="transaction-total-summary">(Importe total ventas: @trSaleTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES")))</span>
-                    </div>
-                    <button type="button" class="mini-button transaction-add-button">+ Incluir venta</button>
-                </div>
-                <div class="table-wrap">
-                    <table class="market-table market-table-grid transaction-table">
-                        <thead>
-                            <tr>
-                                <th>Título</th>
-                                <th>Tipo operación</th>
-                                <th class="text-align-right">N.º títulos</th>
-                                <th class="text-align-right">Importe total</th>
-                                <th class="text-align-right">Fecha de la operación</th>
-                                <th style="width: 96px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="6" class="empty-state-cell">No hay ventas registradas para Trade Republic.</td>
-                                </tr>
-                            }
-                            else
-                            {
-                                @foreach (var row in Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
-                                {
-                                    <tr data-row-key="@row.Id">
-                                        <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
-                                        <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
-                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
-                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
-                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
-                                        <td class="delete-cell">
-                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar" data-id="@row.Id" data-titulo="@row.Titulo" data-numero="@row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-importe="@row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-fecha="@row.FechaOperacion.ToString("yyyy-MM-dd")">✎</button>
-                                            <form method="post" asp-page-handler="DeleteTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
-                                                <input type="hidden" name="type" value="sale" />
-                                                <input type="hidden" name="broker" value="TR" />
-                                                <input type="hidden" name="id" value="@row.Id" />
-                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <dialog id="transaction-entry-dialog" class="add-entry-dialog">
         <form id="transaction-entry-form" method="post" asp-page-handler="SaveTransaction">
             <h3 id="transaction-dialog-title">Añadir movimiento</h3>
@@ -2011,6 +1762,13 @@
         </div>
     </div>
 
+    <div class="blank-lines-2"></div>
+
+    <div class="control-cotizaciones-title operaciones-compra-venta-title">
+        <h2 class="control-cotizaciones-title-text">Operaciones de compra-venta</h2>
+        <div class="control-cotizaciones-title-line"></div>
+    </div>
+
     @{
         var esCulture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
         var excelKinds = new[]
@@ -2248,6 +2006,135 @@
                 <div class="hacienda-notices-note">Resultado = importe de ventas − importe de compras. Si un título aún tiene títulos en cartera, el resultado es parcial (aún no está regularizado).</div>
             </div>
         </div>
+    </div>
+
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
+                Operaciones de compra y venta Trade Republic
+            </span>
+            <div class="panel-head-actions">
+                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-tr" data-toggle-name="operaciones de compra y venta Trade Republic" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta Trade Republic" aria-expanded="false"></button>
+            </div>
+        </div>
+        <div id="transaction-broker-grid-tr" class="transaction-broker-grid is-collapsed">
+            @{ var trPurchaseTotal = Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
+            <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="purchase">
+                <div class="transaction-broker-header">
+                    <div class="transaction-broker-name">
+                        <span>Compras</span>
+                        <span class="transaction-total-summary">(Importe total compras: @trPurchaseTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES")))</span>
+                    </div>
+                    <button type="button" class="mini-button transaction-add-button">+ Incluir compra</button>
+                </div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Tipo operación</th>
+                                <th class="text-align-right">N.º títulos</th>
+                                <th class="text-align-right">Importe total</th>
+                                <th class="text-align-right">Fecha de la operación</th>
+                                <th style="width: 96px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="6" class="empty-state-cell">No hay compras registradas para Trade Republic.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var row in Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
+                                {
+                                    <tr data-row-key="@row.Id">
+                                        <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
+                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
+                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
+                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
+                                        <td class="delete-cell">
+                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar" data-id="@row.Id" data-titulo="@row.Titulo" data-numero="@row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-importe="@row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-fecha="@row.FechaOperacion.ToString("yyyy-MM-dd")">✎</button>
+                                            <form method="post" asp-page-handler="DeleteTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
+                                                <input type="hidden" name="type" value="purchase" />
+                                                <input type="hidden" name="broker" value="TR" />
+                                                <input type="hidden" name="id" value="@row.Id" />
+                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @{ var trSaleTotal = Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
+            <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="sale">
+                <div class="transaction-broker-header">
+                    <div class="transaction-broker-name">
+                        <span>Ventas</span>
+                        <span class="transaction-total-summary">(Importe total ventas: @trSaleTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES")))</span>
+                    </div>
+                    <button type="button" class="mini-button transaction-add-button">+ Incluir venta</button>
+                </div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Tipo operación</th>
+                                <th class="text-align-right">N.º títulos</th>
+                                <th class="text-align-right">Importe total</th>
+                                <th class="text-align-right">Fecha de la operación</th>
+                                <th style="width: 96px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="6" class="empty-state-cell">No hay ventas registradas para Trade Republic.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var row in Model.SaleTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows ?? new List<IndexModel.BrokerTransactionRow>())
+                                {
+                                    <tr data-row-key="@row.Id">
+                                        <td>@(string.IsNullOrWhiteSpace(row.Titulo) ? row.Concept : row.Titulo)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(row.TipoOperacion) ? (string.Equals(row.Concept, "VENTA", StringComparison.OrdinalIgnoreCase) ? "VENTA" : "COMPRA") : row.TipoOperacion)</td>
+                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
+                                        <td class="text-align-right price-cell">@row.ImporteTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
+                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
+                                        <td class="delete-cell">
+                                            <button type="button" class="icon-button-edit transaction-edit-row" title="Editar" data-id="@row.Id" data-titulo="@row.Titulo" data-numero="@row.NumeroTitulos.ToString("0.######", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-importe="@row.ImporteTotal.ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))" data-fecha="@row.FechaOperacion.ToString("yyyy-MM-dd")">✎</button>
+                                            <form method="post" asp-page-handler="DeleteTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
+                                                <input type="hidden" name="type" value="sale" />
+                                                <input type="hidden" name="broker" value="TR" />
+                                                <input type="hidden" name="id" value="@row.Id" />
+                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="blank-lines-2"></div>
+
+    <div class="control-cotizaciones-title agencia-tributaria-title">
+        <h2 class="control-cotizaciones-title-text">Agencia Tributaria</h2>
+        <div class="control-cotizaciones-title-line"></div>
     </div>
 
     @{
@@ -2989,7 +2876,6 @@
                 'tbody-checkingaccounts',
                 'tbody-cash',
                 'tbody-portfolio-stocks',
-                'transaction-broker-grid-ing',
                 'transaction-broker-grid-tr'
             ];
 
