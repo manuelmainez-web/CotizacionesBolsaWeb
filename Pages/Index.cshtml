@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model CotizacionesBolsaWeb.Pages.IndexModel
 @{
     ViewData["Title"] = "Cotizaciones bolsa";
@@ -980,8 +980,8 @@
                 <input type="text" name="name" required maxlength="150" placeholder="Ej. Amundi Ibex 35 Doble Apalancado Diario (2x) (IBEXA)" />
             </label>
             <label>
-                Símbolo (Yahoo Finance)
-                <input type="text" name="symbol" required maxlength="20" placeholder="Ej. IBEXA.MC" />
+                Símbolo (Yahoo Finance, opcional)
+                <input type="text" name="symbol" maxlength="20" placeholder="Ej. IBEXA.MC" />
             </label>
             <label>
                 ISIN
@@ -2005,6 +2005,222 @@
         </div>
     </div>
 
+    @{
+        var esCulture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+        var excelKinds = new[]
+        {
+            new { Key = "purchase", Title = "Compras", TotalLabel = "Importe total compras", Sign = -1m, Rows = Model.ExcelPurchases, EmptyText = "No hay compras cargadas. Usa \"Cargar Excel\" para importarlas." },
+            new { Key = "sale", Title = "Ventas", TotalLabel = "Importe total ventas", Sign = 1m, Rows = Model.ExcelSales, EmptyText = "No hay ventas cargadas. Usa \"Cargar Excel\" para importarlas." }
+        };
+    }
+    <div class="market-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>Operaciones de compra y venta</span>
+            <div class="panel-head-actions">
+                <form method="post" enctype="multipart/form-data" asp-page-handler="ImportExcelTransactions" style="display: inline-block; margin: 0;">
+                    <label class="mini-button" style="cursor: pointer; margin: 0;" title="Cargar operaciones desde un fichero Excel (.xlsx o .xls)">
+                        Cargar Excel
+                        <input type="file" name="file" accept=".xlsx,.xls" style="display: none;" onchange="if (this.files.length) { this.form.submit(); }" />
+                    </label>
+                </form>
+                @if (Model.ExcelTransactions.Count > 0)
+                {
+                    <form method="post" asp-page-handler="ClearExcelTransactions" style="display: inline-block; margin: 0;" onsubmit="return confirm('¿Eliminar todas las operaciones cargadas desde Excel?');">
+                        <button type="submit" class="mini-button mini-button-secondary">Vaciar</button>
+                    </form>
+                }
+                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-excel" data-toggle-name="operaciones de compra y venta Excel" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta" aria-expanded="false"></button>
+            </div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.ExcelTransactionsError))
+        {
+            <div class="form-error-banner">@Model.ExcelTransactionsError</div>
+        }
+        <div id="transaction-broker-grid-excel" class="transaction-broker-grid is-collapsed">
+            @foreach (var kind in excelKinds)
+            {
+                var kindTotal = kind.Sign * kind.Rows.Sum(r => Math.Abs(r.ImporteTotal));
+                var titleGroups = kind.Rows
+                    .GroupBy(r =>
+                    {
+                        var parts = Model.GetTransactionTitleParts(r);
+                        return string.IsNullOrWhiteSpace(parts.Isin) ? "t:" + parts.Nombre.Trim().ToLowerInvariant() : "i:" + parts.Isin;
+                    })
+                    .Select(g =>
+                    {
+                        var parts = Model.GetTransactionTitleParts(g.First());
+                        var groupRows = g.OrderByDescending(r => r.FechaOperacion).ToList();
+                        return new
+                        {
+                            Isin = parts.Isin,
+                            Nombre = parts.Nombre,
+                            Label = string.IsNullOrWhiteSpace(parts.Nombre) ? parts.Isin : parts.Nombre,
+                            Rows = groupRows,
+                            Total = kind.Sign * groupRows.Sum(r => Math.Abs(r.ImporteTotal))
+                        };
+                    })
+                    .OrderBy(g => g.Label, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                <div class="transaction-broker-card" data-transaction-type="@kind.Key">
+                    <div class="transaction-broker-header">
+                        <div class="transaction-broker-name">
+                            <span>@kind.Title</span>
+                            <span class="transaction-total-summary">(@kind.TotalLabel: @kindTotal.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €", esCulture))</span>
+                        </div>
+                        <button type="button" class="mini-button excel-tx-add-button" data-type="@kind.Key" data-titulo="">+ Incluir @(kind.Key == "purchase" ? "compra" : "venta")</button>
+                    </div>
+                    @if (titleGroups.Count == 0)
+                    {
+                        <div class="table-wrap">
+                            <table class="market-table market-table-grid transaction-table">
+                                <tbody>
+                                    <tr>
+                                        <td class="empty-state-cell">@kind.EmptyText</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <ul class="nav nav-tabs market-tabs transaction-title-tabs" role="tablist">
+                            @for (var gi = 0; gi < titleGroups.Count; gi++)
+                            {
+                                var tabGroup = titleGroups[gi];
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link @(gi == 0 ? "active" : "")" id="excel-@kind.Key-tab-@gi" data-bs-toggle="tab" data-bs-target="#excel-@kind.Key-pane-@gi" type="button" role="tab" aria-controls="excel-@kind.Key-pane-@gi" aria-selected="@(gi == 0 ? "true" : "false")" title="@tabGroup.Isin">@tabGroup.Label <span class="transaction-tab-count">(@tabGroup.Rows.Count)</span></button>
+                                </li>
+                            }
+                        </ul>
+                        <div class="tab-content">
+                            @for (var gi = 0; gi < titleGroups.Count; gi++)
+                            {
+                                var paneGroup = titleGroups[gi];
+                                <div class="tab-pane fade @(gi == 0 ? "show active" : "")" id="excel-@kind.Key-pane-@gi" role="tabpanel" aria-labelledby="excel-@kind.Key-tab-@gi">
+                                    <div class="transaction-tab-summary"><span>@kind.TotalLabel: <strong>@paneGroup.Total.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €", esCulture)</strong></span>
+                                        <button type="button" class="mini-button excel-tx-add-button" data-type="@kind.Key" data-titulo="@(string.IsNullOrWhiteSpace(paneGroup.Isin) ? paneGroup.Nombre : paneGroup.Isin)">+ Incluir @(kind.Key == "purchase" ? "compra" : "venta") de este título</button>
+                                    </div>
+                                    <div class="table-wrap">
+                                        <table class="market-table market-table-grid transaction-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Título</th>
+                                                    <th>Tipo operación</th>
+                                                    <th class="text-align-right">N.º títulos</th>
+                                                    <th class="text-align-right">Importe total</th>
+                                                    <th class="text-align-right">Fecha de la operación</th>
+                                                    <th style="width: 96px;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var row in paneGroup.Rows)
+                                                {
+                                                    <tr class="@(row.FechaOperacion.Year == DateTime.Now.Year ? "transaction-row-current-year" : "")">
+                                                        <td><span class="transaction-title-isin">@(string.IsNullOrWhiteSpace(paneGroup.Isin) ? "—" : paneGroup.Isin)</span>@if (!string.IsNullOrWhiteSpace(paneGroup.Nombre)) {<br /><span class="transaction-title-name">@paneGroup.Nombre</span>}</td>
+                                                        <td>@row.TipoOperacion</td>
+                                                        <td class="text-align-right">@row.NumeroTitulos.ToString("#,##0.######", esCulture)</td>
+                                                        <td class="text-align-right price-cell">@((kind.Sign * Math.Abs(row.ImporteTotal)).ToString("+#,##0.00 €;-#,##0.00 €;0.00 €", esCulture))</td>
+                                                        <td class="text-align-right">@row.FechaOperacion.ToString("dd/MM/yyyy")</td>
+                                                        <td class="delete-cell">
+                                                            <button type="button" class="icon-button-edit" data-dialog-target="edit-excel-tx-@row.Id" title="Editar">✎</button>
+                                                            <form method="post" asp-page-handler="DeleteExcelTransaction" onsubmit="return confirm('¿Eliminar este movimiento?');">
+                                                                <input type="hidden" name="id" value="@row.Id" />
+                                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    @foreach (var row in Model.ExcelTransactions)
+    {
+        var rowIsSale = row.TipoOperacion != null && row.TipoOperacion.StartsWith("VEN", StringComparison.OrdinalIgnoreCase);
+
+        <dialog id="edit-excel-tx-@row.Id" class="add-entry-dialog">
+            <form method="post" asp-page-handler="EditExcelTransaction">
+                <h3>Editar movimiento</h3>
+                <input type="hidden" name="id" value="@row.Id" />
+                <label>
+                    Título
+                    <input type="text" name="titulo" required maxlength="200" value="@row.Titulo" />
+                </label>
+                <label>
+                    Tipo de operación
+                    <select name="tipoOperacion" required>
+                        <option value="COMPRA" selected="@(!rowIsSale)">COMPRA</option>
+                        <option value="VENTA" selected="@(rowIsSale)">VENTA</option>
+                    </select>
+                </label>
+                <label>
+                    Número de títulos
+                    <input type="text" name="numeroTitulos" inputmode="decimal" pattern="[0-9.,]+" required value="@row.NumeroTitulos.ToString("0.######", esCulture)" />
+                </label>
+                <label>
+                    Importe total de la operación
+                    <input type="text" name="importeTotal" inputmode="decimal" pattern="[0-9.,]+" required value="@row.ImporteTotal.ToString("0.00", esCulture)" />
+                </label>
+                <label>
+                    Fecha de la operación
+                    <input type="date" name="fechaOperacion" required value="@row.FechaOperacion.ToString("yyyy-MM-dd")" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </form>
+        </dialog>
+    }
+
+    <dialog id="add-excel-tx-dialog" class="add-entry-dialog">
+        <form method="post" asp-page-handler="AddExcelTransaction">
+            <h3 id="add-excel-tx-title">Incluir movimiento</h3>
+            <label>
+                Título (ISIN o nombre)
+                <input type="text" id="add-excel-tx-titulo" name="titulo" list="add-excel-tx-titles" required maxlength="200" placeholder="Ej. LU1681043941" />
+                <datalist id="add-excel-tx-titles">
+                    @foreach (var knownTitle in Model.ExcelTransactions.Select(r => Model.GetTransactionTitleParts(r)).Where(p => !string.IsNullOrWhiteSpace(p.Isin)).GroupBy(p => p.Isin).Select(g => g.First()))
+                    {
+                        <option value="@knownTitle.Isin">@knownTitle.Nombre</option>
+                    }
+                </datalist>
+            </label>
+            <label>
+                Tipo de operación
+                <select id="add-excel-tx-tipo" name="tipoOperacion" required>
+                    <option value="COMPRA">COMPRA</option>
+                    <option value="VENTA">VENTA</option>
+                </select>
+            </label>
+            <label>
+                Número de títulos
+                <input type="text" name="numeroTitulos" inputmode="decimal" pattern="[0-9.,]+" required placeholder="Ej. 10" />
+            </label>
+            <label>
+                Importe total de la operación
+                <input type="text" name="importeTotal" inputmode="decimal" pattern="[0-9.,]+" required placeholder="Ej. 1500,00" />
+            </label>
+            <label>
+                Fecha de la operación
+                <input type="date" id="add-excel-tx-fecha" name="fechaOperacion" required />
+            </label>
+            <div class="dialog-actions">
+                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                <button type="submit" class="mini-button">Añadir</button>
+            </div>
+        </form>
+    </dialog>
+
     @for (var i = 0; i < Model.CashHoldings.Count; i++)
     {
         var cashItem = Model.CashHoldings[i];
@@ -2049,6 +2265,39 @@
 </div>
 
 @section Scripts {
+    <script>
+        (function () {
+            document.addEventListener('click', function (event) {
+                var button = event.target && event.target.closest ? event.target.closest('.excel-tx-add-button') : null;
+                if (!button) {
+                    return;
+                }
+
+                var dialog = document.getElementById('add-excel-tx-dialog');
+                if (!dialog) {
+                    return;
+                }
+
+                var type = button.getAttribute('data-type');
+                var now = new Date();
+                var today = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+
+                document.getElementById('add-excel-tx-title').textContent = 'Incluir ' + (type === 'purchase' ? 'compra' : 'venta');
+                document.getElementById('add-excel-tx-titulo').value = button.getAttribute('data-titulo') || '';
+                document.getElementById('add-excel-tx-tipo').value = type === 'purchase' ? 'COMPRA' : 'VENTA';
+                document.getElementById('add-excel-tx-fecha').value = today;
+                dialog.querySelectorAll('input[name="numeroTitulos"], input[name="importeTotal"]').forEach(function (input) {
+                    input.value = '';
+                });
+
+                if (typeof dialog.showModal === 'function') {
+                    dialog.showModal();
+                } else {
+                    dialog.setAttribute('open', 'open');
+                }
+            });
+        })();
+    </script>
     <script>
         (function () {
             function normalizeMoneyValue(value) {

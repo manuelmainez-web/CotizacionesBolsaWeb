@@ -226,6 +226,51 @@ public sealed class YahooFinanceService
     };
 
     /// <summary>
+    /// Nombre de un título a partir de su ISIN: ficha de justETF (coincidencia exacta por ISIN, solo ETF).
+    /// Devuelve null si no se encuentra, para no mostrar nunca un nombre dudoso.
+    /// </summary>
+    public async Task<string?> LookupNameByIsinAsync(string isin, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(isin))
+        {
+            return null;
+        }
+
+        var normalizedIsin = isin.Trim().ToUpperInvariant();
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"https://www.justetf.com/en/etf-profile.html?isin={Uri.EscapeDataString(normalizedIsin)}");
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.ParseAdd("text/html");
+
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                var html = await response.Content.ReadAsStringAsync(cancellationToken);
+                if (html.Contains($"isin=\"{normalizedIsin}\"", StringComparison.OrdinalIgnoreCase))
+                {
+                    var titleMatch = Regex.Match(html, @"<meta property=""og:title"" content=""([^""|]+)");
+                    if (titleMatch.Success)
+                    {
+                        var name = System.Net.WebUtility.HtmlDecode(titleMatch.Groups[1].Value.Trim());
+                        if (!string.IsNullOrWhiteSpace(name))
+                        {
+                            return name;
+                        }
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Sin conexión o ficha no disponible: no se muestra nombre.
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// Búsqueda de respaldo cuando <see cref="SearchSymbolAsync"/> (buscador difuso de Yahoo Finance)
     /// no encuentra un ISIN: consulta la ficha del ETF en justETF (indexa prácticamente cualquier ETF
     /// UCITS por ISIN, a diferencia del buscador de Yahoo) y extrae los tickers "Reuters RIC" de su
@@ -531,6 +576,12 @@ public sealed class YahooFinanceService
             return yahooQuote;
         }
 
+        var justEtfQuote = await GetQuoteFromJustEtfAsync(config, cancellationToken);
+        if (justEtfQuote != null)
+        {
+            return justEtfQuote;
+        }
+
         var alternativeSymbol = await ResolveFutureSymbolByNameAsync(config.Name, symbol, cancellationToken);
         if (!string.IsNullOrWhiteSpace(alternativeSymbol) && !string.Equals(alternativeSymbol, symbol, StringComparison.OrdinalIgnoreCase))
         {
@@ -539,6 +590,82 @@ public sealed class YahooFinanceService
             {
                 return alternativeQuote;
             }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Cotización de respaldo por ISIN desde justETF (API JSON que usa su propia ficha), para ETF
+    /// que no cotizan en Yahoo Finance. Devuelve null si el ISIN no es válido o justETF no lo conoce.
+    /// </summary>
+    public async Task<Quote?> GetQuoteFromJustEtfAsync(QuoteConfig config, CancellationToken cancellationToken = default)
+    {
+        var isin = config.Isin?.Trim().ToUpperInvariant();
+        if (string.IsNullOrEmpty(isin) || !Regex.IsMatch(isin, @"^[A-Z]{2}[A-Z0-9]{9}[0-9]$"))
+        {
+            return null;
+        }
+
+        var url = $"https://www.justetf.com/api/etfs/{Uri.EscapeDataString(isin)}/quote?locale=en&currency=EUR";
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.ParseAdd("application/json");
+
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var payload = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var json = JsonDocument.Parse(payload);
+            var root = json.RootElement;
+
+            var price = GetJustEtfRaw(root, "latestQuote");
+            if (!price.HasValue)
+            {
+                return null;
+            }
+
+            DateTimeOffset? updated = null;
+            if (root.TryGetProperty("latestQuoteDate", out var dateElement) &&
+                dateElement.ValueKind == JsonValueKind.String &&
+                DateTime.TryParseExact(dateElement.GetString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+            {
+                var localDate = date.AddHours(17).AddMinutes(30);
+                updated = new DateTimeOffset(localDate, Quote.SpainTimeZone.GetUtcOffset(localDate));
+            }
+
+            return new Quote
+            {
+                Name = config.Name,
+                Symbol = config.Symbol,
+                Isin = config.Isin ?? string.Empty,
+                CountryCode = config.CountryCode ?? string.Empty,
+                Price = price,
+                PercentChange = GetJustEtfRaw(root, "dtdPrc"),
+                PreviousClose = GetJustEtfRaw(root, "previousQuote"),
+                LastUpdated = updated
+            };
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static decimal? GetJustEtfRaw(JsonElement root, string property)
+    {
+        if (root.TryGetProperty(property, out var element) &&
+            element.ValueKind == JsonValueKind.Object &&
+            element.TryGetProperty("raw", out var raw) &&
+            raw.ValueKind == JsonValueKind.Number)
+        {
+            return raw.GetDecimal();
         }
 
         return null;

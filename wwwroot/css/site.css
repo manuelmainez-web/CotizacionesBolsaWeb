@@ -1105,6 +1105,61 @@ body.wco-active .topbar-datetime {
   font-size: 0.74rem;
 }
 
+.transaction-table .transaction-title-isin {
+  font-weight: 600;
+}
+
+.market-tabs.transaction-title-tabs {
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.market-tabs.transaction-title-tabs .nav-link {
+  font-size: 0.78rem;
+  padding: 6px 12px;
+}
+
+.transaction-tab-count {
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.transaction-tab-summary {
+  align-items: center;
+  color: #a9bacd;
+  display: flex;
+  font-size: 0.78rem;
+  gap: 10px;
+  justify-content: space-between;
+  margin: 0 0 6px;
+}
+
+.transaction-tab-summary .excel-tx-add-button {
+  border-radius: 8px;
+  font-size: 0.7rem;
+  min-width: 0;
+  padding: 0.3rem 0.7rem;
+}
+
+.transaction-table .transaction-title-name {
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 400;
+}
+
+.market-table.transaction-table tbody tr.transaction-row-current-year {
+  background: rgba(250, 204, 21, 0.16);
+}
+
+.market-table.transaction-table tbody tr.transaction-row-current-year:hover {
+  background: rgba(250, 204, 21, 0.24);
+}
+
+.transaction-table tr.transaction-row-current-year td {
+  border-color: rgba(250, 204, 21, 0.45);
+}
+
 .transaction-row-actions {
   white-space: nowrap;
   width: 70px;

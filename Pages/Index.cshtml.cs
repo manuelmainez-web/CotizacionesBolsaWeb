@@ -10,6 +10,8 @@ namespace CotizacionesBolsaWeb.Pages;
 public class IndexModel : PageModel
 {
     private const string TransactionStateKey = "custom-transaction-state";
+    private const string ExcelTransactionsKey = "custom-excel-transactions";
+    private const long MaxExcelUploadBytes = 5 * 1024 * 1024;
     private const string IndicesKey = "custom-indices";
     private const string StocksKey = "custom-stocks";
     private const string EtfsKey = "custom-etfs";
@@ -216,6 +218,464 @@ public class IndexModel : PageModel
     }
 
     [TempData]
+    public string? ExcelTransactionsError { get; set; }
+
+    public List<BrokerTransactionRow> ExcelTransactions { get; private set; } = new();
+
+    public List<BrokerTransactionRow> ExcelPurchases => ExcelTransactions
+        .Where(r => !IsSaleOperation(r.TipoOperacion))
+        .OrderByDescending(r => r.FechaOperacion)
+        .ToList();
+
+    public List<BrokerTransactionRow> ExcelSales => ExcelTransactions
+        .Where(r => IsSaleOperation(r.TipoOperacion))
+        .OrderByDescending(r => r.FechaOperacion)
+        .ToList();
+
+    private static bool IsSaleOperation(string? tipoOperacion) =>
+        !string.IsNullOrWhiteSpace(tipoOperacion) && tipoOperacion.Trim().StartsWith("VEN", StringComparison.OrdinalIgnoreCase);
+
+    private static string NormalizeHeader(string? value)
+    {
+        var decomposed = (value ?? string.Empty).Normalize(System.Text.NormalizationForm.FormD);
+        var sb = new System.Text.StringBuilder();
+        foreach (var ch in decomposed)
+        {
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(ch) == System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                continue;
+            }
+
+            if (char.IsLetterOrDigit(ch))
+            {
+                sb.Append(char.ToLowerInvariant(ch));
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    public async Task<IActionResult> OnPostImportExcelTransactionsAsync(IFormFile? file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            ExcelTransactionsError = "Selecciona un fichero Excel (.xlsx o .xls).";
+            return RedirectToPage();
+        }
+
+        var extension = Path.GetExtension(file.FileName);
+        if (!string.Equals(extension, ".xlsx", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(extension, ".xls", StringComparison.OrdinalIgnoreCase))
+        {
+            ExcelTransactionsError = "El fichero debe ser un Excel con formato .xlsx o .xls.";
+            return RedirectToPage();
+        }
+
+        if (file.Length > MaxExcelUploadBytes)
+        {
+            ExcelTransactionsError = "El fichero Excel supera el tamaño máximo permitido (5 MB).";
+            return RedirectToPage();
+        }
+
+        List<BrokerTransactionRow> rows;
+        try
+        {
+            await using var stream = file.OpenReadStream();
+            rows = ReadTransactionsFromExcel(stream);
+        }
+        catch
+        {
+            ExcelTransactionsError = "No se ha podido leer el fichero Excel. Comprueba que es un .xlsx o .xls válido.";
+            return RedirectToPage();
+        }
+
+        if (rows.Count == 0)
+        {
+            ExcelTransactionsError = "El fichero Excel no contiene operaciones válidas. Debe tener las columnas VALOR, OPERACIÓN, TÍTULOS, IMPORTE TOTAL (€) y FECHA.";
+            return RedirectToPage();
+        }
+
+        // Las operaciones ya grabadas se conservan: solo se añaden las filas nuevas del Excel
+        // (se omiten las que ya existen con los mismos datos, para no duplicar al recargar el mismo fichero).
+        var stored = await _dataStore.LoadEntriesAsync<BrokerTransactionRow>(ExcelTransactionsKey);
+        var known = new Dictionary<string, BrokerTransactionRow>();
+        foreach (var storedRow in stored)
+        {
+            known.TryAdd(TransactionSignature(storedRow), storedRow);
+        }
+
+        var newRows = new List<BrokerTransactionRow>();
+        foreach (var row in rows)
+        {
+            if (known.TryGetValue(TransactionSignature(row), out var duplicate))
+            {
+                // Fila ya grabada: se conserva, pero se completa el nombre si aún no lo tenía.
+                if (string.IsNullOrWhiteSpace(duplicate.Nombre))
+                {
+                    duplicate.Nombre = row.Nombre;
+                }
+
+                continue;
+            }
+
+            known[TransactionSignature(row)] = row;
+            newRows.Add(row);
+        }
+
+        stored.AddRange(newRows);
+        await ResolveTitleNamesAsync(stored);
+
+        await _dataStore.SaveEntriesAsync(ExcelTransactionsKey, stored);
+        return RedirectToPage();
+    }
+
+    private static bool IsIsinLike(string? value) =>
+        !string.IsNullOrWhiteSpace(value) &&
+        System.Text.RegularExpressions.Regex.IsMatch(value.Trim(), "^[A-Za-z]{2}[A-Za-z0-9]{9}[0-9]$");
+
+    private static string? FindNameInPortfolio(string isin,
+        IEnumerable<StockHolding> stockHoldings, IEnumerable<EtfHolding> etfHoldings,
+        IEnumerable<FundHolding> fundHoldings, IEnumerable<Quote> etfControl)
+    {
+        bool Same(string? candidate) => string.Equals(candidate?.Trim(), isin.Trim(), StringComparison.OrdinalIgnoreCase);
+
+        return etfHoldings.FirstOrDefault(h => Same(h.Isin))?.Name
+            ?? stockHoldings.FirstOrDefault(h => Same(h.Isin))?.Name
+            ?? fundHoldings.FirstOrDefault(h => Same(h.Isin))?.Name
+            ?? etfControl.FirstOrDefault(q => Same(q.Isin))?.Name;
+    }
+
+    /// <summary>
+    /// ISIN y nombre del título de una operación. Si el título es un ISIN, el nombre sale del guardado o de la
+    /// cartera; si el título es un nombre, el ISIN se busca en la cartera por parecido de nombre.
+    /// </summary>
+    public (string Isin, string Nombre) GetTransactionTitleParts(BrokerTransactionRow row)
+    {
+        var titulo = (row.Titulo ?? string.Empty).Trim();
+
+        if (IsIsinLike(titulo))
+        {
+            var name = !string.IsNullOrWhiteSpace(row.Nombre)
+                ? row.Nombre
+                : FindNameInPortfolio(titulo, StockHoldings, EtfHoldings, FundHoldings, EtfsControl) ?? string.Empty;
+            return (titulo.ToUpperInvariant(), name);
+        }
+
+        return (FindIsinByName(titulo) ?? string.Empty, titulo);
+    }
+
+    private static readonly HashSet<string> NameStopWords = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "etf", "ucits", "ac", "acc", "daily", "the", "de", "del", "la", "el", "fund", "ii"
+    };
+
+    private static HashSet<string> NameTokens(string? name) =>
+        System.Text.RegularExpressions.Regex.Matches((name ?? string.Empty).ToLowerInvariant(), "[a-z0-9áéíóúñ]+")
+            .Select(m => m.Value)
+            .Where(t => !NameStopWords.Contains(t))
+            .ToHashSet();
+
+    private string? FindIsinByName(string titulo)
+    {
+        var wanted = NameTokens(titulo);
+        if (wanted.Count == 0)
+        {
+            return null;
+        }
+
+        var candidates = EtfHoldings.Select(h => (Name: h.Name, Isin: h.Isin))
+            .Concat(StockHoldings.Select(h => (Name: h.Name, Isin: h.Isin)))
+            .Concat(FundHoldings.Select(h => (Name: h.Name, Isin: h.Isin)))
+            .Concat(EtfsControl.Select(q => (Name: q.Name, Isin: q.Isin)))
+            .Where(c => !string.IsNullOrWhiteSpace(c.Isin))
+            .ToList();
+
+        var exact = candidates.FirstOrDefault(c => string.Equals(c.Name?.Trim(), titulo, StringComparison.OrdinalIgnoreCase));
+        if (exact.Isin != null)
+        {
+            return exact.Isin;
+        }
+
+        // Parecido por palabras: casi todas las palabras del título deben aparecer en el nombre de la cartera
+        // (una palabra también coincide si una es prefijo de la otra: "leverage" / "leveraged").
+        var scored = candidates
+            .Select(c =>
+            {
+                var tokens = NameTokens(c.Name);
+                var hits = wanted.Count(w => tokens.Any(t => t == w || (w.Length >= 5 && t.StartsWith(w)) || (t.Length >= 5 && w.StartsWith(t))));
+                return (c.Isin, Score: (double)hits / wanted.Count);
+            })
+            .Where(s => s.Score >= 0.6)
+            .OrderByDescending(s => s.Score)
+            .ToList();
+
+        if (scored.Count == 0 || (scored.Count > 1 && scored[0].Score - scored[1].Score < 0.01 && scored[0].Isin != scored[1].Isin))
+        {
+            return null;
+        }
+
+        return scored[0].Isin;
+    }
+
+    private async Task ResolveTitleNamesAsync(List<BrokerTransactionRow> rows)
+    {
+        var pending = rows.Where(r => string.IsNullOrWhiteSpace(r.Nombre) && IsIsinLike(r.Titulo)).ToList();
+        if (pending.Count == 0)
+        {
+            return;
+        }
+
+        var stockHoldings = await _dataStore.LoadEntriesAsync<StockHolding>(StockHoldingsKey);
+        var etfHoldings = await _dataStore.LoadEntriesAsync<EtfHolding>(EtfsKey);
+        var fundHoldings = await _dataStore.LoadEntriesAsync<FundHolding>(FundsKey);
+        var etfControl = (await _dataStore.LoadEntriesAsync<QuoteConfig>(EtfControlKey))
+            .Select(c => new Quote { Name = c.Name, Isin = c.Isin ?? string.Empty })
+            .ToList();
+
+        var cache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var row in pending)
+        {
+            var isin = row.Titulo.Trim().ToUpperInvariant();
+            if (!cache.TryGetValue(isin, out var name))
+            {
+                name = FindNameInPortfolio(isin, stockHoldings, etfHoldings, fundHoldings, etfControl)
+                    ?? await _service.LookupNameByIsinAsync(isin)
+                    ?? string.Empty;
+                cache[isin] = name;
+            }
+
+            row.Nombre = name;
+        }
+    }
+
+    public async Task<IActionResult> OnPostClearExcelTransactionsAsync()
+    {
+        await _dataStore.SaveEntriesAsync(ExcelTransactionsKey, new List<BrokerTransactionRow>());
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAddExcelTransactionAsync(string titulo, string tipoOperacion, string numeroTitulos, string importeTotal, DateTime fechaOperacion)
+    {
+        if (string.IsNullOrWhiteSpace(titulo))
+        {
+            return RedirectToPage();
+        }
+
+        var operation = IsSaleOperation(tipoOperacion) ? "VENTA" : "COMPRA";
+        var cleanTitle = titulo.Trim();
+        var amount = ParseFormDecimal(importeTotal);
+
+        var rows = await _dataStore.LoadEntriesAsync<BrokerTransactionRow>(ExcelTransactionsKey);
+        rows.Add(new BrokerTransactionRow
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Titulo = cleanTitle,
+            TipoOperacion = operation,
+            NumeroTitulos = ParseFormDecimal(numeroTitulos),
+            ImporteTotal = amount,
+            FechaOperacion = fechaOperacion.Date,
+            Concept = $"{operation} - {cleanTitle}",
+            Valor = amount
+        });
+
+        await ResolveTitleNamesAsync(rows);
+        await _dataStore.SaveEntriesAsync(ExcelTransactionsKey, rows);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEditExcelTransactionAsync(string id, string titulo, string tipoOperacion, string numeroTitulos, string importeTotal, DateTime fechaOperacion)
+    {
+        if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(titulo))
+        {
+            return RedirectToPage();
+        }
+
+        var rows = await _dataStore.LoadEntriesAsync<BrokerTransactionRow>(ExcelTransactionsKey);
+        var existing = rows.FirstOrDefault(r => r.Id == id);
+        if (existing == null)
+        {
+            return RedirectToPage();
+        }
+
+        var operation = IsSaleOperation(tipoOperacion) ? "VENTA" : "COMPRA";
+        var amount = ParseFormDecimal(importeTotal);
+
+        existing.Titulo = titulo.Trim();
+        existing.Nombre = string.Empty;
+        existing.TipoOperacion = operation;
+        existing.NumeroTitulos = ParseFormDecimal(numeroTitulos);
+        existing.ImporteTotal = amount;
+        existing.FechaOperacion = fechaOperacion.Date;
+        existing.Concept = $"{operation} - {existing.Titulo}";
+        existing.Valor = amount;
+
+        await ResolveTitleNamesAsync(rows);
+        await _dataStore.SaveEntriesAsync(ExcelTransactionsKey, rows);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostDeleteExcelTransactionAsync(string id)
+    {
+        if (!string.IsNullOrWhiteSpace(id))
+        {
+            var rows = await _dataStore.LoadEntriesAsync<BrokerTransactionRow>(ExcelTransactionsKey);
+            if (rows.RemoveAll(r => r.Id == id) > 0)
+            {
+                await _dataStore.SaveEntriesAsync(ExcelTransactionsKey, rows);
+            }
+        }
+
+        return RedirectToPage();
+    }
+
+    private static List<BrokerTransactionRow> ReadTransactionsFromExcel(Stream input)
+    {
+        var spanish = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+        var result = new List<BrokerTransactionRow>();
+
+        // Los .xls (BIFF) necesitan las codificaciones antiguas (code pages).
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+        // ExcelDataReader detecta solo el formato (.xls o .xlsx) y necesita un flujo con posición.
+        using var buffer = new MemoryStream();
+        input.CopyTo(buffer);
+        buffer.Position = 0;
+
+        // Cada hoja se carga como cuadrícula de celdas (fila, columna) con el valor tal cual (texto, número o fecha).
+        var sheets = new List<List<object?[]>>();
+        using (var reader = ExcelDataReader.ExcelReaderFactory.CreateReader(buffer))
+        {
+            do
+            {
+                var grid = new List<object?[]>();
+                while (reader.Read())
+                {
+                    var cells = new object?[reader.FieldCount];
+                    for (var i = 0; i < cells.Length; i++)
+                    {
+                        cells[i] = reader.GetValue(i);
+                    }
+
+                    grid.Add(cells);
+                }
+
+                sheets.Add(grid);
+            }
+            while (reader.NextResult());
+        }
+
+        static object? CellAt(List<object?[]> grid, int row, int col) =>
+            row < grid.Count && col < grid[row].Length ? grid[row][col] : null;
+
+        static string CellText(object? value) => value switch
+        {
+            null => string.Empty,
+            DateTime d => d.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture),
+            IFormattable f => f.ToString(null, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty,
+            _ => value.ToString() ?? string.Empty
+        };
+
+        // Correspondencia de columnas del Excel con las de las tablas de compras y ventas:
+        //   VALOR            -> Título en cartera
+        //   OPERACIÓN        -> Tipo de operación
+        //   TÍTULOS          -> Número de títulos
+        //   IMPORTE TOTAL (€)-> Importe total de la operación
+        //   FECHA            -> Fecha de la operación
+        // El resto de columnas del fichero se ignoran. La cabecera se localiza por nombre (en cualquier fila
+        // de las primeras 30 y en cualquier hoja).
+        List<object?[]>? sheet = null;
+        var headerRow = -1;
+        int colTitulo = -1, colTipo = -1, colNumero = -1, colImporte = -1, colFecha = -1;
+
+        foreach (var candidate in sheets)
+        {
+            for (var r = 0; r < Math.Min(candidate.Count, 30) && sheet == null; r++)
+            {
+                int cTitulo = -1, cTipo = -1, cNumero = -1, cImporte = -1, cFecha = -1;
+                for (var c = 0; c < candidate[r].Length; c++)
+                {
+                    switch (NormalizeHeader(CellText(candidate[r][c])))
+                    {
+                        case "valor": if (cTitulo < 0) cTitulo = c; break;
+                        case "operacion": if (cTipo < 0) cTipo = c; break;
+                        case "titulos": if (cNumero < 0) cNumero = c; break;
+                        case "importetotal": if (cImporte < 0) cImporte = c; break;
+                        case "fecha": if (cFecha < 0) cFecha = c; break;
+                    }
+                }
+
+                if (cTitulo >= 0 && cTipo >= 0 && cNumero >= 0 && cImporte >= 0 && cFecha >= 0)
+                {
+                    sheet = candidate;
+                    headerRow = r;
+                    colTitulo = cTitulo; colTipo = cTipo; colNumero = cNumero; colImporte = cImporte; colFecha = cFecha;
+                }
+            }
+
+            if (sheet != null)
+            {
+                break;
+            }
+        }
+
+        if (sheet == null)
+        {
+            return result;
+        }
+
+        for (var r = headerRow + 1; r < sheet.Count; r++)
+        {
+            var titulo = CellText(CellAt(sheet, r, colTitulo)).Trim();
+            if (string.IsNullOrWhiteSpace(titulo))
+            {
+                continue;
+            }
+
+            var tipoRaw = CellText(CellAt(sheet, r, colTipo)).Trim();
+            var tipo = IsSaleOperation(tipoRaw) ? "VENTA" : "COMPRA";
+
+            var numeroValue = CellAt(sheet, r, colNumero);
+            var numero = numeroValue is double numeroDouble
+                ? (decimal)numeroDouble
+                : ParseFormDecimal(CellText(numeroValue));
+
+            var importeValue = CellAt(sheet, r, colImporte);
+            var importe = importeValue is double importeDouble
+                ? (decimal)importeDouble
+                : ParseFormDecimal(CellText(importeValue));
+
+            var fechaValue = CellAt(sheet, r, colFecha);
+            DateTime fecha;
+            if (fechaValue is DateTime fechaDate)
+            {
+                fecha = fechaDate.Date;
+            }
+            else if (fechaValue is double fechaSerial && fechaSerial > 1 && fechaSerial < 2958466)
+            {
+                fecha = DateTime.FromOADate(fechaSerial).Date;
+            }
+            else if (!DateTime.TryParse(CellText(fechaValue), spanish, System.Globalization.DateTimeStyles.None, out fecha))
+            {
+                continue;
+            }
+
+            result.Add(new BrokerTransactionRow
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Titulo = titulo,
+                TipoOperacion = tipo,
+                NumeroTitulos = numero,
+                ImporteTotal = importe,
+                FechaOperacion = fecha.Date,
+                Concept = $"{tipo} - {titulo}",
+                Valor = importe
+            });
+        }
+
+        return result;
+    }
+
+    [TempData]
     public string? StockHoldingError { get; set; }
 
     [TempData]
@@ -259,6 +719,7 @@ public class IndexModel : PageModel
     {
         public string Id { get; set; } = string.Empty;
         public string Titulo { get; set; } = string.Empty;
+        public string Nombre { get; set; } = string.Empty;
         public string TipoOperacion { get; set; } = string.Empty;
         public decimal NumeroTitulos { get; set; }
         public decimal ImporteTotal { get; set; }
@@ -414,6 +875,7 @@ public class IndexModel : PageModel
     {
         ResolvePublicUrl();
         _transactionState = await LoadTransactionStateAsync();
+        ExcelTransactions = await _dataStore.LoadEntriesAsync<BrokerTransactionRow>(ExcelTransactionsKey);
         RendimientoReferenciaIng = (await _dataStore.LoadJsonAsync<RendimientoRefState>(RendimientoRefKey))?.Valor ?? string.Empty;
 
         if (!await _dataStore.ExistsAsync(IndicesKey))
@@ -1132,11 +1594,32 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostAddEtfAsync(string name, string symbol, string isin, string? countryCode, decimal positionCount, decimal unitPurchasePrice, string broker)
+    public async Task<IActionResult> OnPostAddEtfAsync(string name, string? symbol, string isin, string? countryCode, decimal positionCount, decimal unitPurchasePrice, string broker)
     {
-        if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(symbol) &&
-            !string.IsNullOrWhiteSpace(isin) && positionCount > 0 && unitPurchasePrice > 0)
+        if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(isin) &&
+            positionCount > 0 && unitPurchasePrice > 0)
         {
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                var trimmedIsin = isin.Trim();
+                var match = await _service.SearchSymbolAsync(trimmedIsin) ?? await _service.SearchIsinViaJustEtfAsync(trimmedIsin);
+                if (match.HasValue)
+                {
+                    symbol = match.Value.Symbol;
+                    countryCode = string.IsNullOrWhiteSpace(countryCode) ? match.Value.CountryCode : countryCode;
+                }
+                else
+                {
+                    var isinQuote = await _service.GetQuoteFromJustEtfAsync(new QuoteConfig(name.Trim(), trimmedIsin.ToUpperInvariant(), trimmedIsin.ToUpperInvariant()));
+                    if (isinQuote == null)
+                    {
+                        return RedirectToPage();
+                    }
+
+                    symbol = trimmedIsin.ToUpperInvariant();
+                }
+            }
+
             var holdings = await _dataStore.LoadEntriesAsync<EtfHolding>(EtfsKey);
             holdings.Add(new EtfHolding(
                 name.Trim(),
