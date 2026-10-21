@@ -1573,26 +1573,18 @@
         </form>
     </dialog>
 
-    <div class="blank-lines-2"></div>
-
-    <div class="summary-panel summary-panel--fit">
-        <div class="summary-strip-label" id="summary-strip-label-checkingaccounts">
-            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-checkingaccounts" data-toggle-name="cuenta corriente" title="Mostrar/ocultar">Mostrar</button>
-            <span translate="no" class="notranslate">🏦 Cuenta Corriente (Resumen Total)</span>
-        </div>
-        <div class="summary-strip is-collapsed" id="summary-strip-checkingaccounts">
-            <div class="summary-box">
-                <span>Importe Total</span>
-                <strong>@Model.CheckingAccounts.Sum(a => a.Balance).ToString("#,##0.00 €")</strong>
-            </div>
-        </div>
-    </div>
+    <div class="blank-line-1"></div>
 
     <div class="market-panel mt-4 market-panel-non-cartera">
         <div class="panel-head panel-head-row">
             <span>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/cuenta-corriente.png" style="border-radius: 4px;" alt="Cuenta corriente" title="Cuenta corriente" />
                 CUENTA CORRIENTE
+                @{
+                    var checkingTotal = Model.CheckingAccounts.Sum(a => a.Balance);
+                    var checkingTotalClass = checkingTotal > 0 ? "hacienda-gain" : (checkingTotal < 0 ? "hacienda-loss" : "");
+                }
+                <span class="transaction-total-summary" style="margin-left: 14px;">Total: <strong class="@checkingTotalClass" style="font-size: 0.9rem;">@checkingTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
             </span>
             <button type="button" class="mini-button" data-dialog-target="add-checkingaccount-dialog">+ Añadir Cuenta</button>
         </div>
@@ -1708,6 +1700,11 @@
             <span>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/dinero-en-efectivo.png" style="width: 34px; border-radius: 4px;" alt="Efectivo" title="Efectivo" />
                 EFECTIVO
+                @{
+                    var cashTotal = Model.CashTotalValue;
+                    var cashTotalClass = cashTotal > 0 ? "hacienda-gain" : (cashTotal < 0 ? "hacienda-loss" : "");
+                }
+                <span class="transaction-total-summary" style="margin-left: 14px;">Total: <strong class="@cashTotalClass" style="font-size: 0.9rem;">@cashTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
             </span>
             <div class="panel-head-actions">
                 <button type="button" class="mini-button" data-dialog-target="add-cash-dialog">+ Añadir Efectivo</button>
@@ -2141,6 +2138,7 @@
         var hac = Model.Hacienda;
         var eurSigned = "+#,##0.00 €;-#,##0.00 €;0.00 €";
         var eurPlain = "#,##0.00 €;-#,##0.00 €;0.00 €";
+        var toPayClass = hac.ToPay > 0 ? "hacienda-loss" : (hac.ToPay < 0 ? "hacienda-gain" : "");
     }
     <div class="market-panel mt-4">
         <div class="panel-head panel-head-row">
@@ -2149,7 +2147,7 @@
                 Hacienda <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
-                <span class="transaction-total-summary">@(hac.ToPay >= 0 ? "A pagar" : "A devolver"): <strong>@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong> · tramo @((hac.MarginalRate * 100m).ToString("0.##", esCulture)) %</span>
+                <span class="transaction-total-summary">@(hac.ToPay >= 0 ? "A pagar" : "A devolver"): <strong class="@toPayClass">@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong> · tramo @((hac.MarginalRate * 100m).ToString("0.##", esCulture)) %</span>
                 <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="hacienda-panel-body" data-toggle-name="hacienda" title="Mostrar/ocultar" aria-label="Mostrar hacienda" aria-expanded="false"></button>
             </div>
         </div>
@@ -2178,7 +2176,7 @@
                             <tr><td><strong>Base liquidable del ahorro</strong></td><td class="text-align-right price-cell"><strong>@hac.SavingsBase.ToString(eurPlain, esCulture)</strong></td></tr>
                             <tr><td><strong>Cuota estimada</strong> (tipo medio @((hac.AverageRate * 100m).ToString("0.##", esCulture)) %)</td><td class="text-align-right price-cell"><strong>@hac.Tax.ToString(eurPlain, esCulture)</strong></td></tr>
                             <tr><td>Retenciones ya practicadas</td><td class="text-align-right price-cell">@((-hac.Withholdings).ToString(eurSigned, esCulture))</td></tr>
-                            <tr class="@(hac.ToPay > 0 ? "transaction-row-current-year" : "")"><td><strong>@(hac.ToPay >= 0 ? "Resultado: a pagar a Hacienda" : "Resultado: a devolver")</strong></td><td class="text-align-right price-cell"><strong>@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong></td></tr>
+                            <tr class="@(hac.ToPay > 0 ? "transaction-row-current-year" : "")"><td><strong>@(hac.ToPay >= 0 ? "Resultado: a pagar a Hacienda" : "Resultado: a devolver")</strong></td><td class="text-align-right price-cell"><strong class="@toPayClass">@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong></td></tr>
                         </tbody>
                     </table>
                 </div>
