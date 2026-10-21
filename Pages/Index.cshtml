@@ -1801,6 +1801,7 @@
                 <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-excel" data-toggle-name="operaciones de compra y venta Excel" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta" aria-expanded="false"></button>
             </div>
         </div>
+        <p class="panel-help-text">A la hora de cargar un fichero Excel con movimientos, tendrá que ser del tipo de los que elabora INGDIRECT cuando se exportan movimientos del Broker Naranja. El fichero en formato XLS es el que se debe utilizar para la carga de movimientos diferenciados por Título.</p>
         @if (!string.IsNullOrWhiteSpace(Model.ExcelTransactionsError))
         {
             <div class="form-error-banner">@Model.ExcelTransactionsError</div>
