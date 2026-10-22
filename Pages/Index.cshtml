@@ -797,6 +797,7 @@
                 <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" /> <span translate="no" class="notranslate">INGDIRECT (Resumen total de las posiciones)</span>
             </span>
         </div>
+        <p class="summary-help-text">Se muestra el resumen correspondiente a todas las operaciones de compra venta realizadas desde INGDIRECT, indicando la rentabilidad total obtenida. También calculamos la rentabilidad tomando como referencia un importe dado.</p>
         <div class="summary-strip is-collapsed" id="summary-strip-ing">
             <div class="summary-box invested">
                 <span>Importe total invertido</span>
@@ -827,6 +828,7 @@
                 <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" /> <span translate="no" class="notranslate">TRADE REPUBLIC (Resumen total de las posiciones)</span>
             </span>
         </div>
+        <p class="summary-help-text">Se muestra el resumen correspondiente a todas las operaciones de compra venta realizadas desde el broker TradeRepublic, indicando la rentabilidad total obtenida.</p>
         <div class="summary-strip is-collapsed" id="summary-strip-tr">
             <div class="summary-box invested">
                 <span>Importe total invertido</span>
@@ -1631,7 +1633,7 @@
                 }
             </div>
         </div>
-        <p class="panel-help-text">A la hora de cargar un fichero Excel con movimientos, tendrá que ser del tipo de los que elabora INGDIRECT cuando se exportan movimientos del Broker Naranja. El fichero en formato XLS es el que se debe utilizar para la carga de movimientos diferenciados por Título.</p>
+        <p class="panel-help-text">A la hora de cargar un fichero Excel con movimientos, tendrá que ser del tipo de los que elabora INGDIRECT cuando se exportan movimientos del Broker Naranja. El fichero en formato XLS es el que se debe utilizar para la carga de movimientos diferenciados por Título. Importante: en los ficheros Excel habrá que modificar el campo, valor, por el código ISIN asociado al título correspondiente.</p>
         @if (!string.IsNullOrWhiteSpace(Model.ExcelTransactionsError))
         {
             <div class="form-error-banner">@Model.ExcelTransactionsError</div>
@@ -1849,6 +1851,7 @@
                 Operaciones de compra y venta Trade Republic
             </span>
         </div>
+        <p class="panel-help-text">Se muestran todas las operaciones de compra venta de títulos bursátiles realizados desde el broker TradeRepublic.</p>
         <div id="transaction-broker-grid-tr" class="transaction-broker-grid is-collapsed">
             @{ var trPurchaseTotal = Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
             <div class="transaction-broker-card" data-broker-code="TR" data-transaction-type="purchase">
@@ -2968,6 +2971,10 @@
                                 }
                             }
                         });
+
+                        if (window.paginarTablasCompraVenta) {
+                            window.paginarTablasCompraVenta();
+                        }
                     })
                     .catch(function () {
                         // Si falla la petición (red, servidor dormido, etc.) simplemente se reintenta en el siguiente ciclo.

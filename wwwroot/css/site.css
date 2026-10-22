@@ -428,7 +428,7 @@ body.wco-active .topbar-datetime {
   cursor: pointer;
 }
 
-/* Paginación de 10 en 10 filas de las tablas de compras y ventas por título. */
+/* Paginación de 5 en 5 filas de las tablas de compras y ventas. */
 tr.tx-page-hidden {
   display: none;
 }
@@ -1001,6 +1001,32 @@ tr.tx-page-hidden {
 
 /* Paneles "Resumen total de las posiciones" de INGDIRECT y Trade Republic,
    con los colores corporativos de cada bróker. */
+.summary-panel .summary-help-text {
+  flex-shrink: 0;
+  margin: 0 0 10px;
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  letter-spacing: normal;
+  white-space: normal;
+  color: #333333;
+  background: #fff3eb;
+  border-bottom: 1px solid #ffd2b3;
+}
+
+/* Mismo formato que el texto del panel de operaciones de Trade Republic. */
+.summary-panel-tr .summary-help-text {
+  color: #111111;
+  background: #f2f2f2;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+/* Con el panel plegado la banda es de color corporativo: el texto conserva su franja de color claro. */
+.summary-panel-ing:not(.summary-panel--expanded) .summary-help-text,
+.summary-panel-tr:not(.summary-panel--expanded) .summary-help-text {
+  margin-bottom: 2px;
+}
+
 .summary-panel-ing {
   background: #ffffff;
   border-color: #ff6200;
@@ -1024,12 +1050,14 @@ tr.tx-page-hidden {
   background: transparent;
 }
 
-/* Plegados, estos dos paneles son más bajos que el resto de paneles de resumen. */
+/* Plegados, estos dos paneles son más bajos que el resto de paneles de resumen
+   (su altura se ajusta al título y al texto descriptivo). */
 .summary-panel-ing:not(.summary-panel--expanded),
 .summary-panel-tr:not(.summary-panel--expanded) {
-  height: 52px;
+  height: auto;
   min-height: 52px;
-  max-height: 52px;
+  max-height: none;
+  overflow: visible;
 }
 
 .summary-panel-ing .summary-strip-label {
@@ -1861,6 +1889,12 @@ tr.tx-page-hidden {
 
 .tr-panel #transaction-broker-grid-tr {
   background: #ffffff;
+  color: #111111;
+}
+
+.tr-panel .panel-help-text {
+  background: #f2f2f2;
+  border-bottom: 1px solid #d0d0d0;
   color: #111111;
 }
 
@@ -3779,6 +3813,47 @@ tr.tx-page-hidden {
     min-width: 65px !important;
   }
 
+}
+
+/* Resúmenes de INGDIRECT y Trade Republic con el mismo formato que los paneles de operaciones:
+   cabecera de color corporativo a todo el ancho y franja de texto descriptivo pegada debajo. */
+.summary-panel.summary-panel-ing,
+.summary-panel.summary-panel-tr {
+  padding: 0;
+  background: #ffffff;
+  overflow: hidden !important;
+}
+
+.summary-panel.summary-panel-ing .summary-strip-label,
+.summary-panel.summary-panel-tr .summary-strip-label {
+  box-sizing: border-box;
+  height: auto;
+  min-height: 52px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 0;
+  color: #ffffff;
+}
+
+.summary-panel.summary-panel-ing .summary-strip-label {
+  background: linear-gradient(180deg, #ff7a24 0%, #ff6200 100%);
+  border-bottom: 3px solid #cc4e00;
+}
+
+.summary-panel.summary-panel-tr .summary-strip-label {
+  background: linear-gradient(180deg, #1c1c1c 0%, #000000 100%);
+  border-bottom: 3px solid #6b6b6b;
+}
+
+.summary-panel.summary-panel-ing .summary-help-text,
+.summary-panel.summary-panel-tr .summary-help-text {
+  margin: 0;
+}
+
+.summary-panel.summary-panel-ing .summary-strip,
+.summary-panel.summary-panel-tr .summary-strip {
+  padding: 14px 14px 0;
+  margin-bottom: 14px;
 }
 
 /* Impresión del panel "Agencia Tributaria": colores corporativos de la AEAT

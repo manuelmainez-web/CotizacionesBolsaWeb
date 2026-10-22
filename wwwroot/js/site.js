@@ -106,8 +106,14 @@ function syncSummaryPanelState(panelResumen) {
             panelResumen.style.height = altoNecesario + 'px';
             panelResumen.style.maxHeight = altoNecesario + 'px';
         } else {
-            // Los paneles de INGDIRECT y Trade Republic plegados son más bajos que el resto.
-            var altoPlegado = panelResumen.matches('.summary-panel-ing, .summary-panel-tr') ? '52px' : '96px';
+            // Los paneles de INGDIRECT y Trade Republic plegados ajustan su altura al título y al texto descriptivo.
+            if (panelResumen.matches('.summary-panel-ing, .summary-panel-tr')) {
+                panelResumen.style.height = 'auto';
+                panelResumen.style.maxHeight = 'none';
+                panelResumen.style.overflow = 'visible';
+                return;
+            }
+            var altoPlegado = '96px';
             panelResumen.style.height = altoPlegado;
             panelResumen.style.maxHeight = altoPlegado;
             panelResumen.style.overflow = 'hidden';
@@ -1536,16 +1542,22 @@ function imprimirConNumeracion(bodyClass, opciones) {
     }
 })();
 
-// Paginación de 10 en 10 filas de las tablas de Compras y Ventas por título
-// (panel "Operaciones de compra y venta INGDIRECT"). Al imprimir se muestran
-// todas las filas (ver imprimirConNumeracion).
+// Paginación de 5 en 5 filas de las tablas de Compras y Ventas (paneles "Operaciones de
+// compra y venta" de INGDIRECT y Trade Republic). Al imprimir se muestran todas las
+// filas (ver imprimirConNumeracion). Se expone como función global para volver a aplicarla
+// cuando la actualización automática de la página sustituye el contenido de las tablas.
 (function () {
-    var FILAS_POR_PAGINA = 10;
+    var FILAS_POR_PAGINA = 5;
 
-    document.querySelectorAll('.ing-panel .transaction-broker-card[data-transaction-type] .tab-pane table.transaction-table').forEach(function (tabla) {
+    function paginarTablasCompraVenta() {
+    document.querySelectorAll('.ing-panel .transaction-broker-card[data-transaction-type] .tab-pane table.transaction-table, .tr-panel .transaction-broker-card[data-transaction-type] table.transaction-table').forEach(function (tabla) {
         var cuerpo = tabla.tBodies[0];
         var contenedor = tabla.closest('.table-wrap');
         if (!cuerpo || !contenedor) {
+            return;
+        }
+
+        if (contenedor.nextElementSibling && contenedor.nextElementSibling.classList.contains('tx-pagination')) {
             return;
         }
 
@@ -1606,4 +1618,8 @@ function imprimirConNumeracion(bodyClass, opciones) {
 
         mostrarPagina();
     });
+    }
+
+    window.paginarTablasCompraVenta = paginarTablasCompraVenta;
+    paginarTablasCompraVenta();
 })();
