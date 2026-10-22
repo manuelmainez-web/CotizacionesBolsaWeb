@@ -1943,6 +1943,53 @@ tr.tx-page-hidden {
   background: #e9e9e9;
 }
 
+/* Paneles de cuenta corriente con formato ING / Trade Republic: cabecera con total y celdas sobre fondo claro. */
+.tr-panel .panel-head .hacienda-gain,
+.tr-panel .panel-head .hacienda-loss {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.ing-panel .name-cell,
+.ing-panel .time-cell {
+  color: #333333;
+}
+
+.tr-panel .name-cell,
+.tr-panel .time-cell {
+  color: #111111;
+}
+
+.ing-panel .icon-button-edit,
+.tr-panel .icon-button-edit {
+  border-color: #8a8a8a;
+  background: #f2f2f2;
+  color: #333333;
+}
+
+.ing-panel .icon-button-edit:hover {
+  background: #ffe3cf;
+  color: #cc4e00;
+}
+
+.tr-panel .icon-button-edit:hover {
+  background: #d4d4d4;
+  color: #000000;
+}
+
+.ing-panel .icon-button-delete,
+.tr-panel .icon-button-delete {
+  border-color: #c81e28;
+  background: #fdecee;
+  color: #c81e28;
+}
+
+.ing-panel .icon-button-delete:hover,
+.tr-panel .icon-button-delete:hover {
+  background: #c81e28;
+  color: #ffffff;
+}
+
 .range-buttons {
   display: flex;
   gap: 5px;

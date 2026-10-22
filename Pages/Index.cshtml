@@ -1594,23 +1594,31 @@
         <div class="control-cotizaciones-title-line"></div>
     </div>
 
-    <div class="market-panel mt-4 market-panel-non-cartera">
+    @if (!string.IsNullOrWhiteSpace(Model.CheckingAccountError))
+    {
+        <div class="form-error-banner">@Model.CheckingAccountError</div>
+    }
+    @{
+        var checkingEntities = new[]
+        {
+            new { Name = "ING Direct", Code = "ING", PanelClass = "ing-panel", Logo = "/images/brokers/ing.png", TbodyId = "tbody-checkingaccounts-ing", DialogId = "add-checkingaccount-ing-dialog" },
+            new { Name = "Trade Republic", Code = "TR", PanelClass = "tr-panel", Logo = "/images/brokers/traderepublic.png", TbodyId = "tbody-checkingaccounts-tr", DialogId = "add-checkingaccount-tr-dialog" }
+        };
+    }
+    @foreach (var entity in checkingEntities)
+    {
+    var entityAccounts = Model.CheckingAccounts.Where(a => a.Name == entity.Name).ToList();
+    var checkingTotal = entityAccounts.Sum(a => a.Balance);
+    var checkingTotalClass = checkingTotal > 0 ? "hacienda-gain" : (checkingTotal < 0 ? "hacienda-loss" : "");
+    <div class="market-panel @entity.PanelClass mt-4 market-panel-non-cartera">
         <div class="panel-head panel-head-row">
             <span>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/cuenta-corriente.png" style="border-radius: 4px;" alt="Cuenta corriente" title="Cuenta corriente" />
-                Cuenta corriente
-                @{
-                    var checkingTotal = Model.CheckingAccounts.Sum(a => a.Balance);
-                    var checkingTotalClass = checkingTotal > 0 ? "hacienda-gain" : (checkingTotal < 0 ? "hacienda-loss" : "");
-                }
+                <img class="transaction-broker-logo panel-header-logo" src="@entity.Logo" style="border-radius: 4px;" alt="@entity.Name" title="@entity.Name" />
+                Cuenta corriente @entity.Name
                 <span class="transaction-total-summary" style="margin-left: 14px;">Total: <strong class="@checkingTotalClass" style="font-size: 0.9rem;">@checkingTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
             </span>
-            <button type="button" class="mini-button" data-dialog-target="add-checkingaccount-dialog">+ Añadir Cuenta</button>
+            <button type="button" class="mini-button" data-dialog-target="@entity.DialogId">+ Añadir Cuenta</button>
         </div>
-        @if (!string.IsNullOrWhiteSpace(Model.CheckingAccountError))
-        {
-            <div class="form-error-banner">@Model.CheckingAccountError</div>
-        }
         <div class="table-wrap is-collapsed">
             <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
                 <thead>
@@ -1621,16 +1629,16 @@
                         <th style="width: 66px;"></th>
                     </tr>
                 </thead>
-                <tbody id="tbody-checkingaccounts">
-                    @if (Model.CheckingAccounts.Count == 0)
+                <tbody id="@entity.TbodyId">
+                    @if (entityAccounts.Count == 0)
                     {
                         <tr>
-                            <td colspan="4" class="empty-state-cell">No hay cuentas corrientes añadidas. Usa "+ Añadir Cuenta" para empezar.</td>
+                            <td colspan="4" class="empty-state-cell">No hay cuenta corriente de @entity.Name. Usa "+ Añadir Cuenta" para empezar.</td>
                         </tr>
                     }
                     else
                     {
-                        @foreach (var item in Model.CheckingAccounts)
+                        @foreach (var item in entityAccounts)
                         {
                             <tr data-broker="@(item.Name == "Trade Republic" ? "TR" : "ING")">
                                 <td class="name-cell">
@@ -1662,6 +1670,7 @@
             </table>
         </div>
     </div>
+    }
 
     @foreach (var item in Model.CheckingAccounts)
     {
@@ -1692,26 +1701,23 @@
         </dialog>
     }
 
-    <dialog id="add-checkingaccount-dialog" class="add-entry-dialog">
-        <form method="post" asp-page-handler="AddCheckingAccount">
-            <h3>Añadir Cuenta Corriente</h3>
-            <label>
-                Entidad
-                <select name="entidad" required>
-                    <option value="ING">ING Direct</option>
-                    <option value="TR">Trade Republic</option>
-                </select>
-            </label>
-            <label>
-                Importe
-                <input type="text" name="importe" inputmode="decimal" pattern="[0-9.,]+" required step="0.01" placeholder="Ej. 1500.00" />
-            </label>
-            <div class="dialog-actions">
-                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
-                <button type="submit" class="mini-button">Añadir</button>
-            </div>
-        </form>
-    </dialog>
+    @foreach (var entity in checkingEntities)
+    {
+        <dialog id="@entity.DialogId" class="add-entry-dialog">
+            <form method="post" asp-page-handler="AddCheckingAccount">
+                <h3>Añadir Cuenta Corriente @entity.Name</h3>
+                <input type="hidden" name="entidad" value="@entity.Code" />
+                <label>
+                    Importe
+                    <input type="text" name="importe" inputmode="decimal" pattern="[0-9.,]+" required step="0.01" placeholder="Ej. 1500.00" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Añadir</button>
+                </div>
+            </form>
+        </dialog>
+    }
 
     <img src="/images/imagen-efectivo.jpg" alt="" class="print-all-cash-image" />
     <div class="market-panel mt-4 market-panel-non-cartera">
@@ -2891,7 +2897,8 @@
                 'tbody-etfs',
                 'tbody-funds',
                 'tbody-pensionplans',
-                'tbody-checkingaccounts',
+                'tbody-checkingaccounts-ing',
+                'tbody-checkingaccounts-tr',
                 'tbody-cash',
                 'tbody-portfolio-stocks',
                 'transaction-broker-grid-tr'
