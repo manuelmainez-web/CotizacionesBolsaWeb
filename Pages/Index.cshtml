@@ -400,6 +400,13 @@
                                 <span translate="no" class="notranslate">Imprimir cartera</span>
                             </div>
                             <div class="quick-link-inline">
+                                <button type="button" class="mini-button quick-link-button notranslate" id="btn-print-hacienda-tab" title="Imprime solo los datos de la Agencia Tributaria del año en curso">
+                                    <span aria-hidden="true">🖨️</span>
+                                    <span translate="no" class="notranslate">Imprimir</span>
+                                </button>
+                                <span translate="no" class="notranslate">Datos de la Agencia Tributaria, relativos a operaciones del año en curso</span>
+                            </div>
+                            <div class="quick-link-inline">
                                 <button type="button" class="mini-button quick-link-button notranslate" id="btn-print-page-tab" title="Imprime toda la página">
                                     <span aria-hidden="true">🖨️</span>
                                     <span translate="no" class="notranslate">Imprimir</span>
@@ -1587,210 +1594,6 @@
         </form>
     </dialog>
 
-    <div class="blank-line-1"></div>
-
-    <div class="control-cotizaciones-title cuentas-efectivo-title">
-        <h2 class="control-cotizaciones-title-text">Cuentas corrientes y Efectivo</h2>
-        <div class="control-cotizaciones-title-line"></div>
-    </div>
-
-    @if (!string.IsNullOrWhiteSpace(Model.CheckingAccountError))
-    {
-        <div class="form-error-banner">@Model.CheckingAccountError</div>
-    }
-    @{
-        var checkingEntities = new[]
-        {
-            new { Name = "ING Direct", Code = "ING", PanelClass = "ing-panel", Logo = "/images/brokers/ing.png", TbodyId = "tbody-checkingaccounts-ing", DialogId = "add-checkingaccount-ing-dialog" },
-            new { Name = "Trade Republic", Code = "TR", PanelClass = "tr-panel", Logo = "/images/brokers/traderepublic.png", TbodyId = "tbody-checkingaccounts-tr", DialogId = "add-checkingaccount-tr-dialog" }
-        };
-    }
-    @foreach (var entity in checkingEntities)
-    {
-    var entityAccounts = Model.CheckingAccounts.Where(a => a.Name == entity.Name).ToList();
-    var checkingTotal = entityAccounts.Sum(a => a.Balance);
-    var checkingTotalClass = checkingTotal > 0 ? "hacienda-gain" : (checkingTotal < 0 ? "hacienda-loss" : "");
-    <div class="market-panel @entity.PanelClass mt-4 market-panel-non-cartera">
-        <div class="panel-head panel-head-row">
-            <span>
-                <img class="transaction-broker-logo panel-header-logo" src="@entity.Logo" style="border-radius: 4px;" alt="@entity.Name" title="@entity.Name" />
-                Cuenta corriente @entity.Name
-                <span class="transaction-total-summary" style="margin-left: 14px;">Total: <strong class="@checkingTotalClass" style="font-size: 0.9rem;">@checkingTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
-            </span>
-            <button type="button" class="mini-button" data-dialog-target="@entity.DialogId">+ Añadir Cuenta</button>
-        </div>
-        <div class="table-wrap is-collapsed">
-            <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
-                <thead>
-                    <tr>
-                        <th class="col-nombre-wide" style="width: 942px;">Nombre</th>
-                        <th class="text-align-right" style="width: 122px;">Saldo cuenta corriente</th>
-                        <th class="text-align-right" style="width: 115px;">Actualización</th>
-                        <th style="width: 66px;"></th>
-                    </tr>
-                </thead>
-                <tbody id="@entity.TbodyId">
-                    @if (entityAccounts.Count == 0)
-                    {
-                        <tr>
-                            <td colspan="4" class="empty-state-cell">No hay cuenta corriente de @entity.Name. Usa "+ Añadir Cuenta" para empezar.</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        @foreach (var item in entityAccounts)
-                        {
-                            <tr data-broker="@(item.Name == "Trade Republic" ? "TR" : "ING")">
-                                <td class="name-cell">
-                                    <span class="name-with-flag">
-                                        @if (item.Name == "Trade Republic")
-                                        {
-                                            <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
-                                        }
-                                        else
-                                        {
-                                            <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
-                                        }
-                                        @item.Name
-                                    </span>
-                                </td>
-                                <td class="price-cell price-cell-quote">@item.Balance.ToString("#,##0.00 €")</td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="delete-cell">
-                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-checkingaccount-@Model.CheckingAccounts.IndexOf(item)" title="Editar">✎</button>
-                                    <form method="post" asp-page-handler="DeleteCheckingAccount" onsubmit="return confirm('¿Eliminar esta cuenta corriente?');">
-                                        <input type="hidden" name="name" value="@item.Name" />
-                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-    }
-
-    @foreach (var item in Model.CheckingAccounts)
-    {
-        var accountIndex = Model.CheckingAccounts.IndexOf(item);
-        var accountIsIngDirect = item.Name == "ING Direct";
-        var accountIsTradeRepublic = item.Name == "Trade Republic";
-
-        <dialog id="edit-checkingaccount-@accountIndex" class="add-entry-dialog">
-            <form method="post" asp-page-handler="EditCheckingAccount">
-                <h3>Editar @item.Name</h3>
-                <input type="hidden" name="name" value="@item.Name" />
-                <label>
-                    Entidad
-                    <select name="entidad" required>
-                        <option value="ING" selected="@(accountIsIngDirect)">ING Direct</option>
-                        <option value="TR" selected="@(accountIsTradeRepublic)">Trade Republic</option>
-                    </select>
-                </label>
-                <label>
-                    Importe
-                    <input type="text" name="importe" inputmode="decimal" pattern="[0-9.,]+" required step="0.01" value="@item.Balance" />
-                </label>
-                <div class="dialog-actions">
-                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
-                    <button type="submit" class="mini-button">Guardar</button>
-                </div>
-            </form>
-        </dialog>
-    }
-
-    @foreach (var entity in checkingEntities)
-    {
-        <dialog id="@entity.DialogId" class="add-entry-dialog">
-            <form method="post" asp-page-handler="AddCheckingAccount">
-                <h3>Añadir Cuenta Corriente @entity.Name</h3>
-                <input type="hidden" name="entidad" value="@entity.Code" />
-                <label>
-                    Importe
-                    <input type="text" name="importe" inputmode="decimal" pattern="[0-9.,]+" required step="0.01" placeholder="Ej. 1500.00" />
-                </label>
-                <div class="dialog-actions">
-                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
-                    <button type="submit" class="mini-button">Añadir</button>
-                </div>
-            </form>
-        </dialog>
-    }
-
-    <img src="/images/imagen-efectivo.jpg" alt="" class="print-all-cash-image" />
-    <div class="blank-line-1"></div>
-    <div class="blank-line-1"></div>
-
-    <div class="control-cotizaciones-title efectivo-title">
-        <h2 class="control-cotizaciones-title-text">Efectivo</h2>
-        <div class="control-cotizaciones-title-line"></div>
-    </div>
-    <div class="market-panel mt-4 market-panel-non-cartera">
-        <div class="panel-head panel-head-row">
-            <span>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/dinero-en-efectivo.png" style="width: 34px; border-radius: 4px;" alt="Efectivo" title="Efectivo" />
-                Efectivo
-                @{
-                    var cashTotal = Model.CashTotalValue;
-                    var cashTotalClass = cashTotal > 0 ? "hacienda-gain" : (cashTotal < 0 ? "hacienda-loss" : "");
-                }
-                <span class="transaction-total-summary" style="margin-left: 14px;">Total: <strong class="@cashTotalClass" style="font-size: 0.9rem;">@cashTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
-            </span>
-            <div class="panel-head-actions">
-                <button type="button" class="mini-button" data-dialog-target="add-cash-dialog">+ Añadir Efectivo</button>
-                <button type="button" class="btn-toggle-summary btn-toggle-summary-cash" data-toggle-target="cash-panel-body" data-toggle-name="efectivo" title="Mostrar/ocultar" aria-label="Ocultar efectivo" aria-expanded="true"></button>
-            </div>
-        </div>
-        <div id="cash-panel-body" class="cash-panel-body is-collapsed">
-            @if (!string.IsNullOrWhiteSpace(Model.CashError))
-            {
-                <div class="form-error-banner">@Model.CashError</div>
-            }
-            <div class="table-wrap">
-                <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
-                    <thead>
-                        <tr>
-                            <th class="col-nombre-wide" style="width: 942px;">Nombre</th>
-                            <th class="text-align-right" style="width: 122px;">Importe</th>
-                            <th class="text-align-right" style="width: 115px;">Actualización</th>
-                            <th style="width: 66px;"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-cash">
-                        @if (Model.CashHoldings.Count == 0)
-                        {
-                            <tr>
-                                <td colspan="4" class="empty-state-cell">No hay efectivo añadido. Usa "+ Añadir Efectivo" para empezar.</td>
-                            </tr>
-                        }
-                        else
-                        {
-                            @for (var i = 0; i < Model.CashHoldings.Count; i++)
-                            {
-                                var item = Model.CashHoldings[i];
-
-                                <tr>
-                                    <td class="name-cell">@item.Name</td>
-                                    <td class="price-cell price-cell-quote">@item.Amount.ToString("#,##0.00 €")</td>
-                                    <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td class="delete-cell">
-                                        <button type="button" class="icon-button-edit" data-dialog-target="edit-cash-@i" title="Editar">✎</button>
-                                        <form method="post" asp-page-handler="DeleteCash" onsubmit="return confirm('¿Eliminar este efectivo?');">
-                                            <input type="hidden" name="index" value="@i" />
-                                            <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
     <div class="blank-lines-2"></div>
 
     <div class="control-cotizaciones-title operaciones-compra-venta-title">
@@ -1809,6 +1612,7 @@
     <div class="market-panel ing-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="transaction-broker-grid-excel" data-toggle-name="operaciones de compra y venta Excel" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta" aria-expanded="false"></button>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
                 Operaciones de compra y venta INGDIRECT
             </span>
@@ -1825,7 +1629,6 @@
                         <button type="submit" class="mini-button mini-button-secondary">Vaciar</button>
                     </form>
                 }
-                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-excel" data-toggle-name="operaciones de compra y venta Excel" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta" aria-expanded="false"></button>
             </div>
         </div>
         <p class="panel-help-text">A la hora de cargar un fichero Excel con movimientos, tendrá que ser del tipo de los que elabora INGDIRECT cuando se exportan movimientos del Broker Naranja. El fichero en formato XLS es el que se debe utilizar para la carga de movimientos diferenciados por Título.</p>
@@ -1976,12 +1779,12 @@
     <div class="market-panel ing-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="title-summary-panel-body" data-toggle-name="resumen por título" title="Mostrar/ocultar" aria-label="Mostrar resumen por título" aria-expanded="false"></button>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
                 Resumen por título <span class="panel-head-subtitle">(compras y ventas regularizadas)</span>
             </span>
             <div class="panel-head-actions">
                 <span class="transaction-total-summary">Resultado total: <strong class="@(summaryResultTotal >= 0 ? "hacienda-gain" : "hacienda-loss")">@summaryResultTotal.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €", esCulture)</strong></span>
-                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="title-summary-panel-body" data-toggle-name="resumen por título" title="Mostrar/ocultar" aria-label="Mostrar resumen por título" aria-expanded="false"></button>
             </div>
         </div>
         <div id="title-summary-panel-body" class="transaction-broker-grid is-collapsed">
@@ -2041,12 +1844,10 @@
     <div class="market-panel tr-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="transaction-broker-grid-tr" data-toggle-name="operaciones de compra y venta Trade Republic" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta Trade Republic" aria-expanded="false"></button>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
                 Operaciones de compra y venta Trade Republic
             </span>
-            <div class="panel-head-actions">
-                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="transaction-broker-grid-tr" data-toggle-name="operaciones de compra y venta Trade Republic" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta Trade Republic" aria-expanded="false"></button>
-            </div>
         </div>
         <div id="transaction-broker-grid-tr" class="transaction-broker-grid is-collapsed">
             @{ var trPurchaseTotal = Model.PurchaseTransactionsByBroker.FirstOrDefault(g => g.Broker == "TR")?.Rows.Sum(r => r.ImporteTotal) ?? 0m; }
@@ -2160,7 +1961,219 @@
         </div>
     </div>
 
+    <div class="blank-line-1"></div>
+    <div class="blank-line-1"></div>
+    <div class="blank-line-1"></div>
+    <div class="blank-line-1"></div>
+
+    <div class="control-cotizaciones-title cuentas-efectivo-title">
+        <h2 class="control-cotizaciones-title-text">Cuentas corrientes</h2>
+        <div class="control-cotizaciones-title-line"></div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.CheckingAccountError))
+    {
+        <div class="form-error-banner">@Model.CheckingAccountError</div>
+    }
+    @{
+        var checkingEntities = new[]
+        {
+            new { Name = "ING Direct", Code = "ING", PanelClass = "ing-panel", Logo = "/images/brokers/ing.png", TbodyId = "tbody-checkingaccounts-ing", DialogId = "add-checkingaccount-ing-dialog" },
+            new { Name = "Trade Republic", Code = "TR", PanelClass = "tr-panel", Logo = "/images/brokers/traderepublic.png", TbodyId = "tbody-checkingaccounts-tr", DialogId = "add-checkingaccount-tr-dialog" }
+        };
+    }
+    @foreach (var entity in checkingEntities)
+    {
+    var entityAccounts = Model.CheckingAccounts.Where(a => a.Name == entity.Name).ToList();
+    var checkingTotal = entityAccounts.Sum(a => a.Balance);
+    var checkingTotalClass = checkingTotal > 0 ? "hacienda-gain" : (checkingTotal < 0 ? "hacienda-loss" : "");
+    <div class="market-panel @entity.PanelClass mt-4 market-panel-non-cartera">
+        <div class="panel-head panel-head-row">
+            <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="__auto-panel-table__" data-toggle-name="cuenta corriente @entity.Name" title="Mostrar/ocultar" aria-label="Mostrar cuenta corriente @entity.Name" aria-expanded="false"></button>
+                <img class="transaction-broker-logo panel-header-logo" src="@entity.Logo" style="border-radius: 4px;" alt="@entity.Name" title="@entity.Name" />
+                Cuenta corriente @entity.Name
+                <span class="transaction-total-summary" style="margin-left: 14px;">Total: <strong class="@checkingTotalClass" style="font-size: 0.9rem;">@checkingTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
+            </span>
+            <button type="button" class="mini-button" data-dialog-target="@entity.DialogId">+ Añadir Cuenta</button>
+        </div>
+        <div class="table-wrap is-collapsed">
+            <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
+                <thead>
+                    <tr>
+                        <th class="col-nombre-wide" style="width: 942px;">Nombre</th>
+                        <th class="text-align-right" style="width: 122px;">Saldo cuenta corriente</th>
+                        <th class="text-align-right" style="width: 115px;">Actualización</th>
+                        <th style="width: 66px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="@entity.TbodyId">
+                    @if (entityAccounts.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4" class="empty-state-cell">No hay cuenta corriente de @entity.Name. Usa "+ Añadir Cuenta" para empezar.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in entityAccounts)
+                        {
+                            <tr data-broker="@(item.Name == "Trade Republic" ? "TR" : "ING")">
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        @if (item.Name == "Trade Republic")
+                                        {
+                                            <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
+                                        }
+                                        else
+                                        {
+                                            <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                                        }
+                                        @item.Name
+                                    </span>
+                                </td>
+                                <td class="price-cell price-cell-quote">@item.Balance.ToString("#,##0.00 €")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="delete-cell">
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-checkingaccount-@Model.CheckingAccounts.IndexOf(item)" title="Editar">✎</button>
+                                    <form method="post" asp-page-handler="DeleteCheckingAccount" onsubmit="return confirm('¿Eliminar esta cuenta corriente?');">
+                                        <input type="hidden" name="name" value="@item.Name" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+
+    @foreach (var item in Model.CheckingAccounts)
+    {
+        var accountIndex = Model.CheckingAccounts.IndexOf(item);
+        var accountIsIngDirect = item.Name == "ING Direct";
+        var accountIsTradeRepublic = item.Name == "Trade Republic";
+
+        <dialog id="edit-checkingaccount-@accountIndex" class="add-entry-dialog">
+            <form method="post" asp-page-handler="EditCheckingAccount">
+                <h3>Editar @item.Name</h3>
+                <input type="hidden" name="name" value="@item.Name" />
+                <label>
+                    Entidad
+                    <select name="entidad" required>
+                        <option value="ING" selected="@(accountIsIngDirect)">ING Direct</option>
+                        <option value="TR" selected="@(accountIsTradeRepublic)">Trade Republic</option>
+                    </select>
+                </label>
+                <label>
+                    Importe
+                    <input type="text" name="importe" inputmode="decimal" pattern="[0-9.,]+" required step="0.01" value="@item.Balance" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </form>
+        </dialog>
+    }
+
+    @foreach (var entity in checkingEntities)
+    {
+        <dialog id="@entity.DialogId" class="add-entry-dialog">
+            <form method="post" asp-page-handler="AddCheckingAccount">
+                <h3>Añadir Cuenta Corriente @entity.Name</h3>
+                <input type="hidden" name="entidad" value="@entity.Code" />
+                <label>
+                    Importe
+                    <input type="text" name="importe" inputmode="decimal" pattern="[0-9.,]+" required step="0.01" placeholder="Ej. 1500.00" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                    <button type="submit" class="mini-button">Añadir</button>
+                </div>
+            </form>
+        </dialog>
+    }
+
+    <img src="/images/imagen-efectivo.jpg" alt="" class="print-all-cash-image" />
+    <div class="blank-line-1"></div>
+    <div class="blank-line-1"></div>
+    <div class="blank-line-1"></div>
+    <div class="blank-line-1"></div>
+
+    <div class="control-cotizaciones-title efectivo-title">
+        <h2 class="control-cotizaciones-title-text">Efectivo</h2>
+        <div class="control-cotizaciones-title-line"></div>
+    </div>
+    <div class="market-panel mt-4 market-panel-non-cartera">
+        <div class="panel-head panel-head-row">
+            <span>
+                <button type="button" class="btn-toggle-summary btn-toggle-summary-cash toggle-left" data-toggle-target="cash-panel-body" data-toggle-name="efectivo" title="Mostrar/ocultar" aria-label="Ocultar efectivo" aria-expanded="true"></button>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/dinero-en-efectivo.png" style="width: 34px; border-radius: 4px;" alt="Efectivo" title="Efectivo" />
+                Efectivo
+                @{
+                    var cashTotal = Model.CashTotalValue;
+                    var cashTotalClass = cashTotal > 0 ? "hacienda-gain" : (cashTotal < 0 ? "hacienda-loss" : "");
+                }
+                <span class="transaction-total-summary" style="margin-left: 14px;">Total: <strong class="@cashTotalClass" style="font-size: 0.9rem;">@cashTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
+            </span>
+            <div class="panel-head-actions">
+                <button type="button" class="mini-button" data-dialog-target="add-cash-dialog">+ Añadir Efectivo</button>
+            </div>
+        </div>
+        <div id="cash-panel-body" class="cash-panel-body is-collapsed">
+            @if (!string.IsNullOrWhiteSpace(Model.CashError))
+            {
+                <div class="form-error-banner">@Model.CashError</div>
+            }
+            <div class="table-wrap">
+                <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
+                    <thead>
+                        <tr>
+                            <th class="col-nombre-wide" style="width: 942px;">Nombre</th>
+                            <th class="text-align-right" style="width: 122px;">Importe</th>
+                            <th class="text-align-right" style="width: 115px;">Actualización</th>
+                            <th style="width: 66px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-cash">
+                        @if (Model.CashHoldings.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="4" class="empty-state-cell">No hay efectivo añadido. Usa "+ Añadir Efectivo" para empezar.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @for (var i = 0; i < Model.CashHoldings.Count; i++)
+                            {
+                                var item = Model.CashHoldings[i];
+
+                                <tr>
+                                    <td class="name-cell">@item.Name</td>
+                                    <td class="price-cell price-cell-quote">@item.Amount.ToString("#,##0.00 €")</td>
+                                    <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="delete-cell">
+                                        <button type="button" class="icon-button-edit" data-dialog-target="edit-cash-@i" title="Editar">✎</button>
+                                        <form method="post" asp-page-handler="DeleteCash" onsubmit="return confirm('¿Eliminar este efectivo?');">
+                                            <input type="hidden" name="index" value="@i" />
+                                            <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div class="blank-lines-2"></div>
+    <div class="blank-line-1"></div>
+    <div class="blank-line-1"></div>
 
     <div class="control-cotizaciones-title agencia-tributaria-title">
         <h2 class="control-cotizaciones-title-text">Agencia Tributaria</h2>
@@ -2176,12 +2189,12 @@
     <div class="market-panel hacienda-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="hacienda-panel-body" data-toggle-name="hacienda" title="Mostrar/ocultar" aria-label="Mostrar hacienda" aria-expanded="false"></button>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
                 Agencia Tributaria <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
                 <span class="transaction-total-summary">@(hac.ToPay >= 0 ? "A pagar" : "A devolver"): <strong class="@toPayClass">@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong> · tramo @((hac.MarginalRate * 100m).ToString("0.##", esCulture)) %</span>
-                <button type="button" class="btn-toggle-summary table-toggle-button" data-toggle-target="hacienda-panel-body" data-toggle-name="hacienda" title="Mostrar/ocultar" aria-label="Mostrar hacienda" aria-expanded="false"></button>
             </div>
         </div>
         <div id="hacienda-panel-body" class="transaction-broker-grid is-collapsed">

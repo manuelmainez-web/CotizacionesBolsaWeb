@@ -212,6 +212,7 @@ document.addEventListener('click', function (event) {
     bindPrintButton('btn-print-ing', 'print-broker-ing', { broker: 'ING' });
     bindPrintButton('btn-print-tr', 'print-broker-tr', { broker: 'TR' });
     bindPrintButton('btn-print-cartera-tab', 'print-all', { sinCotizaciones: true });
+    bindPrintButton('btn-print-hacienda-tab', 'print-all', { soloHacienda: true });
     bindPrintButton('btn-print-page-tab', 'print-all');
     bindPrintButton('btn-print-ing-tab', 'print-broker-ing', { broker: 'ING' });
     bindPrintButton('btn-print-tr-tab', 'print-broker-tr', { broker: 'TR' });
@@ -1192,6 +1193,40 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
     });
 }
 
+// "Imprimir" de la Agencia Tributaria: el documento solo lleva un membrete
+// (título, nombre y fecha/hora) y el panel de Hacienda del año en curso.
+function prepararImpresionSoloHacienda(shellClone) {
+    var panelHacienda = shellClone.querySelector('.hacienda-panel');
+    if (!panelHacienda) {
+        return;
+    }
+
+    var membrete = shellClone.querySelector('.print-cartera-letterhead');
+    if (membrete) {
+        membrete = membrete.cloneNode(true);
+        membrete.classList.remove('print-broker-letterhead');
+        membrete.classList.add('print-hacienda-letterhead');
+
+        var titulo = membrete.querySelector('.print-cartera-letterhead-title');
+        if (titulo) {
+            titulo.textContent = 'Agencia Tributaria';
+            var subtitulo = document.createElement('p');
+            subtitulo.className = 'print-hacienda-letterhead-subtitle';
+            subtitulo.textContent = 'Datos relativos a operaciones del año en curso';
+            titulo.parentNode.insertBefore(subtitulo, titulo.nextSibling);
+        }
+    }
+
+    while (shellClone.firstChild) {
+        shellClone.removeChild(shellClone.firstChild);
+    }
+
+    if (membrete) {
+        shellClone.appendChild(membrete);
+    }
+    shellClone.appendChild(panelHacienda);
+}
+
 // Impresión con numeración real de página ("Página - N -") usando paged.js.
 // Chrome/Edge no exponen counter(page) ni los márgenes @page al imprimir de
 // forma nativa, así que se clona el contenido ya filtrado (reutilizando el
@@ -1210,7 +1245,7 @@ function imprimirConNumeracion(bodyClass, opciones) {
 
     // Checkbox "Imprimir los datos de Hacienda": si está desmarcado no se imprime el panel de Hacienda.
     var checkHacienda = document.getElementById('chk-print-hacienda');
-    if (checkHacienda && !checkHacienda.checked) {
+    if (checkHacienda && !checkHacienda.checked && !(opciones && opciones.soloHacienda)) {
         opciones = Object.assign({}, opciones, { sinHacienda: true });
     }
 
@@ -1234,7 +1269,9 @@ function imprimirConNumeracion(bodyClass, opciones) {
         document.body.classList.remove(bodyClass);
     }
 
-    if (bodyClass === 'print-cartera-only' || bodyClass === 'print-all' || (opciones && opciones.broker)) {
+    if (opciones && opciones.soloHacienda) {
+        prepararImpresionSoloHacienda(copiaContenido);
+    } else if (bodyClass === 'print-cartera-only' || bodyClass === 'print-all' || (opciones && opciones.broker)) {
         reorganizarCarteraPorBroker(copiaContenido, bodyClass, opciones);
         eliminarPanelesVaciosEnImpresion(copiaContenido);
     }
