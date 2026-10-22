@@ -1132,6 +1132,15 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
         element.remove();
     });
 
+    // "Imprimir cartera" no incluye el panel "Resumen por título (compras y ventas regularizadas)".
+    if (opciones && opciones.sinCotizaciones) {
+        var cuerpoResumenTitulo = shellClone.querySelector('#title-summary-panel-body');
+        var panelResumenTitulo = cuerpoResumenTitulo ? cuerpoResumenTitulo.closest('.market-panel') : null;
+        if (panelResumenTitulo) {
+            panelResumenTitulo.remove();
+        }
+    }
+
     if (resumenGlobal) {
         // En "Imprimir todo" la primera página queda solo para las tablas de
         // Control de cotizaciones; el resumen total empieza en la página siguiente.

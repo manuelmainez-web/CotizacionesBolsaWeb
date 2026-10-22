@@ -1537,6 +1537,18 @@ body.wco-active .topbar-datetime {
     opacity: 1 !important;
   }
 
+  /* Operaciones de INGDIRECT: en pantalla solo se ve la pestaña (título) activa;
+     al imprimir se muestran las operaciones de todos los títulos. */
+  .transaction-broker-card .transaction-title-tabs {
+    display: none !important;
+  }
+
+  .transaction-broker-card .tab-content > .tab-pane {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
   /* Impresión de un solo bróker (ING Direct / Trade Republic): se muestran los
      paneles del grupo generado (cartera y operaciones de compra-venta). */
   body.print-broker-ing .print-broker-group .market-panel,
