@@ -1000,6 +1000,24 @@ tr.tx-page-hidden {
   border-color: #ff6200;
 }
 
+/* Plegado, el panel de INGDIRECT es una banda naranja completa, sin marco blanco alrededor. */
+.summary-panel-ing:not(.summary-panel--expanded) {
+  background: linear-gradient(180deg, #ff7a24 0%, #ff6200 100%);
+}
+
+.summary-panel-ing:not(.summary-panel--expanded) .summary-strip-label {
+  background: transparent;
+}
+
+/* Plegado, el panel de Trade Republic es una banda negra completa, sin marco blanco alrededor. */
+.summary-panel-tr:not(.summary-panel--expanded) {
+  background: linear-gradient(180deg, #1c1c1c 0%, #000000 100%);
+}
+
+.summary-panel-tr:not(.summary-panel--expanded) .summary-strip-label {
+  background: transparent;
+}
+
 /* Plegados, estos dos paneles son más bajos que el resto de paneles de resumen. */
 .summary-panel-ing:not(.summary-panel--expanded),
 .summary-panel-tr:not(.summary-panel--expanded) {
