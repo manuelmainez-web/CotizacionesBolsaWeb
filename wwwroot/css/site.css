@@ -1531,10 +1531,17 @@ body.wco-active .topbar-datetime {
   }
 
   /* Las operaciones de compra-venta (colapsadas en pantalla) se imprimen siempre. */
+  /* Se usa display:block (no grid) para que las tablas largas se fragmenten
+     correctamente en varias páginas al imprimir. */
+  .transaction-broker-grid,
   .transaction-broker-grid.is-collapsed {
-    display: grid !important;
+    display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+  }
+
+  .transaction-broker-grid > .transaction-broker-card {
+    margin-bottom: 12px !important;
   }
 
   /* Operaciones de INGDIRECT: en pantalla solo se ve la pestaña (título) activa;
@@ -2775,9 +2782,37 @@ body.wco-active .topbar-datetime {
     margin: 0 !important;
   }
 
-  .market-panel {
+  /* Los paneles, tarjetas y tablas largas (operaciones de compra-venta,
+     Hacienda...) deben poder continuar en las páginas siguientes: nunca se
+     recortan ni se obligan a caber en una sola página. */
+  .market-panel,
+  .print-broker-group,
+  .transaction-broker-card,
+  .transaction-broker-grid,
+  .tab-content,
+  .tab-pane,
+  .table-wrap {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  .market-table thead {
+    display: table-header-group;
+  }
+
+  .market-table tr {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  .transaction-broker-header,
+  .transaction-tab-summary,
+  .panel-head {
+    break-after: avoid;
+    page-break-after: avoid;
   }
 
   .table-wrap {
