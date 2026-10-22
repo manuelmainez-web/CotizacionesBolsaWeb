@@ -2200,6 +2200,7 @@
                 <span class="transaction-total-summary">@(hac.ToPay >= 0 ? "A pagar" : "A devolver"): <strong class="@toPayClass">@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong> · tramo @((hac.MarginalRate * 100m).ToString("0.##", esCulture)) %</span>
             </div>
         </div>
+        <p class="panel-help-text">Se muestra: Resumen y cuota estimada, Tramos de la base del ahorro, Ventas de @hac.Year y compras que se descuentan (FIFO) y Avisos y aspectos a tener en cuenta.</p>
         <div id="hacienda-panel-body" class="transaction-broker-grid is-collapsed">
             <div class="transaction-broker-card">
                 <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Resumen y cuota estimada</span></div></div>

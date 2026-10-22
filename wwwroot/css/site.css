@@ -1577,6 +1577,12 @@ tr.tx-page-hidden {
   color: #333333;
 }
 
+.hacienda-panel .panel-help-text {
+  background: #eef1fa;
+  border-bottom: 1px solid #c9d2ec;
+  color: #333333;
+}
+
 .hacienda-panel .transaction-broker-card {
   background: #ffffff;
   border-color: #b8c3e6;
