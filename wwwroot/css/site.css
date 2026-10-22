@@ -406,6 +406,13 @@ body.wco-active .topbar-datetime {
   margin-bottom: 4px;
 }
 
+/* Línea de separación entre las opciones de impresión y los botones. */
+.print-options.print-options-last {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.45);
+}
+
 .print-option-label {
   display: inline-flex;
   align-items: center;
@@ -419,6 +426,35 @@ body.wco-active .topbar-datetime {
   width: 16px;
   height: 16px;
   cursor: pointer;
+}
+
+/* Paginación de 10 en 10 filas de las tablas de compras y ventas por título. */
+tr.tx-page-hidden {
+  display: none;
+}
+
+.tx-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 0.78rem;
+}
+
+.tx-pagination .tx-pagination-button {
+  min-width: 0;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.72rem;
+}
+
+.tx-pagination .tx-pagination-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tx-pagination .tx-pagination-info {
+  color: #333333;
 }
 
 .quick-link-text {
@@ -955,6 +991,134 @@ body.wco-active .topbar-datetime {
 
 .summary-box.invested strong {
   color: #ffffff;
+}
+
+/* Paneles "Resumen total de las posiciones" de INGDIRECT y Trade Republic,
+   con los colores corporativos de cada bróker. */
+.summary-panel-ing {
+  background: #ffffff;
+  border-color: #ff6200;
+}
+
+/* Plegados, estos dos paneles son más bajos que el resto de paneles de resumen. */
+.summary-panel-ing:not(.summary-panel--expanded),
+.summary-panel-tr:not(.summary-panel--expanded) {
+  height: 52px;
+  min-height: 52px;
+  max-height: 52px;
+}
+
+.summary-panel-ing .summary-strip-label {
+  background: linear-gradient(180deg, #ff7a24 0%, #ff6200 100%);
+  border-radius: 8px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  color: #ffffff;
+}
+
+.summary-panel-ing .btn-toggle-summary {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #cc4e00;
+}
+
+.summary-panel-ing .btn-toggle-summary:hover {
+  background: #fff3eb;
+  border-color: #fff3eb;
+}
+
+.summary-panel-ing .summary-box {
+  background: #fff7f0;
+  border-color: #ffc499;
+  box-shadow: none;
+}
+
+.summary-panel-ing .summary-box span {
+  color: #666666;
+}
+
+.summary-panel-ing .summary-box strong,
+.summary-panel-ing .summary-box.invested strong {
+  color: #1f1f1f;
+}
+
+.summary-panel-ing .summary-box.gain strong {
+  color: #15803d;
+}
+
+.summary-panel-ing .summary-box.loss strong {
+  color: #c81e28;
+}
+
+.summary-panel-ing .rendimiento-ref-panel {
+  background: #fff3eb;
+  border-color: #ffc499;
+  color: #333333;
+}
+
+.summary-panel-ing .rendimiento-ref-input {
+  background: #ffffff;
+  border-color: #ffb380;
+  color: #333333;
+}
+
+.summary-panel-ing .rendimiento-ref-total {
+  color: #cc4e00;
+}
+
+.summary-panel-ing .rendimiento-ref-result.rendimiento-ref-positivo {
+  color: #15803d;
+}
+
+.summary-panel-ing .rendimiento-ref-result.rendimiento-ref-negativo {
+  color: #c81e28;
+}
+
+.summary-panel-tr {
+  background: #ffffff;
+  border-color: #000000;
+}
+
+.summary-panel-tr .summary-strip-label {
+  background: linear-gradient(180deg, #1c1c1c 0%, #000000 100%);
+  border-radius: 8px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  color: #ffffff;
+}
+
+.summary-panel-tr .btn-toggle-summary {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
+}
+
+.summary-panel-tr .btn-toggle-summary:hover {
+  background: #e9e9e9;
+  border-color: #e9e9e9;
+}
+
+.summary-panel-tr .summary-box {
+  background: #f6f6f6;
+  border-color: #bdbdbd;
+  box-shadow: none;
+}
+
+.summary-panel-tr .summary-box span {
+  color: #666666;
+}
+
+.summary-panel-tr .summary-box strong,
+.summary-panel-tr .summary-box.invested strong {
+  color: #000000;
+}
+
+.summary-panel-tr .summary-box.gain strong {
+  color: #15803d;
+}
+
+.summary-panel-tr .summary-box.loss strong {
+  color: #c81e28;
 }
 
 .print-only {
@@ -3248,6 +3412,15 @@ body.wco-active .topbar-datetime {
 
   .market-table thead {
     display: table-header-group;
+  }
+
+  /* La paginación es solo de pantalla: al imprimir salen todas las filas. */
+  tr.tx-page-hidden {
+    display: table-row !important;
+  }
+
+  .tx-pagination {
+    display: none !important;
   }
 
   .market-table tr {

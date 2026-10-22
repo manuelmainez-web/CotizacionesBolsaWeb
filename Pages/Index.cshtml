@@ -385,6 +385,12 @@
                                 <span translate="no" class="notranslate">Imprimir los movimientos de las operaciones de compra y venta (INGDIRECT y Trade Republic)</span>
                             </label>
                         </div>
+                        <div class="print-options print-options-last">
+                            <label class="print-option-label" for="chk-print-hacienda">
+                                <input type="checkbox" id="chk-print-hacienda" checked />
+                                <span translate="no" class="notranslate">Imprimir los datos de Hacienda (Agencia Tributaria)</span>
+                            </label>
+                        </div>
                         <div class="quick-links" translate="no">
                             <div class="quick-link-inline">
                                 <button type="button" class="mini-button quick-link-button notranslate" id="btn-print-cartera-tab" title="Imprime solo la cartera, cuenta corriente y efectivo con las casillas de resumen">
@@ -772,7 +778,7 @@
 
     <div class="blank-lines-2"></div>
 
-    <div class="summary-panel">
+    <div class="summary-panel summary-panel-ing">
         <div class="summary-strip-label" id="summary-strip-label-ing">
             <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-ing" data-toggle-name="resumen ING" title="Mostrar/ocultar">Mostrar</button>
             <span class="broker-label-text">
@@ -800,7 +806,9 @@
                 <input type="text" readonly tabindex="-1" class="rendimiento-ref-input rendimiento-ref-result" id="rendimiento-ref-ing-result" aria-label="Importe total ING Direct menos importe de referencia" />
             </div>
         </div>
+    </div>
 
+    <div class="summary-panel summary-panel-tr">
         <div class="summary-strip-label" id="summary-strip-label-tr">
             <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-tr" data-toggle-name="resumen Trade Republic" title="Mostrar/ocultar">Mostrar</button>
             <span class="broker-label-text">
@@ -2156,7 +2164,7 @@
         <div class="panel-head panel-head-row">
             <span>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
-                Hacienda <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
+                Agencia Tributaria <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
                 <span class="transaction-total-summary">@(hac.ToPay >= 0 ? "A pagar" : "A devolver"): <strong class="@toPayClass">@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong> · tramo @((hac.MarginalRate * 100m).ToString("0.##", esCulture)) %</span>

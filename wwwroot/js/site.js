@@ -106,8 +106,10 @@ function syncSummaryPanelState(panelResumen) {
             panelResumen.style.height = altoNecesario + 'px';
             panelResumen.style.maxHeight = altoNecesario + 'px';
         } else {
-            panelResumen.style.height = '96px';
-            panelResumen.style.maxHeight = '96px';
+            // Los paneles de INGDIRECT y Trade Republic plegados son más bajos que el resto.
+            var altoPlegado = panelResumen.matches('.summary-panel-ing, .summary-panel-tr') ? '52px' : '96px';
+            panelResumen.style.height = altoPlegado;
+            panelResumen.style.maxHeight = altoPlegado;
             panelResumen.style.overflow = 'hidden';
         }
     });
@@ -975,6 +977,12 @@ function eliminarPanelesVaciosEnImpresion(shellClone) {
 function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
     var origen = window.location.origin;
 
+    if (opciones && opciones.sinHacienda) {
+        shellClone.querySelectorAll('.hacienda-panel, .agencia-tributaria-title').forEach(function (elemento) {
+            elemento.remove();
+        });
+    }
+
     if (opciones && opciones.sinOperaciones) {
         shellClone.querySelectorAll('.market-panel').forEach(function (panel) {
             var cabecera = ((panel.querySelector('.panel-head') || panel).textContent || '').replace(/\s+/g, ' ');
@@ -1200,6 +1208,12 @@ function imprimirConNumeracion(bodyClass, opciones) {
         opciones = Object.assign({}, opciones, { sinOperaciones: true });
     }
 
+    // Checkbox "Imprimir los datos de Hacienda": si está desmarcado no se imprime el panel de Hacienda.
+    var checkHacienda = document.getElementById('chk-print-hacienda');
+    if (checkHacienda && !checkHacienda.checked) {
+        opciones = Object.assign({}, opciones, { sinHacienda: true });
+    }
+
     if (bodyClass) {
         document.body.classList.add(bodyClass);
     }
@@ -1207,6 +1221,14 @@ function imprimirConNumeracion(bodyClass, opciones) {
     window.dispatchEvent(new Event('beforeprint'));
     var copiaContenido = document.getElementById('market-shell').cloneNode(true);
     window.dispatchEvent(new Event('afterprint'));
+
+    // La paginación es solo de pantalla: al imprimir salen todas las filas y sin controles.
+    copiaContenido.querySelectorAll('.tx-page-hidden').forEach(function (fila) {
+        fila.classList.remove('tx-page-hidden');
+    });
+    copiaContenido.querySelectorAll('.tx-pagination').forEach(function (barra) {
+        barra.remove();
+    });
 
     if (bodyClass) {
         document.body.classList.remove(bodyClass);
@@ -1475,4 +1497,76 @@ function imprimirConNumeracion(bodyClass, opciones) {
     } else {
         iniciar();
     }
+})();
+
+// Paginación de 10 en 10 filas de las tablas de Compras y Ventas por título
+// (panel "Operaciones de compra y venta INGDIRECT"). Al imprimir se muestran
+// todas las filas (ver imprimirConNumeracion).
+(function () {
+    var FILAS_POR_PAGINA = 10;
+
+    document.querySelectorAll('.ing-panel .transaction-broker-card[data-transaction-type] .tab-pane table.transaction-table').forEach(function (tabla) {
+        var cuerpo = tabla.tBodies[0];
+        var contenedor = tabla.closest('.table-wrap');
+        if (!cuerpo || !contenedor) {
+            return;
+        }
+
+        var filas = Array.prototype.slice.call(cuerpo.rows);
+        var totalPaginas = Math.ceil(filas.length / FILAS_POR_PAGINA);
+        if (totalPaginas <= 1) {
+            return;
+        }
+
+        var paginaActual = 1;
+
+        var barra = document.createElement('div');
+        barra.className = 'tx-pagination';
+
+        var anterior = document.createElement('button');
+        anterior.type = 'button';
+        anterior.className = 'mini-button tx-pagination-button';
+        anterior.textContent = '‹ Anterior';
+
+        var info = document.createElement('span');
+        info.className = 'tx-pagination-info';
+
+        var siguiente = document.createElement('button');
+        siguiente.type = 'button';
+        siguiente.className = 'mini-button tx-pagination-button';
+        siguiente.textContent = 'Siguiente ›';
+
+        barra.appendChild(anterior);
+        barra.appendChild(info);
+        barra.appendChild(siguiente);
+        contenedor.parentNode.insertBefore(barra, contenedor.nextSibling);
+
+        function mostrarPagina() {
+            var desde = (paginaActual - 1) * FILAS_POR_PAGINA;
+            var hasta = desde + FILAS_POR_PAGINA;
+            filas.forEach(function (fila, indice) {
+                fila.classList.toggle('tx-page-hidden', indice < desde || indice >= hasta);
+            });
+            info.textContent = 'Página ' + paginaActual + ' de ' + totalPaginas +
+                ' (filas ' + (desde + 1) + '–' + Math.min(hasta, filas.length) + ' de ' + filas.length + ')';
+            anterior.disabled = paginaActual === 1;
+            siguiente.disabled = paginaActual === totalPaginas;
+        }
+
+        anterior.addEventListener('click', function () {
+            if (paginaActual > 1) {
+                paginaActual--;
+                mostrarPagina();
+            }
+        });
+
+        siguiente.addEventListener('click', function () {
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                mostrarPagina();
+            }
+        });
+
+        mostrarPagina();
+    });
 })();
