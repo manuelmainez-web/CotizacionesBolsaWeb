@@ -379,6 +379,12 @@
                         <span>Imprimir</span>
                     </div>
                     <div class="quick-links-panel">
+                        <div class="print-options">
+                            <label class="print-option-label" for="chk-print-operaciones">
+                                <input type="checkbox" id="chk-print-operaciones" checked />
+                                <span translate="no" class="notranslate">Imprimir los movimientos de las operaciones de compra y venta (INGDIRECT y Trade Republic)</span>
+                            </label>
+                        </div>
                         <div class="quick-links" translate="no">
                             <div class="quick-link-inline">
                                 <button type="button" class="mini-button quick-link-button notranslate" id="btn-print-cartera-tab" title="Imprime solo la cartera, cuenta corriente y efectivo con las casillas de resumen">
@@ -1779,7 +1785,7 @@
             new { Key = "sale", Title = "Ventas", TotalLabel = "Importe total ventas", Sign = 1m, Rows = Model.ExcelSales, EmptyText = "No hay ventas cargadas. Usa \"Cargar Excel\" para importarlas." }
         };
     }
-    <div class="market-panel mt-4">
+    <div class="market-panel ing-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
@@ -1946,7 +1952,7 @@
             .ToList();
         var summaryResultTotal = summaryRows.Sum(s => s.Result);
     }
-    <div class="market-panel mt-4">
+    <div class="market-panel ing-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
@@ -2011,7 +2017,7 @@
         </div>
     </div>
 
-    <div class="market-panel mt-4">
+    <div class="market-panel tr-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
@@ -2146,7 +2152,7 @@
         var eurPlain = "#,##0.00 €;-#,##0.00 €;0.00 €";
         var toPayClass = hac.ToPay > 0 ? "hacienda-loss" : (hac.ToPay < 0 ? "hacienda-gain" : "");
     }
-    <div class="market-panel mt-4">
+    <div class="market-panel hacienda-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />

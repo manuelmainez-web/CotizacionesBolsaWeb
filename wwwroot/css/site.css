@@ -402,6 +402,25 @@ body.wco-active .topbar-datetime {
   min-height: 32px;
 }
 
+.print-options {
+  margin-bottom: 4px;
+}
+
+.print-option-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #edf6ff;
+  font-size: 0.85rem;
+}
+
+.print-option-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .quick-link-text {
   color: #bfd0df;
   font-size: 0.7rem;
@@ -1312,6 +1331,434 @@ body.wco-active .topbar-datetime {
 
 .panel-head-subtitle {
   font-weight: 400;
+}
+
+/* Panel de Hacienda: colores corporativos de la Agencia Tributaria
+   (azul #27409A, amarillo #FFCC00 y rojo #E3202B del logotipo). */
+.market-panel.hacienda-panel {
+  border-color: rgba(255, 204, 0, 0.55);
+}
+
+.hacienda-panel .panel-head {
+  background: linear-gradient(180deg, #2f4cb0 0%, #1f3585 100%);
+  border-bottom: 3px solid #ffcc00;
+  color: #ffffff;
+}
+
+.hacienda-panel .panel-head .panel-head-subtitle,
+.hacienda-panel .panel-head .transaction-total-summary {
+  color: #ffffff;
+}
+
+.hacienda-panel .panel-head .hacienda-gain,
+.hacienda-panel .panel-head .hacienda-loss {
+  color: #ffcc00;
+}
+
+/* Cuerpo del panel: fondo blanco y texto gris oscuro, como la web de la Agencia Tributaria. */
+.hacienda-panel #hacienda-panel-body {
+  background: #ffffff;
+  color: #333333;
+}
+
+.hacienda-panel .transaction-broker-card {
+  background: #ffffff;
+  border-color: #b8c3e6;
+}
+
+.hacienda-panel .transaction-broker-header {
+  background: #eef1fa;
+  border-bottom: 2px solid #ffcc00;
+}
+
+.hacienda-panel .transaction-broker-name {
+  color: #27409a;
+}
+
+.hacienda-panel .transaction-broker-header .transaction-total-summary,
+.hacienda-panel .transaction-tab-summary {
+  color: #333333;
+}
+
+.hacienda-panel .market-table {
+  color: #333333;
+}
+
+.hacienda-panel .market-table thead th {
+  background: #27409a;
+  color: #ffffff;
+  border-bottom: 2px solid #ffcc00;
+}
+
+.hacienda-panel .market-table-grid th,
+.hacienda-panel .market-table-grid td {
+  border-color: #c9d2ec;
+}
+
+.hacienda-panel .market-table tbody tr {
+  background: #ffffff;
+}
+
+.hacienda-panel .market-table tbody tr:nth-child(even) {
+  background: #f5f7fc;
+}
+
+.hacienda-panel .market-table tbody tr:hover {
+  background: #e8edfa;
+}
+
+.hacienda-panel .price-cell {
+  color: #1f2937;
+}
+
+.hacienda-panel .transaction-table .transaction-title-name {
+  color: #5b6475;
+}
+
+.hacienda-panel .empty-state-cell {
+  color: #5b6475;
+}
+
+.hacienda-panel .market-table.transaction-table tbody tr.transaction-row-current-year {
+  background: rgba(255, 204, 0, 0.28);
+}
+
+.hacienda-panel .market-table.transaction-table tbody tr.transaction-row-current-year:hover {
+  background: rgba(255, 204, 0, 0.4);
+}
+
+.hacienda-panel .transaction-table tr.transaction-row-current-year td {
+  border-color: #e0b400;
+}
+
+.hacienda-panel .market-table.transaction-table tbody tr.hacienda-lot-row td {
+  color: #5b6475;
+  background: #f1f3f9;
+}
+
+.hacienda-panel .market-table.transaction-table tbody tr.hacienda-lot-row-warn td {
+  color: #8a5a00;
+  background: #fff7d6;
+}
+
+.hacienda-panel #hacienda-panel-body .hacienda-gain {
+  color: #15803d;
+}
+
+.hacienda-panel #hacienda-panel-body .hacienda-loss {
+  color: #c81e28;
+}
+
+.hacienda-panel .hacienda-inputs-form label {
+  color: #333333;
+}
+
+.hacienda-panel .hacienda-inputs-form input {
+  background: #ffffff;
+  border-color: #9fb0e0;
+  color: #333333;
+}
+
+.hacienda-panel .hacienda-notices {
+  color: #333333;
+}
+
+.hacienda-panel .hacienda-notices .hacienda-notice-warn {
+  color: #8a5a00;
+}
+
+.hacienda-panel .mini-button {
+  background: #27409a;
+  border-color: #ffcc00;
+  color: #ffffff;
+}
+
+.hacienda-panel .mini-button:hover {
+  background: #1f3585;
+}
+
+/* Panel "Operaciones de compra y venta INGDIRECT": colores corporativos de ING
+   (naranja #FF6200, blanco y gris oscuro). */
+.market-panel.ing-panel {
+  background: #ffffff;
+  border-color: #ff6200;
+  color: #333333;
+}
+
+.ing-panel .panel-head {
+  background: linear-gradient(180deg, #ff7a24 0%, #ff6200 100%);
+  border-bottom: 3px solid #cc4e00;
+  color: #ffffff;
+}
+
+.ing-panel .panel-head .panel-head-subtitle,
+.ing-panel .panel-head .transaction-total-summary {
+  color: #ffffff;
+}
+
+.ing-panel .panel-help-text {
+  background: #fff3eb;
+  border-bottom: 1px solid #ffd2b3;
+  color: #333333;
+}
+
+.ing-panel .form-error-banner {
+  color: #b42318;
+}
+
+.ing-panel #transaction-broker-grid-excel,
+.ing-panel #title-summary-panel-body {
+  background: #ffffff;
+  color: #333333;
+}
+
+.ing-panel .transaction-broker-card {
+  background: #ffffff;
+  border-color: #ffc499;
+}
+
+.ing-panel .transaction-broker-header {
+  background: #fff3eb;
+  border-bottom: 2px solid #ff6200;
+}
+
+.ing-panel .transaction-broker-name {
+  color: #cc4e00;
+}
+
+.ing-panel .transaction-broker-header .transaction-total-summary,
+.ing-panel .transaction-tab-summary,
+.ing-panel .transaction-tab-count {
+  color: #333333;
+}
+
+.ing-panel .market-tabs {
+  border-bottom-color: #ffc499;
+}
+
+.ing-panel .market-tabs .nav-link {
+  color: #555555;
+}
+
+.ing-panel .market-tabs .nav-link:hover {
+  color: #cc4e00;
+  border-color: #ffc499;
+}
+
+.ing-panel .market-tabs .nav-link.active {
+  background: #ff6200;
+  border-color: #ff6200;
+  color: #ffffff;
+}
+
+.ing-panel .market-table {
+  color: #333333;
+}
+
+.ing-panel .market-table thead th {
+  background: #ff6200;
+  color: #ffffff;
+  border-bottom: 2px solid #cc4e00;
+}
+
+.ing-panel .market-table-grid th,
+.ing-panel .market-table-grid td {
+  border-color: #ffd2b3;
+}
+
+.ing-panel .market-table tbody tr {
+  background: #ffffff;
+}
+
+.ing-panel .market-table tbody tr:nth-child(even) {
+  background: #fff7f0;
+}
+
+.ing-panel .market-table tbody tr:hover {
+  background: #ffe9d9;
+}
+
+.ing-panel .price-cell {
+  color: #1f1f1f;
+}
+
+.ing-panel .transaction-table .transaction-title-name,
+.ing-panel .empty-state-cell {
+  color: #666666;
+}
+
+.ing-panel .market-table.transaction-table tbody tr.transaction-row-current-year {
+  background: #ffe3cf;
+}
+
+.ing-panel .market-table.transaction-table tbody tr.transaction-row-current-year:hover {
+  background: #ffd5b8;
+}
+
+.ing-panel .transaction-table tr.transaction-row-current-year td {
+  border-color: #ff9a5c;
+}
+
+.ing-panel .mini-button {
+  background: #ff6200;
+  border-color: #cc4e00;
+  color: #ffffff;
+}
+
+.ing-panel .mini-button:hover {
+  background: #e65800;
+}
+
+.ing-panel .mini-button.mini-button-secondary {
+  background: #ffffff;
+  border-color: #ff6200;
+  color: #cc4e00;
+}
+
+/* Los botones de la cabecera naranja ("Cargar Excel", "Vaciar") van en blanco para que se vean. */
+.ing-panel .panel-head .mini-button,
+.ing-panel .panel-head .mini-button.mini-button-secondary {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #cc4e00;
+}
+
+.ing-panel .panel-head .mini-button:hover {
+  background: #fff3eb;
+}
+
+/* Resumen por título: resultado en cabecera, pie de totales, nota y colores de ganancia/pérdida. */
+.ing-panel .panel-head .hacienda-gain,
+.ing-panel .panel-head .hacienda-loss {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.ing-panel #title-summary-panel-body .hacienda-gain {
+  color: #15803d;
+}
+
+.ing-panel #title-summary-panel-body .hacienda-loss {
+  color: #c81e28;
+}
+
+.ing-panel .market-table tfoot td {
+  background: #ffe3cf;
+  color: #333333;
+  border-top: 2px solid #ff6200;
+}
+
+.ing-panel .hacienda-notices-note {
+  color: #666666;
+}
+
+/* Panel "Operaciones de compra y venta Trade Republic": colores corporativos de
+   Trade Republic (negro y blanco). */
+.market-panel.tr-panel {
+  background: #ffffff;
+  border-color: #000000;
+  color: #111111;
+}
+
+.tr-panel .panel-head {
+  background: linear-gradient(180deg, #1c1c1c 0%, #000000 100%);
+  border-bottom: 3px solid #6b6b6b;
+  color: #ffffff;
+}
+
+.tr-panel .panel-head .panel-head-subtitle,
+.tr-panel .panel-head .transaction-total-summary {
+  color: #ffffff;
+}
+
+.tr-panel #transaction-broker-grid-tr {
+  background: #ffffff;
+  color: #111111;
+}
+
+.tr-panel .transaction-broker-card {
+  background: #ffffff;
+  border-color: #bdbdbd;
+}
+
+.tr-panel .transaction-broker-header {
+  background: #f2f2f2;
+  border-bottom: 2px solid #000000;
+}
+
+.tr-panel .transaction-broker-name {
+  color: #000000;
+}
+
+.tr-panel .transaction-broker-header .transaction-total-summary {
+  color: #333333;
+}
+
+.tr-panel .market-table {
+  color: #111111;
+}
+
+.tr-panel .market-table thead th {
+  background: #000000;
+  color: #ffffff;
+  border-bottom: 2px solid #6b6b6b;
+}
+
+.tr-panel .market-table-grid th,
+.tr-panel .market-table-grid td {
+  border-color: #d0d0d0;
+}
+
+.tr-panel .market-table tbody tr {
+  background: #ffffff;
+}
+
+.tr-panel .market-table tbody tr:nth-child(even) {
+  background: #f6f6f6;
+}
+
+.tr-panel .market-table tbody tr:hover {
+  background: #e9e9e9;
+}
+
+.tr-panel .price-cell {
+  color: #000000;
+}
+
+.tr-panel .empty-state-cell {
+  color: #666666;
+}
+
+.tr-panel .market-table.transaction-table tbody tr.transaction-row-current-year {
+  background: #e2e2e2;
+}
+
+.tr-panel .market-table.transaction-table tbody tr.transaction-row-current-year:hover {
+  background: #d4d4d4;
+}
+
+.tr-panel .transaction-table tr.transaction-row-current-year td {
+  border-color: #8a8a8a;
+}
+
+.tr-panel .mini-button {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+.tr-panel .mini-button:hover {
+  background: #333333;
+}
+
+.tr-panel .panel-head .mini-button {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
+}
+
+.tr-panel .panel-head .mini-button:hover {
+  background: #e9e9e9;
 }
 
 .range-buttons {

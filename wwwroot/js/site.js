@@ -975,6 +975,15 @@ function eliminarPanelesVaciosEnImpresion(shellClone) {
 function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
     var origen = window.location.origin;
 
+    if (opciones && opciones.sinOperaciones) {
+        shellClone.querySelectorAll('.market-panel').forEach(function (panel) {
+            var cabecera = ((panel.querySelector('.panel-head') || panel).textContent || '').replace(/\s+/g, ' ');
+            if (/Operaciones de compra y venta/i.test(cabecera)) {
+                panel.remove();
+            }
+        });
+    }
+
     function filtrarFilasPorBroker(tabla, broker) {
         var textoPanel = ((tabla.querySelector('.panel-head') || tabla).textContent || '').replace(/\s+/g, ' ').trim();
         var esOperacionBroker = /Operaciones de compra y venta/i.test(textoPanel);
@@ -1184,6 +1193,13 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
 // y se invoca la impresión de ese iframe. El iframe se elimina solo al
 // terminar de imprimir (o cancelar).
 function imprimirConNumeracion(bodyClass, opciones) {
+    // Checkbox de la pestaña "Imprimir": si está desmarcado no se imprimen los
+    // movimientos de las operaciones de compra y venta (INGDIRECT y Trade Republic).
+    var checkOperaciones = document.getElementById('chk-print-operaciones');
+    if (checkOperaciones && !checkOperaciones.checked) {
+        opciones = Object.assign({}, opciones, { sinOperaciones: true });
+    }
+
     if (bodyClass) {
         document.body.classList.add(bodyClass);
     }
