@@ -790,61 +790,6 @@
         <div class="control-cotizaciones-title-line"></div>
     </div>
 
-    <div class="summary-panel summary-panel-ing">
-        <div class="summary-strip-label" id="summary-strip-label-ing">
-            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-ing" data-toggle-name="resumen ING" title="Mostrar/ocultar">Mostrar</button>
-            <span class="broker-label-text">
-                <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" /> <span translate="no" class="notranslate">INGDIRECT (Resumen total de las posiciones)</span>
-            </span>
-        </div>
-        <p class="summary-help-text">Se muestra el resumen correspondiente a todas las operaciones de compra venta realizadas desde INGDIRECT, indicando la rentabilidad total obtenida. También calculamos la rentabilidad tomando como referencia un importe dado.</p>
-        <div class="summary-strip is-collapsed" id="summary-strip-ing">
-            <div class="summary-box invested">
-                <span>Importe total invertido</span>
-                <strong>@Model.IngPurchaseValue.ToString("#,##0.00 €")</strong>
-            </div>
-            <div class="summary-box gain">
-                <span>Rentabilidad total</span>
-                <strong>@Model.IngGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.IngGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</strong>
-            </div>
-            <div class="summary-box @(Model.IngGainValue >= 0 ? "gain" : "loss")">
-                <span>Importe total</span>
-                <strong>@((Model.IngPurchaseValue + Model.IngGainValue).ToString("#,##0.00 €"))</strong>
-            </div>
-            <div class="rendimiento-ref-panel" id="rendimiento-ref-ing" data-valor="@Model.RendimientoReferenciaIng" data-total="@((Model.IngPurchaseValue + Model.IngGainValue).ToString("0.####", System.Globalization.CultureInfo.InvariantCulture))">
-                @Html.AntiForgeryToken()
-                <label class="rendimiento-ref-label" for="rendimiento-ref-ing-input">Importe de referencia para Rendimiento temporal:</label>
-                <input type="text" inputmode="decimal" autocomplete="off" class="rendimiento-ref-input" id="rendimiento-ref-ing-input" />
-                <span class="rendimiento-ref-total notranslate" translate="no">@((Model.IngPurchaseValue + Model.IngGainValue).ToString("#,##0.00 €")) =</span>
-                <input type="text" readonly tabindex="-1" class="rendimiento-ref-input rendimiento-ref-result" id="rendimiento-ref-ing-result" aria-label="Importe total ING Direct menos importe de referencia" />
-            </div>
-        </div>
-    </div>
-
-    <div class="summary-panel summary-panel-tr">
-        <div class="summary-strip-label" id="summary-strip-label-tr">
-            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-tr" data-toggle-name="resumen Trade Republic" title="Mostrar/ocultar">Mostrar</button>
-            <span class="broker-label-text">
-                <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" /> <span translate="no" class="notranslate">TRADE REPUBLIC (Resumen total de las posiciones)</span>
-            </span>
-        </div>
-        <p class="summary-help-text">Se muestra el resumen correspondiente a todas las operaciones de compra venta realizadas desde el broker TradeRepublic, indicando la rentabilidad total obtenida.</p>
-        <div class="summary-strip is-collapsed" id="summary-strip-tr">
-            <div class="summary-box invested">
-                <span>Importe total invertido</span>
-                <strong>@Model.TrPurchaseValue.ToString("#,##0.00 €")</strong>
-            </div>
-            <div class="summary-box gain">
-                <span>Rentabilidad total</span>
-                <strong>@Model.TrGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.TrGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</strong>
-            </div>
-            <div class="summary-box @(Model.TrGainValue >= 0 ? "gain" : "loss")">
-                <span>Importe total</span>
-                <strong>@((Model.TrPurchaseValue + Model.TrGainValue).ToString("#,##0.00 €"))</strong>
-            </div>
-        </div>
-    </div>
-
     <div class="blank-line-1"></div>
 
     <div class="market-tab-shell mt-4">
@@ -1596,10 +1541,10 @@
         </form>
     </dialog>
 
-    <div class="blank-lines-2"></div>
+    <div class="blank-line-1"></div>
 
     <div class="control-cotizaciones-title operaciones-compra-venta-title">
-        <h2 class="control-cotizaciones-title-text">Operaciones de compra-venta</h2>
+        <h2 class="control-cotizaciones-title-text"><img class="title-broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />Ingdirect</h2>
         <div class="control-cotizaciones-title-line"></div>
     </div>
 
@@ -1611,12 +1556,124 @@
             new { Key = "sale", Title = "Ventas", TotalLabel = "Importe total ventas", Sign = 1m, Rows = Model.ExcelSales, EmptyText = "No hay ventas cargadas. Usa \"Cargar Excel\" para importarlas." }
         };
     }
+    @if (!string.IsNullOrWhiteSpace(Model.CheckingAccountError))
+    {
+        <div class="form-error-banner">@Model.CheckingAccountError</div>
+    }
+    @{
+        var checkingEntities = new[]
+        {
+            new { Name = "ING Direct", Code = "ING", PanelClass = "ing-panel", Logo = "/images/brokers/ing.png", TbodyId = "tbody-checkingaccounts-ing", DialogId = "add-checkingaccount-ing-dialog" },
+            new { Name = "Trade Republic", Code = "TR", PanelClass = "tr-panel", Logo = "/images/brokers/traderepublic.png", TbodyId = "tbody-checkingaccounts-tr", DialogId = "add-checkingaccount-tr-dialog" }
+        };
+    }
+    @{
+        async Task RenderCheckingPanel(string code)
+        {
+            var entity = checkingEntities.First(e => e.Code == code);
+    var entityAccounts = Model.CheckingAccounts.Where(a => a.Name == entity.Name).ToList();
+    var checkingTotal = entityAccounts.Sum(a => a.Balance);
+    var checkingTotalClass = checkingTotal > 0 ? "hacienda-gain" : (checkingTotal < 0 ? "hacienda-loss" : "");
+    <div class="market-panel @entity.PanelClass mt-4 market-panel-non-cartera">
+        <div class="panel-head panel-head-row">
+            <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="__auto-panel-table__" data-toggle-name="cuenta corriente @entity.Name" title="Mostrar/ocultar" aria-label="Mostrar cuenta corriente @entity.Name" aria-expanded="false"></button>
+                Cuenta corriente
+            </span>
+            <span class="transaction-total-summary broker-head-figure"><span class="figure-label">Total:</span> <strong class="@checkingTotalClass">@checkingTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
+            <button type="button" class="mini-button" data-dialog-target="@entity.DialogId">+ Añadir Cuenta</button>
+        </div>
+        <div class="table-wrap is-collapsed">
+            <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
+                <thead>
+                    <tr>
+                        <th class="col-nombre-wide" style="width: 942px;">Nombre</th>
+                        <th class="text-align-right" style="width: 122px;">Saldo cuenta corriente</th>
+                        <th class="text-align-right" style="width: 115px;">Actualización</th>
+                        <th style="width: 66px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="@entity.TbodyId">
+                    @if (entityAccounts.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4" class="empty-state-cell">No hay cuenta corriente de @entity.Name. Usa "+ Añadir Cuenta" para empezar.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in entityAccounts)
+                        {
+                            <tr data-broker="@(item.Name == "Trade Republic" ? "TR" : "ING")">
+                                <td class="name-cell">
+                                    <span class="name-with-flag">
+                                        @if (item.Name == "Trade Republic")
+                                        {
+                                            <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
+                                        }
+                                        else
+                                        {
+                                            <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
+                                        }
+                                        @item.Name
+                                    </span>
+                                </td>
+                                <td class="price-cell price-cell-quote">@item.Balance.ToString("#,##0.00 €")</td>
+                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="delete-cell">
+                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-checkingaccount-@Model.CheckingAccounts.IndexOf(item)" title="Editar">✎</button>
+                                    <form method="post" asp-page-handler="DeleteCheckingAccount" onsubmit="return confirm('¿Eliminar esta cuenta corriente?');">
+                                        <input type="hidden" name="name" value="@item.Name" />
+                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+        }
+    }
+
+    <div class="summary-panel summary-panel-ing">
+        <div class="summary-strip-label" id="summary-strip-label-ing">
+            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-ing" data-toggle-name="resumen ING" title="Mostrar/ocultar">Mostrar</button>
+            <span class="broker-label-text">
+                <span translate="no" class="notranslate">Resumen total de las posiciones</span>
+            </span>
+            <span class="summary-label-gain notranslate" translate="no"><span class="figure-label">Rentabilidad:</span> @Model.IngGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.IngGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</span>
+        </div>
+        <p class="summary-help-text">Se muestra el resumen correspondiente a todas las operaciones de compra venta realizadas desde INGDIRECT, indicando la rentabilidad total obtenida. También calculamos la rentabilidad tomando como referencia un importe dado.</p>
+        <div class="summary-strip is-collapsed" id="summary-strip-ing">
+            <div class="summary-box invested">
+                <span>Importe total invertido</span>
+                <strong>@Model.IngPurchaseValue.ToString("#,##0.00 €")</strong>
+            </div>
+            <div class="summary-box gain">
+                <span>Rentabilidad total</span>
+                <strong>@Model.IngGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.IngGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</strong>
+            </div>
+            <div class="summary-box @(Model.IngGainValue >= 0 ? "gain" : "loss")">
+                <span>Importe total</span>
+                <strong>@((Model.IngPurchaseValue + Model.IngGainValue).ToString("#,##0.00 €"))</strong>
+            </div>
+            <div class="rendimiento-ref-panel" id="rendimiento-ref-ing" data-valor="@Model.RendimientoReferenciaIng" data-total="@((Model.IngPurchaseValue + Model.IngGainValue).ToString("0.####", System.Globalization.CultureInfo.InvariantCulture))">
+                @Html.AntiForgeryToken()
+                <label class="rendimiento-ref-label" for="rendimiento-ref-ing-input">Importe de referencia para Rendimiento temporal:</label>
+                <input type="text" inputmode="decimal" autocomplete="off" class="rendimiento-ref-input" id="rendimiento-ref-ing-input" />
+                <span class="rendimiento-ref-total notranslate" translate="no">@((Model.IngPurchaseValue + Model.IngGainValue).ToString("#,##0.00 €")) =</span>
+                <input type="text" readonly tabindex="-1" class="rendimiento-ref-input rendimiento-ref-result" id="rendimiento-ref-ing-result" aria-label="Importe total ING Direct menos importe de referencia" />
+            </div>
+        </div>
+    </div>
+
     <div class="market-panel ing-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="transaction-broker-grid-excel" data-toggle-name="operaciones de compra y venta Excel" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
-                Operaciones de compra y venta INGDIRECT
+                Operaciones de compra y venta
             </span>
             <div class="panel-head-actions">
                 <form method="post" enctype="multipart/form-data" asp-page-handler="ImportExcelTransactions" style="display: inline-block; margin: 0;">
@@ -1782,12 +1839,9 @@
         <div class="panel-head panel-head-row">
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="title-summary-panel-body" data-toggle-name="resumen por título" title="Mostrar/ocultar" aria-label="Mostrar resumen por título" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
                 Resumen por título <span class="panel-head-subtitle">(compras y ventas regularizadas)</span>
             </span>
-            <div class="panel-head-actions">
-                <span class="transaction-total-summary">Resultado total: <strong class="@(summaryResultTotal >= 0 ? "hacienda-gain" : "hacienda-loss")">@summaryResultTotal.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €", esCulture)</strong></span>
-            </div>
+            <span class="transaction-total-summary broker-head-figure"><span class="figure-label">Resultado total:</span> <strong class="@(summaryResultTotal >= 0 ? "hacienda-gain" : "hacienda-loss")">@summaryResultTotal.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €", esCulture)</strong></span>
         </div>
         <div id="title-summary-panel-body" class="transaction-broker-grid is-collapsed">
             <div class="transaction-broker-card">
@@ -1843,12 +1897,46 @@
         </div>
     </div>
 
+    @{ await RenderCheckingPanel("ING"); }
+
+    <div class="blank-lines-2"></div>
+    <div class="blank-line-1"></div>
+
+    <div class="control-cotizaciones-title operaciones-compra-venta-title">
+        <h2 class="control-cotizaciones-title-text"><img class="title-broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />TradeRepublic</h2>
+        <div class="control-cotizaciones-title-line"></div>
+    </div>
+
+    <div class="summary-panel summary-panel-tr">
+        <div class="summary-strip-label" id="summary-strip-label-tr">
+            <button type="button" class="btn-toggle-summary" data-toggle-target="summary-strip-tr" data-toggle-name="resumen Trade Republic" title="Mostrar/ocultar">Mostrar</button>
+            <span class="broker-label-text">
+                <span translate="no" class="notranslate">Resumen total de las posiciones</span>
+            </span>
+            <span class="summary-label-gain notranslate" translate="no"><span class="figure-label">Rentabilidad:</span> @Model.TrGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.TrGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</span>
+        </div>
+        <p class="summary-help-text">Se muestra el resumen correspondiente a todas las operaciones de compra venta realizadas desde el broker TradeRepublic, indicando la rentabilidad total obtenida.</p>
+        <div class="summary-strip is-collapsed" id="summary-strip-tr">
+            <div class="summary-box invested">
+                <span>Importe total invertido</span>
+                <strong>@Model.TrPurchaseValue.ToString("#,##0.00 €")</strong>
+            </div>
+            <div class="summary-box gain">
+                <span>Rentabilidad total</span>
+                <strong>@Model.TrGainPercent.ToString("+#,##0.00;-#,##0.00;0.00")% (@Model.TrGainValue.ToString("+#,##0.00 €;-#,##0.00 €;0.00 €"))</strong>
+            </div>
+            <div class="summary-box @(Model.TrGainValue >= 0 ? "gain" : "loss")">
+                <span>Importe total</span>
+                <strong>@((Model.TrPurchaseValue + Model.TrGainValue).ToString("#,##0.00 €"))</strong>
+            </div>
+        </div>
+    </div>
+
     <div class="market-panel tr-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="transaction-broker-grid-tr" data-toggle-name="operaciones de compra y venta Trade Republic" title="Mostrar/ocultar" aria-label="Mostrar operaciones de compra y venta Trade Republic" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
-                Operaciones de compra y venta Trade Republic
+                Operaciones de compra y venta
             </span>
         </div>
         <p class="panel-help-text">Se muestran todas las operaciones de compra venta de títulos bursátiles realizados desde el broker TradeRepublic.</p>
@@ -1964,94 +2052,8 @@
         </div>
     </div>
 
-    <div class="blank-line-1"></div>
-    <div class="blank-line-1"></div>
-    <div class="blank-line-1"></div>
-    <div class="blank-line-1"></div>
+    @{ await RenderCheckingPanel("TR"); }
 
-    <div class="control-cotizaciones-title cuentas-efectivo-title">
-        <h2 class="control-cotizaciones-title-text">Cuentas corrientes</h2>
-        <div class="control-cotizaciones-title-line"></div>
-    </div>
-
-    @if (!string.IsNullOrWhiteSpace(Model.CheckingAccountError))
-    {
-        <div class="form-error-banner">@Model.CheckingAccountError</div>
-    }
-    @{
-        var checkingEntities = new[]
-        {
-            new { Name = "ING Direct", Code = "ING", PanelClass = "ing-panel", Logo = "/images/brokers/ing.png", TbodyId = "tbody-checkingaccounts-ing", DialogId = "add-checkingaccount-ing-dialog" },
-            new { Name = "Trade Republic", Code = "TR", PanelClass = "tr-panel", Logo = "/images/brokers/traderepublic.png", TbodyId = "tbody-checkingaccounts-tr", DialogId = "add-checkingaccount-tr-dialog" }
-        };
-    }
-    @foreach (var entity in checkingEntities)
-    {
-    var entityAccounts = Model.CheckingAccounts.Where(a => a.Name == entity.Name).ToList();
-    var checkingTotal = entityAccounts.Sum(a => a.Balance);
-    var checkingTotalClass = checkingTotal > 0 ? "hacienda-gain" : (checkingTotal < 0 ? "hacienda-loss" : "");
-    <div class="market-panel @entity.PanelClass mt-4 market-panel-non-cartera">
-        <div class="panel-head panel-head-row">
-            <span>
-                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="__auto-panel-table__" data-toggle-name="cuenta corriente @entity.Name" title="Mostrar/ocultar" aria-label="Mostrar cuenta corriente @entity.Name" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="@entity.Logo" style="border-radius: 4px;" alt="@entity.Name" title="@entity.Name" />
-                Cuenta corriente @entity.Name
-                <span class="transaction-total-summary" style="margin-left: 14px;">Total: <strong class="@checkingTotalClass" style="font-size: 0.9rem;">@checkingTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
-            </span>
-            <button type="button" class="mini-button" data-dialog-target="@entity.DialogId">+ Añadir Cuenta</button>
-        </div>
-        <div class="table-wrap is-collapsed">
-            <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
-                <thead>
-                    <tr>
-                        <th class="col-nombre-wide" style="width: 942px;">Nombre</th>
-                        <th class="text-align-right" style="width: 122px;">Saldo cuenta corriente</th>
-                        <th class="text-align-right" style="width: 115px;">Actualización</th>
-                        <th style="width: 66px;"></th>
-                    </tr>
-                </thead>
-                <tbody id="@entity.TbodyId">
-                    @if (entityAccounts.Count == 0)
-                    {
-                        <tr>
-                            <td colspan="4" class="empty-state-cell">No hay cuenta corriente de @entity.Name. Usa "+ Añadir Cuenta" para empezar.</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        @foreach (var item in entityAccounts)
-                        {
-                            <tr data-broker="@(item.Name == "Trade Republic" ? "TR" : "ING")">
-                                <td class="name-cell">
-                                    <span class="name-with-flag">
-                                        @if (item.Name == "Trade Republic")
-                                        {
-                                            <img class="broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />
-                                        }
-                                        else
-                                        {
-                                            <img class="broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />
-                                        }
-                                        @item.Name
-                                    </span>
-                                </td>
-                                <td class="price-cell price-cell-quote">@item.Balance.ToString("#,##0.00 €")</td>
-                                <td class="time-cell">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="delete-cell">
-                                    <button type="button" class="icon-button-edit" data-dialog-target="edit-checkingaccount-@Model.CheckingAccounts.IndexOf(item)" title="Editar">✎</button>
-                                    <form method="post" asp-page-handler="DeleteCheckingAccount" onsubmit="return confirm('¿Eliminar esta cuenta corriente?');">
-                                        <input type="hidden" name="name" value="@item.Name" />
-                                        <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-    }
 
     @foreach (var item in Model.CheckingAccounts)
     {
