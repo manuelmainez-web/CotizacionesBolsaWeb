@@ -4045,3 +4045,34 @@ tr.tx-page-hidden {
   }
 }
 
+
+/* Pestañas Ingdirect / TradeRepublic con logotipo. */
+.broker-tabs .nav-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.broker-tab-logo {
+  height: 22px;
+  max-width: 60px;
+  object-fit: contain;
+  margin-right: 8px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+.broker-tab-logo.broker-tab-logo-ing {
+  background: #000000;
+}
+
+@media print {
+  .broker-tabs {
+    display: none !important;
+  }
+
+  .broker-tab-content > .tab-pane {
+    display: block !important;
+    opacity: 1 !important;
+  }
+}

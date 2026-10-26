@@ -1543,10 +1543,17 @@
 
     <div class="blank-line-1"></div>
 
-    <div class="control-cotizaciones-title operaciones-compra-venta-title">
-        <h2 class="control-cotizaciones-title-text"><img class="title-broker-logo" src="/images/brokers/ing.png" alt="ING Direct" title="ING Direct" />Ingdirect</h2>
-        <div class="control-cotizaciones-title-line"></div>
-    </div>
+    <div class="market-tab-shell mt-4 broker-tabs-shell">
+        <ul class="nav nav-tabs market-tabs broker-tabs" id="broker-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="broker-ing-tab" data-bs-toggle="tab" data-bs-target="#broker-ing-tab-pane" type="button" role="tab" aria-controls="broker-ing-tab-pane" aria-selected="true"><img class="broker-tab-logo broker-tab-logo-ing" src="/images/brokers/ing.png" alt="" /><span translate="no" class="notranslate">Ingdirect</span></button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="broker-tr-tab" data-bs-toggle="tab" data-bs-target="#broker-tr-tab-pane" type="button" role="tab" aria-controls="broker-tr-tab-pane" aria-selected="false"><img class="broker-tab-logo" src="/images/brokers/traderepublic.png" alt="" /><span translate="no" class="notranslate">TradeRepublic</span></button>
+            </li>
+        </ul>
+        <div class="tab-content broker-tab-content">
+            <div class="tab-pane fade show active" id="broker-ing-tab-pane" role="tabpanel" aria-labelledby="broker-ing-tab">
 
     @{
         var esCulture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
@@ -1580,8 +1587,8 @@
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="__auto-panel-table__" data-toggle-name="cuenta corriente @entity.Name" title="Mostrar/ocultar" aria-label="Mostrar cuenta corriente @entity.Name" aria-expanded="false"></button>
                 Cuenta corriente
             </span>
-            <span class="transaction-total-summary broker-head-figure"><span class="figure-label">Total:</span> <strong class="@checkingTotalClass">@checkingTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
             <button type="button" class="mini-button" data-dialog-target="@entity.DialogId">+ Añadir Cuenta</button>
+            <span class="transaction-total-summary broker-head-figure"><span class="figure-label">Total:</span> <strong class="@checkingTotalClass">@checkingTotal.ToString("#,##0.00 €", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</strong></span>
         </div>
         <div class="table-wrap is-collapsed">
             <table class="market-table market-table-grid market-table-cuentas" style="table-layout: fixed; width: 1245px;">
@@ -1898,14 +1905,8 @@
     </div>
 
     @{ await RenderCheckingPanel("ING"); }
-
-    <div class="blank-lines-2"></div>
-    <div class="blank-line-1"></div>
-
-    <div class="control-cotizaciones-title operaciones-compra-venta-title">
-        <h2 class="control-cotizaciones-title-text"><img class="title-broker-logo" src="/images/brokers/traderepublic.png" alt="Trade Republic" title="Trade Republic" />TradeRepublic</h2>
-        <div class="control-cotizaciones-title-line"></div>
-    </div>
+            </div>
+            <div class="tab-pane fade" id="broker-tr-tab-pane" role="tabpanel" aria-labelledby="broker-tr-tab">
 
     <div class="summary-panel summary-panel-tr">
         <div class="summary-strip-label" id="summary-strip-label-tr">
@@ -2053,6 +2054,9 @@
     </div>
 
     @{ await RenderCheckingPanel("TR"); }
+            </div>
+        </div>
+    </div>
 
 
     @foreach (var item in Model.CheckingAccounts)
