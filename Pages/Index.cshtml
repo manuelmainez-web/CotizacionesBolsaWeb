@@ -395,6 +395,7 @@
                             ("capital-panel-body", "Rendimientos del capital mobiliario"),
                             ("hacienda-panel-body", "Agencia Tributaria (ganancias y p\u00e9rdidas patrimoniales)"),
                             ("resumen-irpf-panel-body", "Resumen de la declaraci\u00f3n"),
+                            ("tramos-panel-body", "Tramos de la declaraci\u00f3n"),
                             ("autoliquidacion-panel-body", "Datos de la autoliquidaci\u00f3n")
                         })
                         {
@@ -2506,10 +2507,10 @@
                 Agencia Tributaria <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
-                <span class="transaction-total-summary">@(hac.ToPay >= 0 ? "A pagar" : "A devolver"): <strong class="@toPayClass">@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong> · tramo @((hac.MarginalRate * 100m).ToString("0.##", esCulture)) %</span>
+                <span class="transaction-total-summary">@(hac.ToPay >= 0 ? "A pagar" : "A devolver"): <strong class="@toPayClass">@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong></span>
             </div>
         </div>
-        <p class="panel-help-text">Se muestra: Resumen y cuota estimada, Tramos de la base del ahorro, Ventas de @hac.Year y compras que se descuentan (FIFO) y Avisos y aspectos a tener en cuenta.</p>
+        <p class="panel-help-text">Se muestra: Resumen y cuota estimada, Ventas de @hac.Year y compras que se descuentan (FIFO) y Avisos y aspectos a tener en cuenta.</p>
         <div id="hacienda-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
             <div class="transaction-broker-card">
                 <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Resumen y cuota estimada</span></div></div>
@@ -2545,33 +2546,6 @@
                     </label>
                     <button type="submit" class="mini-button">Guardar y recalcular</button>
                 </form>
-            </div>
-
-            <div class="transaction-broker-card">
-                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Tramos de la base del ahorro</span><span class="transaction-total-summary">(en qué tramo caes: @((hac.MarginalRate * 100m).ToString("0.##", esCulture)) %)</span></div></div>
-                <div class="table-wrap">
-                    <table class="market-table market-table-grid transaction-table">
-                        <thead>
-                            <tr>
-                                <th>Tramo</th>
-                                <th class="text-align-right">Tipo</th>
-                                <th class="text-align-right">Tu base en el tramo</th>
-                                <th class="text-align-right">Cuota</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var b in hac.Brackets)
-                            {
-                                <tr class="@(b.IsMarginal ? "transaction-row-current-year" : "")">
-                                    <td>@b.From.ToString("#,##0", esCulture) € @(b.To.HasValue ? "– " + b.To.Value.ToString("#,##0", esCulture) + " €" : "en adelante")@(b.IsMarginal ? "  ◀ estás aquí" : "")</td>
-                                    <td class="text-align-right">@((b.Rate * 100m).ToString("0.##", esCulture)) %</td>
-                                    <td class="text-align-right">@b.AmountInBracket.ToString(eurPlain, esCulture)</td>
-                                    <td class="text-align-right price-cell">@b.Tax.ToString(eurPlain, esCulture)</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
             </div>
 
             <div class="transaction-broker-card">
@@ -2770,6 +2744,69 @@
                 </div>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <div class="market-panel hacienda-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="tramos-panel-body" data-toggle-name="hacienda-tramos" title="Mostrar/ocultar" aria-label="Mostrar tramos de la declaración" aria-expanded="false"></button>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
+                Tramos de la declaración <span class="panel-head-subtitle">(IRPF · escalas de la base general y del ahorro · ejercicio @hac.Year)</span>
+            </span>
+            <div class="panel-head-actions">
+                <span class="transaction-total-summary">Tipo marginal: general @((((resumen.StateGeneralBrackets.LastOrDefault(b => b.IsMarginal)?.Rate ?? 0m) + (resumen.RegionalGeneralBrackets.LastOrDefault(b => b.IsMarginal)?.Rate ?? 0m)) * 100m).ToString("0.##", esCulture)) % · ahorro @((((resumen.SavingsBrackets.LastOrDefault(b => b.IsMarginal)?.Rate ?? 0m)) * 100m).ToString("0.##", esCulture)) %</span>
+            </div>
+        </div>
+        <p class="panel-help-text">Escalas del IRPF aplicadas a las bases liquidables del Resumen de la declaración: en cada tramo se ve qué parte de tu base cae en él y su cuota. El tramo marginal (el último que alcanzas) aparece resaltado.</p>
+        <div id="tramos-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
+            @{
+                var tramosTablas = new (string Titulo, string Detalle, string Nota, List<CotizacionesBolsaWeb.Services.IrpfBracketRow> Filas)[]
+                {
+                    ("Tramos de la base liquidable general · Escala estatal",
+                        "base sometida a gravamen: " + resumen.GeneralLiquidBase.ToString(eurPlain, esCulture),
+                        "Suma de cuotas por tramos: casilla 0528. A ese importe se le resta la cuota del m\u00ednimo personal y familiar (casilla 0530).",
+                        resumen.StateGeneralBrackets),
+                    ("Tramos de la base liquidable general · Escala auton\u00f3mica (Comunidad de Madrid)",
+                        "base sometida a gravamen: " + resumen.GeneralLiquidBase.ToString(eurPlain, esCulture),
+                        "Suma de cuotas por tramos: casilla 0529. A ese importe se le resta la cuota del m\u00ednimo personal y familiar (casilla 0531).",
+                        resumen.RegionalGeneralBrackets),
+                    ("Tramos de la base liquidable del ahorro \u00b7 Escala estatal + auton\u00f3mica",
+                        "base sometida a gravamen: " + resumen.SavingsLiquidBase.ToString(eurPlain, esCulture),
+                        "El tipo es la suma del estatal y el auton\u00f3mico (mitad cada uno). Cuotas por tramos: casillas 0536 y 0537; despu\u00e9s se resta la cuota del m\u00ednimo personal y familiar (casillas 0538 y 0539).",
+                        resumen.SavingsBrackets)
+                };
+            }
+            @foreach (var tabla in tramosTablas)
+            {
+                <div class="transaction-broker-card">
+                    <div class="transaction-broker-header"><div class="transaction-broker-name"><span>@tabla.Titulo</span><span class="transaction-total-summary">(@tabla.Detalle)</span></div></div>
+                    <div class="table-wrap">
+                        <table class="market-table market-table-grid transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>Tramo</th>
+                                    <th class="text-align-right">Tipo</th>
+                                    <th class="text-align-right">Tu base en el tramo</th>
+                                    <th class="text-align-right">Cuota</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var tramo in tabla.Filas)
+                                {
+                                    <tr class="@(tramo.IsMarginal ? "transaction-row-current-year" : "")">
+                                        <td>@tramo.From.ToString("#,##0.00", esCulture) € @(tramo.To.HasValue ? "– " + tramo.To.Value.ToString("#,##0.00", esCulture) + " €" : "en adelante")@(tramo.IsMarginal ? "  ◀ estás aquí" : "")</td>
+                                        <td class="text-align-right">@((tramo.Rate * 100m).ToString("0.##", esCulture)) %</td>
+                                        <td class="text-align-right">@tramo.AmountInBracket.ToString(eurPlain, esCulture)</td>
+                                        <td class="text-align-right price-cell">@tramo.Tax.ToString(eurPlain, esCulture)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="panel-help-text">@tabla.Nota</p>
+                </div>
+            }
         </div>
     </div>
 

@@ -91,6 +91,8 @@ public static class TaxCalculator
         public decimal LossPending { get; set; }
     }
 
+    public static IReadOnlyList<(decimal From, decimal? To, decimal Rate)> SavingsScaleRows => SavingsScale;
+
     public static decimal SavingsTaxOn(decimal amount)
     {
         var tax = 0m;

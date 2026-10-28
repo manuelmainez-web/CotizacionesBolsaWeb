@@ -9,9 +9,17 @@ public sealed record IrpfExtraInput(
     decimal OtherStateDeductions,
     decimal RegionalDeductions);
 
+/// <summary>Un tramo de una escala del impuesto con la parte de la base que cae en él.</summary>
+public sealed record IrpfBracketRow(decimal From, decimal? To, decimal Rate, decimal AmountInBracket, decimal Tax, bool IsMarginal);
+
 /// <summary>Liquidación orientativa del IRPF siguiendo el orden y las casillas de la declaración (modelo 100).</summary>
 public sealed class IrpfResult
 {
+    // Tramos de las escalas aplicadas a las bases liquidables (antes de restar la cuota del mínimo personal y familiar).
+    public List<IrpfBracketRow> StateGeneralBrackets { get; init; } = new();
+    public List<IrpfBracketRow> RegionalGeneralBrackets { get; init; } = new();
+    public List<IrpfBracketRow> SavingsBrackets { get; init; } = new();
+
     // Integración y compensación de rentas / bases imponibles.
     public decimal GainsSum { get; init; }
     public decimal PriorLossesApplied { get; init; }
@@ -116,6 +124,24 @@ public static class IrpfCalculator
         (57_320.40m, null, 0.205m)
     };
 
+    private static List<IrpfBracketRow> BuildBrackets(IEnumerable<(decimal From, decimal? To, decimal Rate)> scale, decimal amount)
+    {
+        var rows = new List<IrpfBracketRow>();
+        foreach (var (from, to, rate) in scale)
+        {
+            var inBracket = Math.Max(0m, Math.Min(amount, to ?? decimal.MaxValue) - from);
+            rows.Add(new IrpfBracketRow(from, to, rate, inBracket, Math.Round(inBracket * rate, 2), false));
+        }
+
+        var last = rows.FindLastIndex(r => r.AmountInBracket > 0m);
+        if (last >= 0)
+        {
+            rows[last] = rows[last] with { IsMarginal = true };
+        }
+
+        return rows;
+    }
+
     private static decimal ApplyScale((decimal From, decimal? To, decimal Rate)[] scale, decimal amount)
     {
         var tax = 0m;
@@ -205,6 +231,9 @@ public static class IrpfCalculator
 
         return new IrpfResult
         {
+            StateGeneralBrackets = BuildBrackets(StateGeneralScale, generalLiquid),
+            RegionalGeneralBrackets = BuildBrackets(RegionalGeneralScale, generalLiquid),
+            SavingsBrackets = BuildBrackets(TaxCalculator.SavingsScaleRows, savingsLiquid),
             GainsSum = savings.NetResult,
             PriorLossesApplied = savings.PriorLossesApplied,
             NetGainsIntegrated = netGains,
