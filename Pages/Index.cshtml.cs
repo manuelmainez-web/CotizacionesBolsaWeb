@@ -161,6 +161,19 @@ public class IndexModel : PageModel
             : 0m;
     }
 
+    // Importes de los formularios de Hacienda: se muestran con separador de miles ("1.234,56"), as\u00ed que
+    // "1.234" (sin coma) tambi\u00e9n se interpreta como 1234.
+    private static decimal ParseHaciendaDecimal(string? value)
+    {
+        var text = (value ?? string.Empty).Replace("\u00A0", string.Empty).Replace("\u20AC", string.Empty).Replace(" ", string.Empty).Trim();
+        if (!text.Contains(',') && System.Text.RegularExpressions.Regex.IsMatch(text, @"^[+-]?[1-9]\d{0,2}(\.\d{3})+$"))
+        {
+            text = text.Replace(".", string.Empty);
+        }
+
+        return ParseFormDecimal(text);
+    }
+
     private static bool IsValidTransactionBroker(string? broker) =>
         string.Equals(broker, "ING", StringComparison.OrdinalIgnoreCase) || string.Equals(broker, "TR", StringComparison.OrdinalIgnoreCase);
 
@@ -632,6 +645,7 @@ public class IndexModel : PageModel
     public sealed class AutoliquidacionInputs
     {
         public string Justificante { get; set; } = string.Empty;
+        public string CuentaIban { get; set; } = string.Empty;
         public bool Fraccionado { get; set; } = true;
         public string FormaPagoPrimerPlazo { get; set; } = "DOMICILIACIÓN DEL IMPORTE A INGRESAR";
         public string FechaCargoPrimerPlazo { get; set; } = "2026-06-30";
@@ -654,7 +668,24 @@ public class IndexModel : PageModel
         ? AutoliquidacionResultado - AutoliquidacionPrimerPlazo
         : 0m;
 
-    public async Task<IActionResult> OnPostSaveAutoliquidacionAsync(string? justificante, bool fraccionado,
+    // Solo se guarda el IBAN enmascarado (los 4 últimos caracteres como asteriscos): el número completo nunca se almacena.
+    private static string MaskIban(string? value)
+    {
+        var compact = new string((value ?? string.Empty).Where(c => !char.IsWhiteSpace(c)).ToArray()).ToUpperInvariant();
+        if (compact.Length > 24)
+        {
+            compact = compact[..24];
+        }
+
+        if (compact.Length > 4 && !compact.EndsWith("****", StringComparison.Ordinal))
+        {
+            compact = compact[..^4] + "****";
+        }
+
+        return string.Join(' ', Enumerable.Range(0, (compact.Length + 3) / 4).Select(i => compact.Substring(i * 4, Math.Min(4, compact.Length - i * 4))));
+    }
+
+    public async Task<IActionResult> OnPostSaveAutoliquidacionAsync(string? justificante, string? cuentaIban, bool fraccionado,
         string? formaPagoPrimerPlazo, string? fechaCargoPrimerPlazo,
         string? formaPagoSegundoPlazo, string? fechaCargoSegundoPlazo)
     {
@@ -670,6 +701,7 @@ public class IndexModel : PageModel
         await _dataStore.SaveJsonAsync(AutoliquidacionKey, new AutoliquidacionInputs
         {
             Justificante = Clean(justificante, 30),
+            CuentaIban = MaskIban(cuentaIban),
             Fraccionado = fraccionado,
             FormaPagoPrimerPlazo = Clean(formaPagoPrimerPlazo, 80).ToUpperInvariant(),
             FechaCargoPrimerPlazo = Fecha(fechaCargoPrimerPlazo),
@@ -688,10 +720,10 @@ public class IndexModel : PageModel
     {
         await _dataStore.SaveJsonAsync(CapitalKey, new CapitalInputs
         {
-            Intereses = Math.Max(0m, ParseFormDecimal(intereses)),
-            Dividendos = Math.Max(0m, ParseFormDecimal(dividendos)),
-            OtrosIngresos = Math.Max(0m, ParseFormDecimal(otrosIngresos)),
-            GastosAdministracion = Math.Max(0m, ParseFormDecimal(gastosAdministracion))
+            Intereses = Math.Max(0m, ParseHaciendaDecimal(intereses)),
+            Dividendos = Math.Max(0m, ParseHaciendaDecimal(dividendos)),
+            OtrosIngresos = Math.Max(0m, ParseHaciendaDecimal(otrosIngresos)),
+            GastosAdministracion = Math.Max(0m, ParseHaciendaDecimal(gastosAdministracion))
         });
         return RedirectToPage(null, null, null, "capital-panel-body");
     }
@@ -736,24 +768,24 @@ public class IndexModel : PageModel
         var previous = await _dataStore.LoadJsonAsync<DeclaracionInputs>(DeclaracionKey) ?? new DeclaracionInputs();
         // Retenciones y pagos a cuenta: se guardan donde ya viven (rendimientos del trabajo y base del ahorro).
         var trabajo = await _dataStore.LoadJsonAsync<TrabajoInputs>(TrabajoKey) ?? new TrabajoInputs();
-        trabajo.Retenciones = Math.Max(0m, ParseFormDecimal(retencionesTrabajo));
+        trabajo.Retenciones = Math.Max(0m, ParseHaciendaDecimal(retencionesTrabajo));
         await _dataStore.SaveJsonAsync(TrabajoKey, trabajo);
 
         var hacienda = await _dataStore.LoadJsonAsync<HaciendaInputs>(HaciendaKey) ?? new HaciendaInputs();
-        hacienda.Retenciones = Math.Max(0m, ParseFormDecimal(retencionesAhorro));
+        hacienda.Retenciones = Math.Max(0m, ParseHaciendaDecimal(retencionesAhorro));
         await _dataStore.SaveJsonAsync(HaciendaKey, hacienda);
 
         var nif = (nifEmpleador ?? string.Empty).Trim().ToUpperInvariant();
         await _dataStore.SaveJsonAsync(DeclaracionKey, new DeclaracionInputs
         {
-            OtrasReducciones = otrasReducciones is null ? previous.OtrasReducciones : Math.Max(0m, ParseFormDecimal(otrasReducciones)),
-            AportacionesTrabajadorPP = Math.Max(0m, ParseFormDecimal(aportacionesTrabajadorPP)),
+            OtrasReducciones = otrasReducciones is null ? previous.OtrasReducciones : Math.Max(0m, ParseHaciendaDecimal(otrasReducciones)),
+            AportacionesTrabajadorPP = Math.Max(0m, ParseHaciendaDecimal(aportacionesTrabajadorPP)),
             NifEmpleador = nif.Length > 20 ? nif[..20] : nif,
-            MinimoAutonomico = Math.Max(0m, ParseFormDecimal(minimoAutonomico)),
-            DonativosBase = donativosBase is null ? previous.DonativosBase : Math.Max(0m, ParseFormDecimal(donativosBase)),
+            MinimoAutonomico = Math.Max(0m, ParseHaciendaDecimal(minimoAutonomico)),
+            DonativosBase = donativosBase is null ? previous.DonativosBase : Math.Max(0m, ParseHaciendaDecimal(donativosBase)),
             DonativosRecurrentes = donativosBase is null ? previous.DonativosRecurrentes : donativosRecurrentes,
-            DeduccionesEstatales = deduccionesEstatales is null ? previous.DeduccionesEstatales : Math.Max(0m, ParseFormDecimal(deduccionesEstatales)),
-            DeduccionesAutonomicas = Math.Max(0m, ParseFormDecimal(deduccionesAutonomicas))
+            DeduccionesEstatales = deduccionesEstatales is null ? previous.DeduccionesEstatales : Math.Max(0m, ParseHaciendaDecimal(deduccionesEstatales)),
+            DeduccionesAutonomicas = Math.Max(0m, ParseHaciendaDecimal(deduccionesAutonomicas))
         });
         return RedirectToPage(null, null, null, "resumen-irpf-panel-body");
     }
@@ -781,7 +813,7 @@ public class IndexModel : PageModel
             }
 
             var shown = Request.Form[key + "Shown"].ToString().Trim();
-            return text == shown ? existing : Math.Max(0m, ParseFormDecimal(text));
+            return text == shown ? existing : Math.Max(0m, ParseHaciendaDecimal(text));
         }
 
         await _dataStore.SaveJsonAsync(TrabajoKey, new TrabajoInputs
@@ -794,18 +826,18 @@ public class IndexModel : PageModel
             OvRendimientoNeto = Override("ovRendimientoNeto", current.OvRendimientoNeto),
             OvReduccionTrabajo = Override("ovReduccionTrabajo", current.OvReduccionTrabajo),
             OvNetoReducido = Override("ovNetoReducido", current.OvNetoReducido),
-            RetribucionesDinerarias = Math.Max(0m, ParseFormDecimal(retribucionesDinerarias)),
-            ValoracionEspecie = Math.Max(0m, ParseFormDecimal(valoracionEspecie)),
-            IngresosCuentaEspecie = Math.Max(0m, ParseFormDecimal(ingresosCuentaEspecie)),
-            IngresosCuentaRepercutidos = Math.Max(0m, ParseFormDecimal(ingresosCuentaRepercutidos)),
-            ContribucionesPlanes = Math.Max(0m, ParseFormDecimal(contribucionesPlanes)),
-            Reducciones = Math.Max(0m, ParseFormDecimal(reducciones)),
-            CotizacionesSS = Math.Max(0m, ParseFormDecimal(cotizacionesSS)),
-            CuotasSindicatos = cuotasSindicatos is null ? current.CuotasSindicatos : Math.Max(0m, ParseFormDecimal(cuotasSindicatos)),
-            DefensaJuridica = defensaJuridica is null ? current.DefensaJuridica : Math.Max(0m, ParseFormDecimal(defensaJuridica)),
-            OtrosGastos = otrosGastos is null ? current.OtrosGastos : Math.Max(0m, ParseFormDecimal(otrosGastos)),
-            Retenciones = Math.Max(0m, ParseFormDecimal(retenciones)),
-            MinimoPersonal = Math.Max(0m, ParseFormDecimal(minimoPersonal))
+            RetribucionesDinerarias = Math.Max(0m, ParseHaciendaDecimal(retribucionesDinerarias)),
+            ValoracionEspecie = Math.Max(0m, ParseHaciendaDecimal(valoracionEspecie)),
+            IngresosCuentaEspecie = Math.Max(0m, ParseHaciendaDecimal(ingresosCuentaEspecie)),
+            IngresosCuentaRepercutidos = Math.Max(0m, ParseHaciendaDecimal(ingresosCuentaRepercutidos)),
+            ContribucionesPlanes = Math.Max(0m, ParseHaciendaDecimal(contribucionesPlanes)),
+            Reducciones = Math.Max(0m, ParseHaciendaDecimal(reducciones)),
+            CotizacionesSS = Math.Max(0m, ParseHaciendaDecimal(cotizacionesSS)),
+            CuotasSindicatos = cuotasSindicatos is null ? current.CuotasSindicatos : Math.Max(0m, ParseHaciendaDecimal(cuotasSindicatos)),
+            DefensaJuridica = defensaJuridica is null ? current.DefensaJuridica : Math.Max(0m, ParseHaciendaDecimal(defensaJuridica)),
+            OtrosGastos = otrosGastos is null ? current.OtrosGastos : Math.Max(0m, ParseHaciendaDecimal(otrosGastos)),
+            Retenciones = Math.Max(0m, ParseHaciendaDecimal(retenciones)),
+            MinimoPersonal = Math.Max(0m, ParseHaciendaDecimal(minimoPersonal))
         });
         return RedirectToPage(null, null, null, "trabajo-panel-body");
     }
@@ -841,8 +873,8 @@ public class IndexModel : PageModel
         var previous = await _dataStore.LoadJsonAsync<HaciendaInputs>(HaciendaKey) ?? new HaciendaInputs();
         await _dataStore.SaveJsonAsync(HaciendaKey, new HaciendaInputs
         {
-            OtrosRendimientos = otrosRendimientos is null ? previous.OtrosRendimientos : Math.Max(0m, ParseFormDecimal(otrosRendimientos)),
-            Retenciones = Math.Max(0m, ParseFormDecimal(retenciones))
+            OtrosRendimientos = otrosRendimientos is null ? previous.OtrosRendimientos : Math.Max(0m, ParseHaciendaDecimal(otrosRendimientos)),
+            Retenciones = Math.Max(0m, ParseHaciendaDecimal(retenciones))
         });
         return RedirectToPage();
     }

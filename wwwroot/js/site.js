@@ -1659,6 +1659,14 @@ function imprimirConNumeracion(bodyClass, opciones) {
 document.addEventListener('change', function (event) {
     var input = event.target;
     if (input && input.classList && input.classList.contains('hacienda-casilla-input') && input.form) {
+        // IBAN: se enmascaran los 4 últimos dígitos antes de enviarlo (el número completo no se guarda).
+        if (input.hasAttribute('data-mask-iban')) {
+            var iban = input.value.replace(/\s+/g, '').toUpperCase();
+            if (iban.length > 4 && !/\*{4}$/.test(iban)) {
+                iban = iban.slice(0, -4) + '****';
+            }
+            input.value = iban.replace(/(.{4})(?=.)/g, '$1 ');
+        }
         // Datos del declarante y de la autoliquidación: se guardan sin recargar, así el panel conserva su estado (plegado/desplegado).
         if (input.form.hasAttribute('data-ajax-save')) {
             fetch(input.form.action, { method: 'POST', body: new FormData(input.form), credentials: 'same-origin', redirect: 'manual' });

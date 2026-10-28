@@ -1764,6 +1764,12 @@ tr.tx-page-hidden {
   color: #333333;
 }
 
+.hacienda-casilla-input.hacienda-casilla-input-wide {
+  width: 24rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .hacienda-panel .hacienda-inputs-form label {
   color: #333333;
 }
