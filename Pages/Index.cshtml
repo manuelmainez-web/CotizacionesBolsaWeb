@@ -393,7 +393,7 @@
                             ("declarante-panel-body", "Datos del declarante"),
                             ("trabajo-panel-body", "Rendimiento del trabajo"),
                             ("capital-panel-body", "Rendimientos del capital mobiliario"),
-                            ("hacienda-panel-body", "Agencia Tributaria (ganancias y p\u00e9rdidas patrimoniales)"),
+                            ("hacienda-panel-body", "Ganancias y p\u00e9rdidas patrimoniales"),
                             ("resumen-irpf-panel-body", "Resumen de la declaraci\u00f3n"),
                             ("tramos-panel-body", "Tramos de la declaraci\u00f3n"),
                             ("autoliquidacion-panel-body", "Datos de la autoliquidaci\u00f3n")
@@ -1562,14 +1562,14 @@
     <div class="market-tab-shell mt-4 broker-tabs-shell">
         <ul class="nav nav-tabs market-tabs broker-tabs" id="broker-tabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="broker-tr-tab" data-bs-toggle="tab" data-bs-target="#broker-tr-tab-pane" type="button" role="tab" aria-controls="broker-tr-tab-pane" aria-selected="true"><img class="broker-tab-logo" src="/images/brokers/traderepublic.png" alt="" /><span translate="no" class="notranslate">TradeRepublic</span></button>
+                <button class="nav-link active" id="broker-ing-tab" data-bs-toggle="tab" data-bs-target="#broker-ing-tab-pane" type="button" role="tab" aria-controls="broker-ing-tab-pane" aria-selected="true"><img class="broker-tab-logo broker-tab-logo-ing" src="/images/brokers/ing.png" alt="" /><span translate="no" class="notranslate">Ingdirect</span></button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="broker-ing-tab" data-bs-toggle="tab" data-bs-target="#broker-ing-tab-pane" type="button" role="tab" aria-controls="broker-ing-tab-pane" aria-selected="false"><img class="broker-tab-logo broker-tab-logo-ing" src="/images/brokers/ing.png" alt="" /><span translate="no" class="notranslate">Ingdirect</span></button>
+                <button class="nav-link" id="broker-tr-tab" data-bs-toggle="tab" data-bs-target="#broker-tr-tab-pane" type="button" role="tab" aria-controls="broker-tr-tab-pane" aria-selected="false"><img class="broker-tab-logo" src="/images/brokers/traderepublic.png" alt="" /><span translate="no" class="notranslate">TradeRepublic</span></button>
             </li>
         </ul>
         <div class="tab-content broker-tab-content">
-            <div class="tab-pane fade" id="broker-ing-tab-pane" role="tabpanel" aria-labelledby="broker-ing-tab">
+            <div class="tab-pane fade show active" id="broker-ing-tab-pane" role="tabpanel" aria-labelledby="broker-ing-tab">
 
     @{
         var esCulture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
@@ -1922,7 +1922,7 @@
 
     @{ await RenderCheckingPanel("ING"); }
             </div>
-            <div class="tab-pane fade show active" id="broker-tr-tab-pane" role="tabpanel" aria-labelledby="broker-tr-tab">
+            <div class="tab-pane fade" id="broker-tr-tab-pane" role="tabpanel" aria-labelledby="broker-tr-tab">
 
     <div class="summary-panel summary-panel-tr">
         <div class="summary-strip-label" id="summary-strip-label-tr">
@@ -2465,7 +2465,7 @@
                 <span class="transaction-total-summary">Suma a integrar en la base del ahorro: <strong>@Model.CapitalNeto.ToString(eurPlain, esCulture)</strong></span>
             </div>
         </div>
-        <p class="panel-help-text">Rellena los ingresos íntegros de capital mobiliario (intereses, dividendos, etc.) y los gastos de administración y depósito; el resto de filas se calcula solo. El resultado se integra en la base imponible del ahorro de los paneles Agencia Tributaria y Resumen de la declaración. Las retenciones se introducen en el panel Agencia Tributaria (retenciones / pagos a cuenta) y se reflejan en el Resumen de la declaración (casilla 0597).</p>
+        <p class="panel-help-text">Rellena los ingresos íntegros de capital mobiliario (intereses, dividendos, etc.) y los gastos de administración y depósito; el resto de filas se calcula solo. El resultado se integra en la base imponible del ahorro de los paneles Ganancias y pérdidas patrimoniales y Resumen de la declaración. Las retenciones se introducen en el panel Ganancias y pérdidas patrimoniales (retenciones / pagos a cuenta) y se reflejan en el Resumen de la declaración (casilla 0597).</p>
         <div id="capital-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
             <div class="transaction-broker-card">
                 <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Rendimientos del capital mobiliario a integrar en la base imponible del ahorro · DECLARANTE</span></div></div>
@@ -2504,7 +2504,7 @@
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="hacienda-panel-body" data-toggle-name="hacienda" title="Mostrar/ocultar" aria-label="Mostrar hacienda" aria-expanded="false"></button>
                 <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
-                Agencia Tributaria <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
+                Ganancias y pérdidas patrimoniales <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
                 <span class="transaction-total-summary">@(hac.ToPay >= 0 ? "A pagar" : "A devolver"): <strong class="@toPayClass">@Math.Abs(hac.ToPay).ToString(eurPlain, esCulture)</strong></span>
@@ -2632,7 +2632,7 @@
                 <span class="transaction-total-summary">@(resumen.ToPay >= 0 ? "A pagar" : "A devolver"): <strong class="@resumenClass">@Math.Abs(resumen.ToPay).ToString(eurPlain, esCulture)</strong></span>
             </div>
         </div>
-        <p class="panel-help-text">Liquidación del IRPF con los apartados y casillas de la declaración (modelo 100): rendimientos del capital mobiliario, integración de rentas, bases, reducciones, circunstancias personales, cálculo del impuesto, deducciones, cuotas líquidas y resultado. Los importes se calculan con los datos de los paneles Agencia Tributaria y Rendimiento del trabajo. Cálculo orientativo (escala estatal y de la Comunidad de Madrid). Las retenciones y pagos a cuenta se toman de los paneles Rendimiento del trabajo (0596) y Agencia Tributaria (0597).</p>
+        <p class="panel-help-text">Liquidación del IRPF con los apartados y casillas de la declaración (modelo 100): rendimientos del capital mobiliario, integración de rentas, bases, reducciones, circunstancias personales, cálculo del impuesto, deducciones, cuotas líquidas y resultado. Los importes se calculan con los datos de los paneles Ganancias y pérdidas patrimoniales y Rendimiento del trabajo. Cálculo orientativo (escala estatal y de la Comunidad de Madrid). Las retenciones y pagos a cuenta se toman de los paneles Rendimiento del trabajo (0596) y Ganancias y pérdidas patrimoniales (0597).</p>
         <div id="resumen-irpf-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
             <div class="transaction-broker-card">
                 <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Liquidación de la declaración</span></div></div>
@@ -2728,7 +2728,7 @@
                             <tr><td>0595</td><td><strong>Cuota resultante de la autoliquidación</strong> [(587)-(588)-(414)-(589)-(590)-(591)]</td><td class="text-align-right price-cell"><strong>@resumen.TotalNetTax.ToString(eurPlain, esCulture)</strong></td></tr>
                             <tr class="hacienda-section-row"><td colspan="3">Retenciones y demás pagos a cuenta</td></tr>
                             <tr><td>0596</td><td>Por rendimientos del trabajo (casilla 0596 del panel Rendimiento del trabajo)</td><td class="text-align-right price-cell">@resumen.WorkWithholdings.ToString(eurPlain, esCulture)</td></tr>
-                            <tr><td>0597</td><td>Por rendimientos del capital mobiliario (retenciones del panel Agencia Tributaria)</td><td class="text-align-right price-cell">@resumen.SavingsWithholdings.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0597</td><td>Por rendimientos del capital mobiliario (retenciones del panel Ganancias y pérdidas patrimoniales)</td><td class="text-align-right price-cell">@resumen.SavingsWithholdings.ToString(eurPlain, esCulture)</td></tr>
                             <tr><td>0609</td><td><strong>Total pagos a cuenta</strong> [suma de (592) + (593)+ (594) + (596) a (606)]</td><td class="text-align-right price-cell"><strong>@resumen.TotalWithholdings.ToString(eurPlain, esCulture)</strong></td></tr>
                             <tr class="hacienda-section-row"><td colspan="3">Resultado de la declaración</td></tr>
                             <tr><td>0610</td><td>Cuota diferencial [(595)-(609)]</td><td class="text-align-right price-cell">@resumen.ToPay.ToString(eurSigned, esCulture)</td></tr>
