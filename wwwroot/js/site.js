@@ -214,12 +214,12 @@ document.addEventListener('click', function (event) {
     // "Imprimir cartera" no incluye las tablas de cotizaciones (Índices, Materias primas);
     // solo "Imprimir todo" las incluye.
     bindPrintButton('btn-print-cartera', 'print-all', { sinCotizaciones: true });
-    bindPrintButton('btn-print-page', 'print-all');
+    bindPrintButton('btn-print-page', 'print-all', { conHacienda: true });
     bindPrintButton('btn-print-ing', 'print-broker-ing', { broker: 'ING' });
     bindPrintButton('btn-print-tr', 'print-broker-tr', { broker: 'TR' });
     bindPrintButton('btn-print-cartera-tab', 'print-all', { sinCotizaciones: true });
     bindPrintButton('btn-print-hacienda-tab', 'print-all', { soloHacienda: true });
-    bindPrintButton('btn-print-page-tab', 'print-all');
+    bindPrintButton('btn-print-page-tab', 'print-all', { conHacienda: true });
     bindPrintButton('btn-print-ing-tab', 'print-broker-ing', { broker: 'ING' });
     bindPrintButton('btn-print-tr-tab', 'print-broker-tr', { broker: 'TR' });
 })();
@@ -950,7 +950,7 @@ document.addEventListener('click', function (event) {
     }
 
     boton.addEventListener('click', function () {
-        imprimirConNumeracion('print-all');
+        imprimirConNumeracion('print-all', { conHacienda: true });
     });
 })();
 
@@ -1200,10 +1200,11 @@ function reorganizarCarteraPorBroker(shellClone, bodyClass, opciones) {
 }
 
 // "Imprimir" de la Agencia Tributaria: el documento solo lleva un membrete
-// (título, nombre y fecha/hora) y el panel de Hacienda del año en curso.
+// (título, nombre y fecha/hora) y todos los paneles de Hacienda (Datos del declarante,
+// Rendimiento del trabajo, Capital mobiliario, Agencia Tributaria, Resumen y Autoliquidación).
 function prepararImpresionSoloHacienda(shellClone) {
-    var panelHacienda = shellClone.querySelector('.hacienda-panel');
-    if (!panelHacienda) {
+    var panelesHacienda = Array.prototype.slice.call(shellClone.querySelectorAll('.hacienda-panel'));
+    if (panelesHacienda.length === 0) {
         return;
     }
 
@@ -1230,7 +1231,9 @@ function prepararImpresionSoloHacienda(shellClone) {
     if (membrete) {
         shellClone.appendChild(membrete);
     }
-    shellClone.appendChild(panelHacienda);
+    panelesHacienda.forEach(function (panel) {
+        shellClone.appendChild(panel);
+    });
 }
 
 // Impresión con numeración real de página ("Página - N -") usando paged.js.
@@ -1242,6 +1245,18 @@ function prepararImpresionSoloHacienda(shellClone) {
 // y se invoca la impresión de ese iframe. El iframe se elimina solo al
 // terminar de imprimir (o cancelar).
 function imprimirConNumeracion(bodyClass, opciones) {
+    // Pestaña "Imprimir": apartados de la Agencia Tributaria que se imprimen.
+    var apartadosDesmarcados = Array.prototype.filter.call(
+        document.querySelectorAll('.chk-print-hacienda-apartado'),
+        function (casilla) { return !casilla.checked; }
+    ).map(function (casilla) { return casilla.getAttribute('data-panel-body'); });
+    var totalApartados = document.querySelectorAll('.chk-print-hacienda-apartado').length;
+
+    if (opciones && opciones.soloHacienda && totalApartados > 0 && apartadosDesmarcados.length === totalApartados) {
+        alert('Selecciona al menos un apartado de la Agencia Tributaria para imprimir.');
+        return;
+    }
+
     // Checkbox de la pestaña "Imprimir": si está desmarcado no se imprimen los
     // movimientos de las operaciones de compra y venta (INGDIRECT y Trade Republic).
     var checkOperaciones = document.getElementById('chk-print-operaciones');
@@ -1249,9 +1264,8 @@ function imprimirConNumeracion(bodyClass, opciones) {
         opciones = Object.assign({}, opciones, { sinOperaciones: true });
     }
 
-    // Checkbox "Imprimir los datos de Hacienda": si está desmarcado no se imprime el panel de Hacienda.
-    var checkHacienda = document.getElementById('chk-print-hacienda');
-    if (checkHacienda && !checkHacienda.checked && !(opciones && opciones.soloHacienda)) {
+    // Los datos de Hacienda salen con su propio botón ("Datos de la Agencia Tributaria") y con "Imprimir todo".
+    if (!(opciones && (opciones.soloHacienda || opciones.conHacienda))) {
         opciones = Object.assign({}, opciones, { sinHacienda: true });
     }
 
@@ -1275,11 +1289,28 @@ function imprimirConNumeracion(bodyClass, opciones) {
         document.body.classList.remove(bodyClass);
     }
 
+    // Se quitan de la copia los apartados de Hacienda que no se han seleccionado.
+    apartadosDesmarcados.forEach(function (idCuerpo) {
+        var cuerpo = copiaContenido.querySelector('#' + idCuerpo);
+        var panelApartado = cuerpo ? cuerpo.closest('.hacienda-panel') : null;
+        if (panelApartado) {
+            panelApartado.remove();
+        }
+    });
+
     if (opciones && opciones.soloHacienda) {
         prepararImpresionSoloHacienda(copiaContenido);
     } else if (bodyClass === 'print-cartera-only' || bodyClass === 'print-all' || (opciones && opciones.broker)) {
         reorganizarCarteraPorBroker(copiaContenido, bodyClass, opciones);
         eliminarPanelesVaciosEnImpresion(copiaContenido);
+    }
+
+    // En "Imprimir todo" los datos de la Agencia Tributaria empiezan en una página nueva.
+    if (opciones && opciones.conHacienda && !opciones.soloHacienda) {
+        var primerPanelHacienda = copiaContenido.querySelector('.hacienda-panel');
+        if (primerPanelHacienda) {
+            primerPanelHacienda.classList.add('print-hacienda-page-break');
+        }
     }
 
     // El HTML clonado se serializa e inyecta en un iframe cuyo documento no
@@ -1622,4 +1653,51 @@ function imprimirConNumeracion(bodyClass, opciones) {
 
     window.paginarTablasCompraVenta = paginarTablasCompraVenta;
     paginarTablasCompraVenta();
+})();
+
+// Rendimiento del trabajo: se graba al modificar cualquier casilla y el panel se reabre tras guardar.
+document.addEventListener('change', function (event) {
+    var input = event.target;
+    if (input && input.classList && input.classList.contains('hacienda-casilla-input') && input.form) {
+        // Datos del declarante y de la autoliquidación: se guardan sin recargar, así el panel conserva su estado (plegado/desplegado).
+        if (input.form.hasAttribute('data-ajax-save')) {
+            fetch(input.form.action, { method: 'POST', body: new FormData(input.form), credentials: 'same-origin', redirect: 'manual' });
+            return;
+        }
+        input.form.submit();
+    }
+});
+
+(function () {
+    function abrirPanelDesdeHash() {
+        var id = decodeURIComponent(window.location.hash.replace(/^#/, ''));
+        if (!id) {
+            return;
+        }
+
+        var panel = document.getElementById(id);
+        if (!panel || !panel.classList.contains('hacienda-panel-body') || !panel.classList.contains('is-collapsed')) {
+            return;
+        }
+
+        panel.classList.remove('is-collapsed');
+        var boton = document.querySelector('[data-toggle-target="' + id + '"]');
+        if (boton) {
+            boton.setAttribute('aria-expanded', 'true');
+            boton.classList.add('is-expanded');
+        }
+
+        panel.scrollIntoView();
+
+        // Se quita el hash para que al recargar la página los paneles vuelvan a aparecer plegados.
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', abrirPanelDesdeHash);
+    } else {
+        abrirPanelDesdeHash();
+    }
 })();

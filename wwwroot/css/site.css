@@ -1642,7 +1642,7 @@ tr.tx-page-hidden {
 }
 
 /* Cuerpo del panel: fondo blanco y texto gris oscuro, como la web de la Agencia Tributaria. */
-.hacienda-panel #hacienda-panel-body {
+.hacienda-panel .hacienda-panel-body {
   background: #ffffff;
   color: #333333;
 }
@@ -1733,12 +1733,35 @@ tr.tx-page-hidden {
   background: #fff7d6;
 }
 
-.hacienda-panel #hacienda-panel-body .hacienda-gain {
+.hacienda-panel .hacienda-panel-body .hacienda-gain {
   color: #15803d;
 }
 
-.hacienda-panel #hacienda-panel-body .hacienda-loss {
+.hacienda-panel .hacienda-panel-body .hacienda-loss {
   color: #c81e28;
+}
+
+.hacienda-panel .market-table.transaction-table tbody tr.hacienda-section-row td {
+  background: #dfe5f6;
+  color: #27409a;
+  font-weight: 700;
+  border-top: 2px solid #ffcc00;
+}
+
+.hacienda-casilla-input.hacienda-casilla-overridden {
+  border-color: #e08a00;
+  background: #fff4e0;
+  font-weight: 700;
+}
+
+.hacienda-casilla-input {
+  width: 140px;
+  padding: 4px 8px;
+  text-align: right;
+  border-radius: 6px;
+  border: 1px solid #9fb0e0;
+  background: #ffffff;
+  color: #333333;
 }
 
 .hacienda-panel .hacienda-inputs-form label {
@@ -3379,6 +3402,7 @@ tr.tx-page-hidden {
   }
 
   .print-broker-group-break,
+  .print-hacienda-page-break,
   .print-summary-global-break {
     break-before: page;
     page-break-before: always;
@@ -4032,11 +4056,11 @@ tr.tx-page-hidden {
     color: #5b6475 !important;
   }
 
-  body .hacienda-panel #hacienda-panel-body .hacienda-gain {
+  body .hacienda-panel .hacienda-panel-body .hacienda-gain {
     color: #15803d !important;
   }
 
-  body .hacienda-panel #hacienda-panel-body .hacienda-loss {
+  body .hacienda-panel .hacienda-panel-body .hacienda-loss {
     color: #c81e28 !important;
   }
 

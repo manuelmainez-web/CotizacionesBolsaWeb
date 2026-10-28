@@ -91,6 +91,17 @@ public static class TaxCalculator
         public decimal LossPending { get; set; }
     }
 
+    public static decimal SavingsTaxOn(decimal amount)
+    {
+        var tax = 0m;
+        foreach (var (from, to, rate) in SavingsScale)
+        {
+            tax += Math.Max(0m, Math.Min(amount, to ?? decimal.MaxValue) - from) * rate;
+        }
+
+        return tax;
+    }
+
     public static TaxResult Compute(IEnumerable<TaxTransaction> transactions, int year, Func<string, int> washMonthsFor,
         decimal otherIncome, decimal withholdings)
     {

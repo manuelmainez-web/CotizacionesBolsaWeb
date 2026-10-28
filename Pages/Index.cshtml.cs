@@ -12,6 +12,11 @@ public class IndexModel : PageModel
     private const string TransactionStateKey = "custom-transaction-state";
     private const string ExcelTransactionsKey = "custom-excel-transactions";
     private const string HaciendaKey = "custom-hacienda";
+    private const string TrabajoKey = "custom-trabajo";
+    private const string DeclaracionKey = "custom-declaracion";
+    private const string DeclaranteKey = "custom-declarante";
+    private const string CapitalKey = "custom-capital";
+    private const string AutoliquidacionKey = "custom-autoliquidacion";
     private const long MaxExcelUploadBytes = 5 * 1024 * 1024;
     private const string IndicesKey = "custom-indices";
     private const string StocksKey = "custom-stocks";
@@ -537,6 +542,274 @@ public class IndexModel : PageModel
 
     public HaciendaInputs HaciendaState { get; private set; } = new();
 
+    public sealed class TrabajoInputs
+    {
+        public decimal RetribucionesDinerarias { get; set; }
+        public decimal ValoracionEspecie { get; set; }
+        public decimal IngresosCuentaEspecie { get; set; }
+        public decimal IngresosCuentaRepercutidos { get; set; }
+        public decimal ContribucionesPlanes { get; set; }
+        public decimal Reducciones { get; set; }
+        public decimal CotizacionesSS { get; set; }
+        public decimal CuotasSindicatos { get; set; }
+        public decimal DefensaJuridica { get; set; }
+        public decimal OtrosGastos { get; set; }
+        public decimal Retenciones { get; set; }
+        public decimal MinimoPersonal { get; set; } = WorkIncomeCalculator.DefaultPersonalMinimum;
+
+        // Valores modificados manualmente de las filas calculadas (null = cálculo automático).
+        public decimal? OvRetribucionesEspecie { get; set; }
+        public decimal? OvTotalIngresos { get; set; }
+        public decimal? OvNetoPrevio { get; set; }
+        public decimal? OvSumaNetosPrevios { get; set; }
+        public decimal? OvOtrosGastos { get; set; }
+        public decimal? OvRendimientoNeto { get; set; }
+        public decimal? OvReduccionTrabajo { get; set; }
+        public decimal? OvNetoReducido { get; set; }
+    }
+
+    public TrabajoInputs TrabajoState { get; private set; } = new();
+
+    private WorkIncomeResult? _trabajo;
+
+    public WorkIncomeResult Trabajo => _trabajo ??= WorkIncomeCalculator.Compute(
+        new WorkIncomeInput(
+            TrabajoState.RetribucionesDinerarias, TrabajoState.ValoracionEspecie, TrabajoState.IngresosCuentaEspecie,
+            TrabajoState.IngresosCuentaRepercutidos, TrabajoState.ContribucionesPlanes, TrabajoState.Reducciones,
+            TrabajoState.CotizacionesSS, TrabajoState.CuotasSindicatos, TrabajoState.DefensaJuridica,
+            TrabajoState.OtrosGastos, TrabajoState.Retenciones, TrabajoState.MinimoPersonal,
+            new WorkIncomeOverrides
+            {
+                InKindIncome = TrabajoState.OvRetribucionesEspecie,
+                GrossIncome = TrabajoState.OvTotalIngresos,
+                PreviousNet = TrabajoState.OvNetoPrevio,
+                PreviousNetSum = TrabajoState.OvSumaNetosPrevios,
+                FixedExpenses = TrabajoState.OvOtrosGastos,
+                NetBeforeReduction = TrabajoState.OvRendimientoNeto,
+                Reduction = TrabajoState.OvReduccionTrabajo,
+                NetIncome = TrabajoState.OvNetoReducido
+            }));
+
+    public sealed class DeclaracionInputs
+    {
+        public decimal OtrasReducciones { get; set; }
+        public decimal AportacionesTrabajadorPP { get; set; }
+        public string NifEmpleador { get; set; } = string.Empty;
+        public decimal MinimoAutonomico { get; set; } = IrpfCalculator.DefaultRegionalMinimum;
+        public decimal DonativosBase { get; set; }
+        public bool DonativosRecurrentes { get; set; }
+        public decimal DeduccionesEstatales { get; set; }
+        public decimal DeduccionesAutonomicas { get; set; }
+    }
+
+    public DeclaracionInputs DeclaracionState { get; private set; } = new();
+
+    public sealed class DeclaranteInputs
+    {
+        public string Nif { get; set; } = string.Empty;
+        public string ApellidosNombre { get; set; } = string.Empty;
+        public string Sexo { get; set; } = "Hombre";
+        public string EstadoCivil { get; set; } = "Soltero/a";
+        public string FechaNacimiento { get; set; } = string.Empty;
+        public string Comunidad { get; set; } = "MADRID";
+        public bool TributacionIndividual { get; set; } = true;
+        public bool IglesiaCatolica { get; set; } = true;
+        public bool FinesSociales { get; set; } = true;
+    }
+
+    public DeclaranteInputs DeclaranteState { get; private set; } = new();
+
+    public sealed class CapitalInputs
+    {
+        public decimal Intereses { get; set; }
+        public decimal Dividendos { get; set; }
+        public decimal OtrosIngresos { get; set; }
+        public decimal GastosAdministracion { get; set; }
+    }
+
+    public CapitalInputs CapitalState { get; private set; } = new();
+
+    public sealed class AutoliquidacionInputs
+    {
+        public string Justificante { get; set; } = string.Empty;
+        public bool Fraccionado { get; set; } = true;
+        public string FormaPagoPrimerPlazo { get; set; } = "DOMICILIACIÓN DEL IMPORTE A INGRESAR";
+        public string FechaCargoPrimerPlazo { get; set; } = "2026-06-30";
+        public string FormaPagoSegundoPlazo { get; set; } = "DOMICILIACIÓN DEL IMPORTE A INGRESAR";
+        public string FechaCargoSegundoPlazo { get; set; } = "2026-11-05";
+    }
+
+    public AutoliquidacionInputs AutoliquidacionState { get; private set; } = new();
+
+    // El resultado y los plazos (60 % / 40 %) salen del Resumen de la declaración.
+    public decimal AutoliquidacionResultado => Math.Round(ResumenIrpf.ToPay, 2, MidpointRounding.AwayFromZero);
+
+    public decimal AutoliquidacionPagoUnico => Math.Max(0m, AutoliquidacionResultado);
+
+    public decimal AutoliquidacionPrimerPlazo => AutoliquidacionResultado > 0
+        ? Math.Round(AutoliquidacionResultado * 0.6m, 2, MidpointRounding.AwayFromZero)
+        : 0m;
+
+    public decimal AutoliquidacionSegundoPlazo => AutoliquidacionResultado > 0
+        ? AutoliquidacionResultado - AutoliquidacionPrimerPlazo
+        : 0m;
+
+    public async Task<IActionResult> OnPostSaveAutoliquidacionAsync(string? justificante, bool fraccionado,
+        string? formaPagoPrimerPlazo, string? fechaCargoPrimerPlazo,
+        string? formaPagoSegundoPlazo, string? fechaCargoSegundoPlazo)
+    {
+        string Clean(string? v, int max)
+        {
+            var t = (v ?? string.Empty).Trim();
+            return t.Length > max ? t[..max] : t;
+        }
+
+        string Fecha(string? v) => DateTime.TryParse(v, System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out var d) ? d.ToString("yyyy-MM-dd") : string.Empty;
+
+        await _dataStore.SaveJsonAsync(AutoliquidacionKey, new AutoliquidacionInputs
+        {
+            Justificante = Clean(justificante, 30),
+            Fraccionado = fraccionado,
+            FormaPagoPrimerPlazo = Clean(formaPagoPrimerPlazo, 80).ToUpperInvariant(),
+            FechaCargoPrimerPlazo = Fecha(fechaCargoPrimerPlazo),
+            FormaPagoSegundoPlazo = Clean(formaPagoSegundoPlazo, 80).ToUpperInvariant(),
+            FechaCargoSegundoPlazo = Fecha(fechaCargoSegundoPlazo)
+        });
+        return RedirectToPage(null, null, null, "autoliquidacion-panel-body");
+    }
+
+    public decimal CapitalTotalIngresos => CapitalState.Intereses + CapitalState.Dividendos + CapitalState.OtrosIngresos;
+
+    public decimal CapitalNeto => Math.Max(0m, CapitalTotalIngresos - Math.Min(CapitalState.GastosAdministracion, CapitalTotalIngresos));
+
+    public async Task<IActionResult> OnPostSaveCapitalAsync(string? intereses, string? dividendos, string? otrosIngresos,
+        string? gastosAdministracion)
+    {
+        await _dataStore.SaveJsonAsync(CapitalKey, new CapitalInputs
+        {
+            Intereses = Math.Max(0m, ParseFormDecimal(intereses)),
+            Dividendos = Math.Max(0m, ParseFormDecimal(dividendos)),
+            OtrosIngresos = Math.Max(0m, ParseFormDecimal(otrosIngresos)),
+            GastosAdministracion = Math.Max(0m, ParseFormDecimal(gastosAdministracion))
+        });
+        return RedirectToPage(null, null, null, "capital-panel-body");
+    }
+
+    public async Task<IActionResult> OnPostSaveDeclaranteAsync(string? nif, string? apellidosNombre, string? sexo,
+        string? estadoCivil, string? fechaNacimiento, string? comunidad, bool tributacionIndividual,
+        bool iglesiaCatolica, bool finesSociales)
+    {
+        string Clean(string? v, int max)
+        {
+            var t = (v ?? string.Empty).Trim();
+            return t.Length > max ? t[..max] : t;
+        }
+
+        var fecha = DateTime.TryParse(fechaNacimiento, System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out var d) ? d.ToString("yyyy-MM-dd") : string.Empty;
+
+        await _dataStore.SaveJsonAsync(DeclaranteKey, new DeclaranteInputs
+        {
+            Nif = Clean(nif, 20).ToUpperInvariant(),
+            ApellidosNombre = Clean(apellidosNombre, 120).ToUpperInvariant(),
+            Sexo = sexo == "Mujer" ? "Mujer" : "Hombre",
+            EstadoCivil = Clean(estadoCivil, 40),
+            FechaNacimiento = fecha,
+            Comunidad = Clean(comunidad, 60).ToUpperInvariant(),
+            TributacionIndividual = tributacionIndividual,
+            IglesiaCatolica = iglesiaCatolica,
+            FinesSociales = finesSociales
+        });
+        return RedirectToPage(null, null, null, "declarante-panel-body");
+    }
+
+    public IrpfResult ResumenIrpf => IrpfCalculator.Compute(Hacienda, Trabajo,
+        new IrpfExtraInput(DeclaracionState.OtrasReducciones, DeclaracionState.AportacionesTrabajadorPP,
+            DeclaracionState.MinimoAutonomico, DeclaracionState.DonativosBase, DeclaracionState.DonativosRecurrentes,
+            DeclaracionState.DeduccionesEstatales, DeclaracionState.DeduccionesAutonomicas));
+
+    public async Task<IActionResult> OnPostSaveDeclaracionAsync(string? otrasReducciones, string? aportacionesTrabajadorPP,
+        string? nifEmpleador, string? minimoAutonomico, string? donativosBase, bool donativosRecurrentes,
+        string? deduccionesEstatales, string? deduccionesAutonomicas, string? retencionesTrabajo, string? retencionesAhorro)
+    {
+        var previous = await _dataStore.LoadJsonAsync<DeclaracionInputs>(DeclaracionKey) ?? new DeclaracionInputs();
+        // Retenciones y pagos a cuenta: se guardan donde ya viven (rendimientos del trabajo y base del ahorro).
+        var trabajo = await _dataStore.LoadJsonAsync<TrabajoInputs>(TrabajoKey) ?? new TrabajoInputs();
+        trabajo.Retenciones = Math.Max(0m, ParseFormDecimal(retencionesTrabajo));
+        await _dataStore.SaveJsonAsync(TrabajoKey, trabajo);
+
+        var hacienda = await _dataStore.LoadJsonAsync<HaciendaInputs>(HaciendaKey) ?? new HaciendaInputs();
+        hacienda.Retenciones = Math.Max(0m, ParseFormDecimal(retencionesAhorro));
+        await _dataStore.SaveJsonAsync(HaciendaKey, hacienda);
+
+        var nif = (nifEmpleador ?? string.Empty).Trim().ToUpperInvariant();
+        await _dataStore.SaveJsonAsync(DeclaracionKey, new DeclaracionInputs
+        {
+            OtrasReducciones = otrasReducciones is null ? previous.OtrasReducciones : Math.Max(0m, ParseFormDecimal(otrasReducciones)),
+            AportacionesTrabajadorPP = Math.Max(0m, ParseFormDecimal(aportacionesTrabajadorPP)),
+            NifEmpleador = nif.Length > 20 ? nif[..20] : nif,
+            MinimoAutonomico = Math.Max(0m, ParseFormDecimal(minimoAutonomico)),
+            DonativosBase = donativosBase is null ? previous.DonativosBase : Math.Max(0m, ParseFormDecimal(donativosBase)),
+            DonativosRecurrentes = donativosBase is null ? previous.DonativosRecurrentes : donativosRecurrentes,
+            DeduccionesEstatales = deduccionesEstatales is null ? previous.DeduccionesEstatales : Math.Max(0m, ParseFormDecimal(deduccionesEstatales)),
+            DeduccionesAutonomicas = Math.Max(0m, ParseFormDecimal(deduccionesAutonomicas))
+        });
+        return RedirectToPage(null, null, null, "resumen-irpf-panel-body");
+    }
+
+    public async Task<IActionResult> OnPostSaveTrabajoAsync(string? retribucionesDinerarias, string? valoracionEspecie,
+        string? ingresosCuentaEspecie, string? ingresosCuentaRepercutidos, string? contribucionesPlanes, string? reducciones,
+        string? cotizacionesSS, string? cuotasSindicatos, string? defensaJuridica, string? otrosGastos,
+        string? retenciones, string? minimoPersonal)
+    {
+        var current = await _dataStore.LoadJsonAsync<TrabajoInputs>(TrabajoKey) ?? new TrabajoInputs();
+
+        // Filas calculadas: el formulario envía el valor mostrado (<clave>Shown) y el valor del campo. Si el campo cambia, se guarda
+        // como valor manual; si se deja vacío se vuelve al cálculo automático; si no cambia, se conserva lo que hubiera.
+        decimal? Override(string key, decimal? existing)
+        {
+            if (!Request.Form.TryGetValue(key, out var posted))
+            {
+                return existing;
+            }
+
+            var text = posted.ToString().Trim();
+            if (text.Length == 0)
+            {
+                return null;
+            }
+
+            var shown = Request.Form[key + "Shown"].ToString().Trim();
+            return text == shown ? existing : Math.Max(0m, ParseFormDecimal(text));
+        }
+
+        await _dataStore.SaveJsonAsync(TrabajoKey, new TrabajoInputs
+        {
+            OvRetribucionesEspecie = Override("ovRetribucionesEspecie", current.OvRetribucionesEspecie),
+            OvTotalIngresos = Override("ovTotalIngresos", current.OvTotalIngresos),
+            OvNetoPrevio = Override("ovNetoPrevio", current.OvNetoPrevio),
+            OvSumaNetosPrevios = Override("ovSumaNetosPrevios", current.OvSumaNetosPrevios),
+            OvOtrosGastos = Override("ovOtrosGastos", current.OvOtrosGastos),
+            OvRendimientoNeto = Override("ovRendimientoNeto", current.OvRendimientoNeto),
+            OvReduccionTrabajo = Override("ovReduccionTrabajo", current.OvReduccionTrabajo),
+            OvNetoReducido = Override("ovNetoReducido", current.OvNetoReducido),
+            RetribucionesDinerarias = Math.Max(0m, ParseFormDecimal(retribucionesDinerarias)),
+            ValoracionEspecie = Math.Max(0m, ParseFormDecimal(valoracionEspecie)),
+            IngresosCuentaEspecie = Math.Max(0m, ParseFormDecimal(ingresosCuentaEspecie)),
+            IngresosCuentaRepercutidos = Math.Max(0m, ParseFormDecimal(ingresosCuentaRepercutidos)),
+            ContribucionesPlanes = Math.Max(0m, ParseFormDecimal(contribucionesPlanes)),
+            Reducciones = Math.Max(0m, ParseFormDecimal(reducciones)),
+            CotizacionesSS = Math.Max(0m, ParseFormDecimal(cotizacionesSS)),
+            CuotasSindicatos = cuotasSindicatos is null ? current.CuotasSindicatos : Math.Max(0m, ParseFormDecimal(cuotasSindicatos)),
+            DefensaJuridica = defensaJuridica is null ? current.DefensaJuridica : Math.Max(0m, ParseFormDecimal(defensaJuridica)),
+            OtrosGastos = otrosGastos is null ? current.OtrosGastos : Math.Max(0m, ParseFormDecimal(otrosGastos)),
+            Retenciones = Math.Max(0m, ParseFormDecimal(retenciones)),
+            MinimoPersonal = Math.Max(0m, ParseFormDecimal(minimoPersonal))
+        });
+        return RedirectToPage(null, null, null, "trabajo-panel-body");
+    }
+
     private TaxResult? _hacienda;
 
     public TaxResult Hacienda => _hacienda ??= BuildHacienda();
@@ -560,14 +833,15 @@ public class IndexModel : PageModel
         // Recompra de valores homogéneos: 2 meses en valores cotizados (ETF, acciones) y 1 año en fondos no cotizados.
         return TaxCalculator.Compute(transactions, DateTime.Now.Year,
             isin => !string.IsNullOrWhiteSpace(isin) && funds.Contains(isin.Trim().ToUpperInvariant()) ? 12 : 2,
-            HaciendaState.OtrosRendimientos, HaciendaState.Retenciones);
+            CapitalNeto, HaciendaState.Retenciones);
     }
 
     public async Task<IActionResult> OnPostSaveHaciendaAsync(string? otrosRendimientos, string? retenciones)
     {
+        var previous = await _dataStore.LoadJsonAsync<HaciendaInputs>(HaciendaKey) ?? new HaciendaInputs();
         await _dataStore.SaveJsonAsync(HaciendaKey, new HaciendaInputs
         {
-            OtrosRendimientos = Math.Max(0m, ParseFormDecimal(otrosRendimientos)),
+            OtrosRendimientos = otrosRendimientos is null ? previous.OtrosRendimientos : Math.Max(0m, ParseFormDecimal(otrosRendimientos)),
             Retenciones = Math.Max(0m, ParseFormDecimal(retenciones))
         });
         return RedirectToPage();
@@ -987,7 +1261,15 @@ public class IndexModel : PageModel
         ResolvePublicUrl();
         _transactionState = await LoadTransactionStateAsync();
         ExcelTransactions = await _dataStore.LoadEntriesAsync<BrokerTransactionRow>(ExcelTransactionsKey);
-        HaciendaState = await _dataStore.LoadJsonAsync<HaciendaInputs>(HaciendaKey) ?? new HaciendaInputs();        RendimientoReferenciaIng = (await _dataStore.LoadJsonAsync<RendimientoRefState>(RendimientoRefKey))?.Valor ?? string.Empty;
+        HaciendaState = await _dataStore.LoadJsonAsync<HaciendaInputs>(HaciendaKey) ?? new HaciendaInputs();
+        TrabajoState = await _dataStore.LoadJsonAsync<TrabajoInputs>(TrabajoKey) ?? new TrabajoInputs();
+        DeclaracionState = await _dataStore.LoadJsonAsync<DeclaracionInputs>(DeclaracionKey) ?? new DeclaracionInputs();
+        DeclaranteState = await _dataStore.LoadJsonAsync<DeclaranteInputs>(DeclaranteKey) ?? new DeclaranteInputs();
+        AutoliquidacionState = await _dataStore.LoadJsonAsync<AutoliquidacionInputs>(AutoliquidacionKey) ?? new AutoliquidacionInputs();
+        // Compatibilidad: los "otros rendimientos del ahorro" guardados antes se tratan como intereses (casilla 0027).
+        CapitalState = await _dataStore.LoadJsonAsync<CapitalInputs>(CapitalKey)
+            ?? new CapitalInputs { Intereses = HaciendaState.OtrosRendimientos };
+        RendimientoReferenciaIng = (await _dataStore.LoadJsonAsync<RendimientoRefState>(RendimientoRefKey))?.Valor ?? string.Empty;
 
         if (!await _dataStore.ExistsAsync(IndicesKey))
         {

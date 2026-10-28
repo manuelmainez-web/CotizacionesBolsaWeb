@@ -385,12 +385,27 @@
                                 <span translate="no" class="notranslate">Imprimir los movimientos de las operaciones de compra y venta (INGDIRECT y Trade Republic)</span>
                             </label>
                         </div>
-                        <div class="print-options print-options-last">
-                            <label class="print-option-label" for="chk-print-hacienda">
-                                <input type="checkbox" id="chk-print-hacienda" autocomplete="off" />
-                                <span translate="no" class="notranslate">Imprimir los datos de Hacienda (Agencia Tributaria)</span>
-                            </label>
+                        <div class="print-options">
+                            <span class="print-option-label" translate="no"><strong class="notranslate">Datos de la Agencia Tributaria: apartados a imprimir</strong></span>
                         </div>
+                        @foreach (var apartado in new[]
+                        {
+                            ("declarante-panel-body", "Datos del declarante"),
+                            ("trabajo-panel-body", "Rendimiento del trabajo"),
+                            ("capital-panel-body", "Rendimientos del capital mobiliario"),
+                            ("hacienda-panel-body", "Agencia Tributaria (ganancias y p\u00e9rdidas patrimoniales)"),
+                            ("resumen-irpf-panel-body", "Resumen de la declaraci\u00f3n"),
+                            ("autoliquidacion-panel-body", "Datos de la autoliquidaci\u00f3n")
+                        })
+                        {
+                            var esUltimoApartado = apartado.Item1 == "autoliquidacion-panel-body";
+                            <div class="print-options@(esUltimoApartado ? " print-options-last" : "")">
+                                <label class="print-option-label" for="chk-print-hac-@apartado.Item1">
+                                    <input type="checkbox" class="chk-print-hacienda-apartado" id="chk-print-hac-@apartado.Item1" data-panel-body="@apartado.Item1" checked autocomplete="off" />
+                                    <span translate="no" class="notranslate">@apartado.Item2</span>
+                                </label>
+                            </div>
+                        }
                         <div class="quick-links" translate="no">
                             <div class="quick-link-inline">
                                 <button type="button" class="mini-button quick-link-button notranslate" id="btn-print-cartera-tab" title="Imprime solo la cartera, cuenta corriente y efectivo con las casillas de resumen">
@@ -404,7 +419,7 @@
                                     <span aria-hidden="true">🖨️</span>
                                     <span translate="no" class="notranslate">Imprimir</span>
                                 </button>
-                                <span translate="no" class="notranslate">Datos de la Agencia Tributaria, relativos a operaciones del año en curso</span>
+                                <span translate="no" class="notranslate">Datos de la Agencia Tributaria</span>
                             </div>
                             <div class="quick-link-inline">
                                 <button type="button" class="mini-button quick-link-button notranslate" id="btn-print-page-tab" title="Imprime toda la página">
@@ -2195,6 +2210,294 @@
         var eurPlain = "#,##0.00 €;-#,##0.00 €;0.00 €";
         var toPayClass = hac.ToPay > 0 ? "hacienda-loss" : (hac.ToPay < 0 ? "hacienda-gain" : "");
     }
+    @{
+        var dcl = Model.DeclaranteState;
+        var estadosCiviles = new[] { "Soltero/a", "Casado/a", "Viudo/a", "Divorciado/a", "Separado/a legalmente" };
+    }
+    <div class="market-panel hacienda-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="declarante-panel-body" data-toggle-name="hacienda-declarante" title="Mostrar/ocultar" aria-label="Mostrar datos del declarante" aria-expanded="false"></button>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
+                Datos del declarante <span class="panel-head-subtitle">(IRPF · ejercicio @hac.Year)</span>
+            </span>
+            <div class="panel-head-actions">
+                <span class="transaction-total-summary">@dcl.ApellidosNombre · @dcl.Nif</span>
+            </div>
+        </div>
+        <p class="panel-help-text">Datos de identificación del primer declarante, residencia, opción de tributación y asignaciones tributarias de la declaración (modelo 100).</p>
+        <div id="declarante-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
+            <form method="post" asp-page-handler="SaveDeclarante" data-ajax-save style="display: contents;">
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Primer declarante y cónyuge, en caso de matrimonio no separado legalmente · Primer declarante</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Casilla</th>
+                                <th>Concepto</th>
+                                <th class="text-align-right">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>0001</td><td>NIF</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="nif" maxlength="20" value="@dcl.Nif" /></td></tr>
+                            <tr><td>0002</td><td>Apellidos y nombre</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="apellidosNombre" maxlength="120" value="@dcl.ApellidosNombre" /></td></tr>
+                            <tr><td>0005</td><td>Sexo del primer declarante</td><td class="text-align-right">
+                                <select class="hacienda-casilla-input" name="sexo">
+                                    <option value="Hombre" selected="@(dcl.Sexo == "Hombre")">Hombre</option>
+                                    <option value="Mujer" selected="@(dcl.Sexo == "Mujer")">Mujer</option>
+                                </select></td></tr>
+                            <tr><td>0006</td><td>Estado civil (el 31-12-@hac.Year) (1)</td><td class="text-align-right">
+                                <select class="hacienda-casilla-input" name="estadoCivil">
+                                    @foreach (var ec in estadosCiviles)
+                                    {
+                                        <option value="@ec" selected="@(dcl.EstadoCivil == ec)">@ec</option>
+                                    }
+                                </select></td></tr>
+                            <tr><td>0010</td><td>Fecha de nacimiento</td><td class="text-align-right"><input type="date" class="hacienda-casilla-input" name="fechaNacimiento" value="@dcl.FechaNacimiento" /></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Comunidad o Ciudad Autónoma de residencia en el ejercicio @hac.Year</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <tbody>
+                            <tr><td>0070</td><td>Comunidad Autónoma o de la Ciudad con Estatuto de Autonomía en la que tuvo/tuvieron su residencia habitual en @hac.Year</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="comunidad" maxlength="60" value="@dcl.Comunidad" /></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Opción de tributación</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <tbody>
+                            <tr><td>0068</td><td>Tributación individual</td><td class="text-align-right"><input type="checkbox" class="hacienda-casilla-input" style="width:auto" name="tributacionIndividual" value="true" @(dcl.TributacionIndividual ? "checked" : "") /></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Asignación tributaria a la Iglesia Católica</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <tbody>
+                            <tr><td>0105</td><td>Desea que se destine un 0,7 por 100 de la cuota íntegra al sostenimiento económico de la Iglesia Católica</td><td class="text-align-right"><input type="checkbox" class="hacienda-casilla-input" style="width:auto" name="iglesiaCatolica" value="true" @(dcl.IglesiaCatolica ? "checked" : "") /></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Asignación de cantidades a actividades de interés general consideradas de interés social</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <tbody>
+                            <tr><td>0106</td><td>Desea que se destine un 0,7 por 100 de la cuota íntegra a las actividades previstas en el Real Decreto-Ley 7/2013, de 28 de junio (BOE del 29)</td><td class="text-align-right"><input type="checkbox" class="hacienda-casilla-input" style="width:auto" name="finesSociales" value="true" @(dcl.FinesSociales ? "checked" : "") /></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="hacienda-inputs-form">
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
+
+    @{
+        var trab = Model.Trabajo;
+        var trabState = Model.TrabajoState;
+        var resumen = Model.ResumenIrpf;
+        var resumenClass = resumen.ToPay > 0 ? "hacienda-loss" : (resumen.ToPay < 0 ? "hacienda-gain" : "");
+        string Num(decimal v) => v.ToString("0.##", esCulture);
+        Microsoft.AspNetCore.Html.IHtmlContent OvCell(string name, decimal value, decimal? manual)
+        {
+            var cls = manual.HasValue ? "hacienda-casilla-input hacienda-casilla-overridden" : "hacienda-casilla-input";
+            var title = manual.HasValue
+                ? "Valor modificado a mano; vacía el campo para volver al cálculo automático"
+                : "Calculado automáticamente; puedes modificarlo";
+            var shown = Num(value);
+            return Html.Raw("<td class=\"text-align-right\"><input type=\"text\" class=\"" + cls + "\" name=\"" + name
+                + "\" inputmode=\"decimal\" value=\"" + shown + "\" title=\"" + title + "\" /><input type=\"hidden\" name=\""
+                + name + "Shown\" value=\"" + shown + "\" /></td>");
+        }
+    }
+    <div class="market-panel hacienda-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="trabajo-panel-body" data-toggle-name="hacienda-trabajo" title="Mostrar/ocultar" aria-label="Mostrar rendimiento del trabajo" aria-expanded="false"></button>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
+                Rendimiento del trabajo <span class="panel-head-subtitle">(IRPF · base general · ejercicio @hac.Year)</span>
+            </span>
+            <div class="panel-head-actions">
+                <span class="transaction-total-summary">Rendimiento neto reducido: <strong>@trab.NetIncome.ToString(eurPlain, esCulture)</strong></span>
+            </div>
+        </div>
+        <p class="panel-help-text">Rellena las casillas de la declaración (modelo 100) según tu certificado de retenciones; el resto de filas se calculan solas con las fórmulas de Renta WEB. Los gastos generales (2.000 €) y la reducción por obtención de rendimientos del trabajo se aplican automáticamente. Las filas calculadas (Retribuciones en especie, Total ingresos, Rendimientos netos, Otros gastos deducibles, reducción…) también se pueden modificar: escribe el importe que quieras y se usará en el resto de cálculos (se marca en naranja); si vacías el campo, vuelve el cálculo automático. Las filas sin número de casilla (—) son desgloses propios de esta página.</p>
+        <div id="trabajo-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Rendimientos del trabajo · Contribuyente que obtiene los rendimientos: DECLARANTE</span></div></div>
+                <form method="post" asp-page-handler="SaveTrabajo">
+                    <div class="table-wrap">
+                        <table class="market-table market-table-grid transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>Casilla</th>
+                                    <th>Concepto</th>
+                                    <th class="text-align-right">Importe (€)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>0003</td>
+                                    <td>Retribuciones dinerarias</td>
+                                    <td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="retribucionesDinerarias" inputmode="decimal" value="@Num(trabState.RetribucionesDinerarias)" /></td>
+                                </tr>
+                                <tr>
+                                    <td>0004</td>
+                                    <td>Valoración retribución en especie</td>
+                                    <td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="valoracionEspecie" inputmode="decimal" value="@Num(trabState.ValoracionEspecie)" /></td>
+                                </tr>
+                                <tr>
+                                    <td>0005</td>
+                                    <td>Ingresos a cuenta de retribución en especie</td>
+                                    <td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="ingresosCuentaEspecie" inputmode="decimal" value="@Num(trabState.IngresosCuentaEspecie)" /></td>
+                                </tr>
+                                <tr>
+                                    <td>0006</td>
+                                    <td>Ingresos a cuenta repercutidos de retribución en especie</td>
+                                    <td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="ingresosCuentaRepercutidos" inputmode="decimal" value="@Num(trabState.IngresosCuentaRepercutidos)" /></td>
+                                </tr>
+                                <tr class="transaction-row-current-year">
+                                    <td>0007</td>
+                                    <td><strong>Retribuciones en especie</strong> [(4)+(5)-(6)]</td>
+                                    @OvCell("ovRetribucionesEspecie", trab.InKindIncome, trabState.OvRetribucionesEspecie)
+                                </tr>
+                                <tr>
+                                    <td>0008</td>
+                                    <td>Contribuciones empresariales a Planes de Pensiones y Mutualidades de Previsión Social</td>
+                                    <td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="contribucionesPlanes" inputmode="decimal" value="@Num(trabState.ContribucionesPlanes)" /></td>
+                                </tr>
+                                <tr>
+                                    <td>0011</td>
+                                    <td>Reducciones (artículo 18.2 y 3, y disposiciones transitorias 11ª, 12ª y 25ª de la Ley)</td>
+                                    <td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="reducciones" inputmode="decimal" value="@Num(trabState.Reducciones)" /></td>
+                                </tr>
+                                <tr class="transaction-row-current-year">
+                                    <td>0012</td>
+                                    <td><strong>Total ingresos íntegros computables</strong> [(03)+(07)+(08)+(24)+(09)+(10)-(11)-(58)]</td>
+                                    @OvCell("ovTotalIngresos", trab.GrossIncome, trabState.OvTotalIngresos)
+                                </tr>
+                                <tr>
+                                    <td>0013</td>
+                                    <td>Cotizac. Seguridad Social, Mutualidad Funcionarios, detracciones derechos pasivos y Coleg. Huérfanos</td>
+                                    <td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="cotizacionesSS" inputmode="decimal" value="@Num(trabState.CotizacionesSS)" /></td>
+                                </tr>
+                                <tr class="transaction-row-current-year">
+                                    <td>0017</td>
+                                    <td><strong>Rendimiento neto previo</strong> [(12)-(13)-(14)-(15)-(16)]</td>
+                                    @OvCell("ovNetoPrevio", trab.PreviousNet, trabState.OvNetoPrevio)
+                                </tr>
+                                <tr class="transaction-row-current-year">
+                                    <td>0018</td>
+                                    <td><strong>Suma de rendimientos netos previos</strong></td>
+                                    @OvCell("ovSumaNetosPrevios", trab.PreviousNetSum, trabState.OvSumaNetosPrevios)
+                                </tr>
+                                <tr>
+                                    <td>0019</td>
+                                    <td>Otros gastos deducibles: gastos generales (importe fijo)</td>
+                                    @OvCell("ovOtrosGastos", trab.FixedExpenses, trabState.OvOtrosGastos)
+                                </tr>
+                                <tr class="transaction-row-current-year">
+                                    <td>0022</td>
+                                    <td><strong>Rendimiento neto</strong> [(18)-(19)-(20)-(21)]</td>
+                                    @OvCell("ovRendimientoNeto", trab.NetBeforeReduction, trabState.OvRendimientoNeto)
+                                </tr>
+                                <tr>
+                                    <td>0023</td>
+                                    <td>↳ Reducción por obtención de rendimientos del trabajo (art. 20 LIRPF, automática)</td>
+                                    @OvCell("ovReduccionTrabajo", trab.Reduction, trabState.OvReduccionTrabajo)
+                                </tr>
+                                <tr class="transaction-row-current-year">
+                                    <td>0025</td>
+                                    <td><strong>Rendimiento neto reducido</strong> [(22)-(23)]</td>
+                                    @OvCell("ovNetoReducido", trab.NetIncome, trabState.OvNetoReducido)
+                                </tr>
+                                <tr>
+                                    <td>0596</td>
+                                    <td>Retenciones del trabajo (pagos a cuenta)</td>
+                                    <td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="retenciones" inputmode="decimal" value="@Num(trabState.Retenciones)" /></td>
+                                </tr>
+                                <tr>
+                                    <td>0519</td>
+                                    <td>Mínimo personal y familiar para calcular el gravamen estatal (5.550 € general; súmale descendientes, ascendientes, etc.)</td>
+                                    <td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="minimoPersonal" inputmode="decimal" value="@Num(trabState.MinimoPersonal)" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="hacienda-inputs-form">
+                        <button type="submit" class="mini-button">Guardar y recalcular</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @{
+        var cap = Model.CapitalState;
+    }
+    <div class="market-panel hacienda-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="capital-panel-body" data-toggle-name="hacienda-capital" title="Mostrar/ocultar" aria-label="Mostrar capital mobiliario" aria-expanded="false"></button>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
+                Rendimientos del capital mobiliario <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
+            </span>
+            <div class="panel-head-actions">
+                <span class="transaction-total-summary">Suma a integrar en la base del ahorro: <strong>@Model.CapitalNeto.ToString(eurPlain, esCulture)</strong></span>
+            </div>
+        </div>
+        <p class="panel-help-text">Rellena los ingresos íntegros de capital mobiliario (intereses, dividendos, etc.) y los gastos de administración y depósito; el resto de filas se calcula solo. El resultado se integra en la base imponible del ahorro de los paneles Agencia Tributaria y Resumen de la declaración. Las retenciones se introducen en el Resumen de la declaración (casilla 0597).</p>
+        <div id="capital-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Rendimientos del capital mobiliario a integrar en la base imponible del ahorro · DECLARANTE</span></div></div>
+                <form method="post" asp-page-handler="SaveCapital">
+                    <div class="table-wrap">
+                        <table class="market-table market-table-grid transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>Casilla</th>
+                                    <th>Concepto</th>
+                                    <th class="text-align-right">Importe (€)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>0027</td><td>Intereses de cuentas, depósitos y de activos financieros en general</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="intereses" inputmode="decimal" value="@Num(cap.Intereses)" /></td></tr>
+                                <tr><td>0028</td><td>Dividendos y demás rendimientos por la participación en fondos propios de entidades</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="dividendos" inputmode="decimal" value="@Num(cap.Dividendos)" /></td></tr>
+                                <tr><td>0029-0035</td><td>Resto de ingresos íntegros de capital mobiliario (seguros, rentas, cesión de capitales, etc.)</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="otrosIngresos" inputmode="decimal" value="@Num(cap.OtrosIngresos)" /></td></tr>
+                                <tr class="transaction-row-current-year"><td>0036</td><td><strong>Total de ingresos íntegros</strong> [(27)+(28)+(29)+(30)+(31)+(32)+(33)+(34)+(35)]</td><td class="text-align-right price-cell"><strong>@Model.CapitalTotalIngresos.ToString(eurPlain, esCulture)</strong></td></tr>
+                                <tr><td>0037</td><td>Gastos de administración y depósito</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="gastosAdministracion" inputmode="decimal" value="@Num(cap.GastosAdministracion)" /></td></tr>
+                                <tr><td>0038</td><td>Rendimiento neto [(36)-(37)]</td><td class="text-align-right price-cell">@Model.CapitalNeto.ToString(eurPlain, esCulture)</td></tr>
+                                <tr><td>0040</td><td>Rendimiento neto reducido [(38)-(39)]</td><td class="text-align-right price-cell">@Model.CapitalNeto.ToString(eurPlain, esCulture)</td></tr>
+                                <tr class="transaction-row-current-year"><td>0041</td><td><strong>Suma de rendimientos de capital mobiliario a integrar en la base imponible del ahorro</strong></td><td class="text-align-right price-cell"><strong>@Model.CapitalNeto.ToString(eurPlain, esCulture)</strong></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="hacienda-inputs-form">
+                        <button type="submit" class="mini-button">Guardar y recalcular</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="market-panel hacienda-panel mt-4">
         <div class="panel-head panel-head-row">
             <span>
@@ -2207,7 +2510,7 @@
             </div>
         </div>
         <p class="panel-help-text">Se muestra: Resumen y cuota estimada, Tramos de la base del ahorro, Ventas de @hac.Year y compras que se descuentan (FIFO) y Avisos y aspectos a tener en cuenta.</p>
-        <div id="hacienda-panel-body" class="transaction-broker-grid is-collapsed">
+        <div id="hacienda-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
             <div class="transaction-broker-card">
                 <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Resumen y cuota estimada</span></div></div>
                 <div class="table-wrap">
@@ -2224,7 +2527,7 @@
                             {
                                 <tr><td>Pérdidas de ejercicios anteriores compensadas</td><td class="text-align-right price-cell">@((-hac.PriorLossesApplied).ToString(eurSigned, esCulture))</td></tr>
                             }
-                            <tr><td>Otros rendimientos del ahorro (dividendos, intereses…)</td><td class="text-align-right price-cell">@hac.OtherIncome.ToString(eurSigned, esCulture)</td></tr>
+                            <tr><td>Otros rendimientos del ahorro (dividendos, intereses… · se editan en el panel Capital mobiliario)</td><td class="text-align-right price-cell">@hac.OtherIncome.ToString(eurSigned, esCulture)</td></tr>
                             @if (hac.OtherIncomeCompensation > 0)
                             {
                                 <tr><td>Compensación de pérdidas con esos rendimientos (máx. 25 %)</td><td class="text-align-right price-cell">@((-hac.OtherIncomeCompensation).ToString(eurSigned, esCulture))</td></tr>
@@ -2237,9 +2540,6 @@
                     </table>
                 </div>
                 <form method="post" asp-page-handler="SaveHacienda" class="hacienda-inputs-form">
-                    <label>Otros rendimientos del ahorro @hac.Year (€)
-                        <input type="text" name="otrosRendimientos" inputmode="decimal" value="@Model.HaciendaState.OtrosRendimientos.ToString("0.##", esCulture)" />
-                    </label>
                     <label>Retenciones / pagos a cuenta (€)
                         <input type="text" name="retenciones" inputmode="decimal" value="@Model.HaciendaState.Retenciones.ToString("0.##", esCulture)" />
                     </label>
@@ -2344,6 +2644,202 @@
                     }
                 </ul>
             </div>
+        </div>
+    </div>
+
+    <div class="market-panel hacienda-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="resumen-irpf-panel-body" data-toggle-name="hacienda-resumen" title="Mostrar/ocultar" aria-label="Mostrar resumen de la declaración" aria-expanded="false"></button>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
+                Resumen de la declaración <span class="panel-head-subtitle">(IRPF · ahorro + trabajo · ejercicio @hac.Year)</span>
+            </span>
+            <div class="panel-head-actions">
+                <span class="transaction-total-summary">@(resumen.ToPay >= 0 ? "A pagar" : "A devolver"): <strong class="@resumenClass">@Math.Abs(resumen.ToPay).ToString(eurPlain, esCulture)</strong></span>
+            </div>
+        </div>
+        <p class="panel-help-text">Liquidación del IRPF con los apartados y casillas de la declaración (modelo 100): rendimientos del capital mobiliario, integración de rentas, bases, reducciones, circunstancias personales, cálculo del impuesto, deducciones, cuotas líquidas y resultado. Los importes se calculan con los datos de los paneles Agencia Tributaria y Rendimiento del trabajo. Cálculo orientativo (escala estatal y de la Comunidad de Madrid).</p>
+        <div id="resumen-irpf-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Liquidación de la declaración</span></div></div>
+                <form method="post" asp-page-handler="SaveDeclaracion">
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Casilla</th>
+                                <th>Concepto</th>
+                                <th class="text-align-right">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hacienda-section-row"><td colspan="3">Rendimientos del capital mobiliario a integrar en la base imponible del ahorro · DECLARANTE</td></tr>
+                            <tr><td>0027</td><td>Intereses de cuentas, depósitos y de activos financieros en general (panel Rendimientos del capital mobiliario)</td><td class="text-align-right price-cell">@Model.CapitalState.Intereses.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0028</td><td>Dividendos y demás rendimientos por la participación en fondos propios de entidades</td><td class="text-align-right price-cell">@Model.CapitalState.Dividendos.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0036</td><td>Total de ingresos íntegros [(27)+(28)+(29)+(30)+(31)+(32)+(33)+(34)+(35)]</td><td class="text-align-right price-cell">@Model.CapitalTotalIngresos.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0038</td><td>Rendimiento neto [(36)-(37)]</td><td class="text-align-right price-cell">@Model.CapitalNeto.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0040</td><td>Rendimiento neto reducido [(38)-(39)]</td><td class="text-align-right price-cell">@Model.CapitalNeto.ToString(eurPlain, esCulture)</td></tr>
+                            <tr class="transaction-row-current-year"><td>0041</td><td><strong>Suma de rendimientos de capital mobiliario a integrar en la base imponible del ahorro</strong></td><td class="text-align-right price-cell"><strong>@hac.OtherIncome.ToString(eurPlain, esCulture)</strong></td></tr>
+
+                            <tr class="hacienda-section-row"><td colspan="3">Integración y compensación de rentas · Ganancias y pérdidas patrimoniales a integrar o compensar en la base imponible del ahorro de @hac.Year</td></tr>
+                            <tr><td>0422</td><td>Suma de ganancias patrimoniales (saldo neto de transmisiones de @hac.Year)</td><td class="text-align-right price-cell">@resumen.GainsSum.ToString(eurSigned, esCulture)</td></tr>
+                            <tr><td>0424</td><td>Saldo neto positivo de ganan./pérd. patrimoniales imputables a @hac.Year a integrar en la B.I. ahorro</td><td class="text-align-right price-cell">@resumen.NetGainsIntegrated.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0429</td><td>Saldo neto positivo del rendimiento capital mobiliario imputable a @hac.Year a integrar en la B.I. ahorro</td><td class="text-align-right price-cell">@resumen.CapitalIncomeIntegrated.ToString(eurPlain, esCulture)</td></tr>
+
+                            <tr class="hacienda-section-row"><td colspan="3">Base imponible general y base imponible del ahorro · Base imponible general</td></tr>
+                            <tr><td>0432</td><td>Saldo neto de rendimientos a integrar en la base imponible general y de las imputaciones de renta</td><td class="text-align-right price-cell">@resumen.GeneralBase.ToString(eurPlain, esCulture)</td></tr>
+                            <tr class="transaction-row-current-year"><td>0435</td><td><strong>Base imponible general</strong> [(420)-(431)+(432)-(433)-(434)]</td><td class="text-align-right price-cell"><strong>@resumen.GeneralBase.ToString(eurPlain, esCulture)</strong></td></tr>
+                            <tr class="hacienda-section-row"><td colspan="3">Base imponible del ahorro</td></tr>
+                            <tr><td>0424</td><td>Saldo neto positivo de ganan./pérd. patrimoniales imputables a @hac.Year a integrar en la B.I. ahorro</td><td class="text-align-right price-cell">@resumen.NetGainsIntegrated.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0429</td><td>Saldo neto positivo del rendimiento capital mobiliario imputable a @hac.Year a integrar en la B.I. ahorro</td><td class="text-align-right price-cell">@resumen.CapitalIncomeIntegrated.ToString(eurPlain, esCulture)</td></tr>
+                            <tr class="transaction-row-current-year"><td>0460</td><td><strong>Base imponible del ahorro</strong></td><td class="text-align-right price-cell"><strong>@resumen.SavingsBase.ToString(eurPlain, esCulture)</strong></td></tr>
+
+                            <tr class="hacienda-section-row"><td colspan="3">Reducciones de la base imponible · Reducciones por aportaciones y contribuciones a sistemas de previsión social (régimen general) · DECLARANTE</td></tr>
+                            <tr><td>0426</td><td>Aportaciones y contribuciones del ejercicio @hac.Year. Aportaciones del trabajador al PP de la empresa</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="aportacionesTrabajadorPP" inputmode="decimal" value="@Num(Model.DeclaracionState.AportacionesTrabajadorPP)" /></td></tr>
+                            <tr><td>0427</td><td>Aportaciones y contribuciones del ejercicio @hac.Year. Contribuciones empresariales excepto SCD (casilla 0008 del panel Rendimiento del trabajo)</td><td class="text-align-right price-cell">@resumen.EmployerContributions.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0397</td><td>Nif del empleador</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="nifEmpleador" maxlength="20" value="@Model.DeclaracionState.NifEmpleador" /></td></tr>
+                            <tr><td>0467</td><td>Importe de aportaciones y contribuciones con derecho a reducción (Límite máximo art.52 de la Ley: 10.000 € y 30 % del rendimiento neto)</td><td class="text-align-right price-cell">@resumen.PensionRightToReduction.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0468</td><td><strong>Total con derecho a reducción</strong></td><td class="text-align-right price-cell"><strong>@resumen.PensionRightToReduction.ToString(eurPlain, esCulture)</strong></td></tr>
+
+                            <tr class="hacienda-section-row"><td colspan="3">Base liquidable general y base liquidable del ahorro · Determinación de la base liquidable general</td></tr>
+                            <tr><td>0435</td><td>Base imponible general [(420)-(431)+(432)-(433)-(434)]</td><td class="text-align-right price-cell">@resumen.GeneralBase.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0492</td><td>Reducción por aportaciones a sistemas de previsión social (régimen general). Importe que se aplica</td><td class="text-align-right price-cell">@((-resumen.ReductionOnGeneral).ToString(eurSigned, esCulture))</td></tr>
+                            <tr><td>0500</td><td><strong>Base liquidable general</strong> [(435)-(491)-(492)-(493)-(494)-(495)-(496)-(497)]</td><td class="text-align-right price-cell"><strong>@resumen.GeneralLiquidBase.ToString(eurPlain, esCulture)</strong></td></tr>
+                            <tr><td>0505</td><td>Base liquidable general sometida a gravamen [(500)-(501)]</td><td class="text-align-right price-cell">@resumen.GeneralLiquidBase.ToString(eurPlain, esCulture)</td></tr>
+                            <tr class="hacienda-section-row"><td colspan="3">Determinación de la base liquidable del ahorro</td></tr>
+                            <tr><td>0460</td><td>Base imponible del ahorro</td><td class="text-align-right price-cell">@resumen.SavingsBase.ToString(eurPlain, esCulture)</td></tr>
+                            <tr class="transaction-row-current-year"><td>0510</td><td><strong>Base liquidable del ahorro</strong> [(460)-(506)-(507)]</td><td class="text-align-right price-cell"><strong>@resumen.SavingsLiquidBase.ToString(eurPlain, esCulture)</strong></td></tr>
+
+                            <tr class="hacienda-section-row"><td colspan="3">Adecuación del impuesto a las circunstancias personales y familiares</td></tr>
+                            <tr><td>0519</td><td>Mínimo personal y familiar para calcular el gravamen estatal (se edita en el panel Rendimiento del trabajo)</td><td class="text-align-right price-cell">@resumen.StateMinimum.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0520</td><td>Mínimo personal y familiar para calcular el gravamen autonómico (€)</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="minimoAutonomico" inputmode="decimal" value="@Num(Model.DeclaracionState.MinimoAutonomico)" /></td></tr>
+                            <tr><td>0521</td><td>Mínimo personal y familiar de la base liquidable general para calcular el gravamen estatal</td><td class="text-align-right price-cell">@resumen.StateMinimumOnGeneral.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0522</td><td>Mínimo personal y familiar de la base liquidable del ahorro para calcular el gravamen estatal</td><td class="text-align-right price-cell">@resumen.StateMinimumOnSavings.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0523</td><td>Mínimo personal y familiar de la base liquidable general para calcular el gravamen autonómico</td><td class="text-align-right price-cell">@resumen.RegionalMinimumOnGeneral.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0524</td><td>Mínimo personal y familiar de la base liquidable del ahorro para calcular el gravamen autonómico</td><td class="text-align-right price-cell">@resumen.RegionalMinimumOnSavings.ToString(eurPlain, esCulture)</td></tr>
+
+                            <tr class="hacienda-section-row"><td colspan="3">Cálculo del impuesto y resultado de la declaración</td></tr>
+                            <tr><td>0528</td><td>Cuota estatal correspondiente a la base liquidable general sometida a gravamen</td><td class="text-align-right price-cell">@resumen.StateGeneralTaxed.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0529</td><td>Cuota autonómica correspondiente a la base liquidable general sometida a gravamen</td><td class="text-align-right price-cell">@resumen.RegionalGeneralTaxed.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0530</td><td>Cuota estatal correspondiente al mínimo personal y familiar de B.L. general</td><td class="text-align-right price-cell">@resumen.StateGeneralOnMinimum.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0531</td><td>Cuota autonómica correspondiente al mínimo personal y familiar de la B.L. general</td><td class="text-align-right price-cell">@resumen.RegionalGeneralOnMinimum.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0532</td><td>Cuota estatal correspondiente a la base liquidable general</td><td class="text-align-right price-cell">@resumen.StateGeneralTax.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0533</td><td>Cuota autonómica correspondiente a la base liquidable general</td><td class="text-align-right price-cell">@resumen.RegionalGeneralTax.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0534</td><td>Tipo medio estatal</td><td class="text-align-right price-cell">@resumen.StateGeneralAverageRate.ToString("0.00", esCulture) %</td></tr>
+                            <tr><td>0535</td><td>Tipo medio autonómico</td><td class="text-align-right price-cell">@resumen.RegionalGeneralAverageRate.ToString("0.00", esCulture) %</td></tr>
+                            <tr><td>0536</td><td>Cuota estatal correspondiente a la base liquidable del ahorro sometida a gravamen</td><td class="text-align-right price-cell">@resumen.StateSavingsTaxed.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0537</td><td>Cuota autonómica correspondiente a la base liquidable del ahorro sometida a gravamen</td><td class="text-align-right price-cell">@resumen.RegionalSavingsTaxed.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0538</td><td>Cuota estatal correspondiente al mínimo personal y familiar de B.L. del ahorro</td><td class="text-align-right price-cell">@resumen.StateSavingsOnMinimum.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0539</td><td>Cuota autonómica correspondiente al mínimo personal y familiar de la B.L. del ahorro</td><td class="text-align-right price-cell">@resumen.RegionalSavingsOnMinimum.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0540</td><td>Cuota estatal correspondiente a la base liquidable del ahorro</td><td class="text-align-right price-cell">@resumen.StateSavingsTax.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0541</td><td>Cuota autonómica correspondiente a la base liquidable del ahorro</td><td class="text-align-right price-cell">@resumen.RegionalSavingsTax.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0542</td><td>Tipo medio estatal</td><td class="text-align-right price-cell">@resumen.StateSavingsAverageRate.ToString("0.00", esCulture) %</td></tr>
+                            <tr><td>0543</td><td>Tipo medio autonómico</td><td class="text-align-right price-cell">@resumen.RegionalSavingsAverageRate.ToString("0.00", esCulture) %</td></tr>
+                            <tr><td>0545</td><td><strong>Cuota íntegra estatal</strong> [(532)+(540)]</td><td class="text-align-right price-cell"><strong>@resumen.StateGrossTax.ToString(eurPlain, esCulture)</strong></td></tr>
+                            <tr><td>0546</td><td><strong>Cuota íntegra autonómica</strong> [(533)+(541)]</td><td class="text-align-right price-cell"><strong>@resumen.RegionalGrossTax.ToString(eurPlain, esCulture)</strong></td></tr>
+
+                            <tr class="hacienda-section-row"><td colspan="3">Deducciones</td></tr>
+                            <tr><td>0723</td><td>Deducción por donativos a entidades reguladas en la Ley 49/2002 con límite 10% de la base liquidable</td><td class="text-align-right price-cell">@resumen.DonationsDeduction.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0552</td><td>Por donativos, parte estatal</td><td class="text-align-right price-cell">@resumen.DonationsStatePart.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0553</td><td>Por donativos, parte autonómica</td><td class="text-align-right price-cell">@resumen.DonationsRegionalPart.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0564</td><td>Deducciones autonómicas de la Comunidad de Madrid · Suma de deducciones autonómicas (€)</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="deduccionesAutonomicas" inputmode="decimal" value="@Num(Model.DeclaracionState.DeduccionesAutonomicas)" /></td></tr>
+
+                            <tr class="hacienda-section-row"><td colspan="3">Determinación de cuotas líquidas y resultados · Cuotas líquidas</td></tr>
+                            <tr><td>0570</td><td>Cuota líquida estatal</td><td class="text-align-right price-cell">@resumen.StateNetTax.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0571</td><td>Cuota líquida autonómica</td><td class="text-align-right price-cell">@resumen.RegionalNetTax.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0585</td><td>Cuota líquida estatal incrementada [(570)+(568)+(582)+(572)+(573)+(574)+(576)]</td><td class="text-align-right price-cell">@resumen.StateNetTax.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0586</td><td>Cuota líquida autonómica incrementada [(571)+(569)+(583)+(577)+(578)+(579)+(581)+(504)]</td><td class="text-align-right price-cell">@resumen.RegionalNetTax.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0587</td><td><strong>Cuota líquida incrementada total</strong> [(585)+(586)]</td><td class="text-align-right price-cell"><strong>@resumen.TotalNetTax.ToString(eurPlain, esCulture)</strong></td></tr>
+                            <tr class="hacienda-section-row"><td colspan="3">Cuota resultante de la autoliquidación</td></tr>
+                            <tr><td>0595</td><td><strong>Cuota resultante de la autoliquidación</strong> [(587)-(588)-(414)-(589)-(590)-(591)]</td><td class="text-align-right price-cell"><strong>@resumen.TotalNetTax.ToString(eurPlain, esCulture)</strong></td></tr>
+                            <tr class="hacienda-section-row"><td colspan="3">Retenciones y demás pagos a cuenta</td></tr>
+                            <tr><td>0596</td><td>Por rendimientos del trabajo (€)</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="retencionesTrabajo" inputmode="decimal" value="@Num(resumen.WorkWithholdings)" /></td></tr>
+                            <tr><td>0597</td><td>Por rendimientos del capital mobiliario (€)</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="retencionesAhorro" inputmode="decimal" value="@Num(resumen.SavingsWithholdings)" /></td></tr>
+                            <tr><td>0609</td><td><strong>Total pagos a cuenta</strong> [suma de (592) + (593)+ (594) + (596) a (606)]</td><td class="text-align-right price-cell"><strong>@resumen.TotalWithholdings.ToString(eurPlain, esCulture)</strong></td></tr>
+                            <tr class="hacienda-section-row"><td colspan="3">Resultado de la declaración</td></tr>
+                            <tr><td>0610</td><td>Cuota diferencial [(595)-(609)]</td><td class="text-align-right price-cell">@resumen.ToPay.ToString(eurSigned, esCulture)</td></tr>
+                            <tr class="@(resumen.ToPay > 0 ? "transaction-row-current-year" : "")"><td>0670</td><td><strong>@(resumen.ToPay >= 0 ? "Resultado de la declaración: a pagar a Hacienda" : "Resultado de la declaración: a devolver")</strong></td><td class="text-align-right price-cell"><strong class="@resumenClass">@Math.Abs(resumen.ToPay).ToString(eurPlain, esCulture)</strong></td></tr>
+
+                            <tr class="hacienda-section-row"><td colspan="3">Importe del IRPF que corresponde a la Comunidad Autónoma de residencia del contribuyente</td></tr>
+                            <tr><td>0671</td><td>Cuota líquida autonómica incrementada</td><td class="text-align-right price-cell">@resumen.RegionalNetTax.ToString(eurPlain, esCulture)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="hacienda-inputs-form">
+                    <button type="submit" class="mini-button">Guardar y recalcular</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @{
+        var aut = Model.AutoliquidacionState;
+    }
+    <div class="market-panel hacienda-panel mt-4">
+        <div class="panel-head panel-head-row">
+            <span>
+                <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="autoliquidacion-panel-body" data-toggle-name="hacienda-autoliquidacion" title="Mostrar/ocultar" aria-label="Mostrar datos de la autoliquidación" aria-expanded="false"></button>
+                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
+                Datos de la autoliquidación <span class="panel-head-subtitle">(IRPF · ejercicio @hac.Year)</span>
+            </span>
+            <div class="panel-head-actions">
+                <span class="transaction-total-summary">@(Model.AutoliquidacionResultado >= 0 ? "Resultado a ingresar" : "Resultado a devolver"): <strong>@Math.Abs(Model.AutoliquidacionResultado).ToString(eurPlain, esCulture)</strong></span>
+            </div>
+        </div>
+        <p class="panel-help-text">Datos del justificante de la declaración presentada. El resultado y los plazos se calculan a partir del Resumen de la declaración (resultado a ingresar o devolver; primer plazo 60 %, segundo plazo 40 %). No se guarda el número de cuenta (IBAN).</p>
+        <div id="autoliquidacion-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
+            <form method="post" asp-page-handler="SaveAutoliquidacion" data-ajax-save style="display: contents;">
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Datos de la autoliquidación</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Concepto</th>
+                                <th class="text-align-right">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Número de Justificante</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="justificante" maxlength="30" value="@aut.Justificante" /></td></tr>
+                            <tr><td>Resultado a ingresar o devolver (según Resumen de la declaración)</td><td class="text-align-right price-cell"><strong>@Model.AutoliquidacionResultado.ToString(eurSigned, esCulture)</strong></td></tr>
+                            <tr><td>Tributación individual</td><td class="text-align-right">@(dcl.TributacionIndividual ? "Sí" : "No") <span class="panel-head-subtitle">(se edita en el panel Datos del declarante)</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="transaction-broker-card">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Declaración a ingresar · Datos del ingreso</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <tbody>
+                            <tr><td>Fraccionamiento del pago en dos plazos</td><td class="text-align-right"><input type="checkbox" class="hacienda-casilla-input" style="width:auto" name="fraccionado" value="true" @(aut.Fraccionado ? "checked" : "") onchange="var f=this.checked;document.querySelectorAll('.aut-frac').forEach(function(e){e.style.display=f?'':'none'});document.querySelectorAll('.aut-single').forEach(function(e){e.style.display=f?'none':''});" /></td></tr>
+                            <tr class="aut-frac" style="@(aut.Fraccionado ? "" : "display:none")"><td>Importe del primer plazo (60% del resultado de la declaración)</td><td class="text-align-right price-cell">@Model.AutoliquidacionPrimerPlazo.ToString(eurPlain, esCulture)</td></tr>
+                            <tr class="aut-single" style="@(aut.Fraccionado ? "display:none" : "")"><td>Importe a ingresar (pago en un solo plazo, 100% del resultado de la declaración)</td><td class="text-align-right price-cell">@Model.AutoliquidacionPagoUnico.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>Forma de pago</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="formaPagoPrimerPlazo" maxlength="80" value="@aut.FormaPagoPrimerPlazo" /></td></tr>
+                            <tr><td>El importe de la domiciliación se cargará el día</td><td class="text-align-right"><input type="date" class="hacienda-casilla-input" name="fechaCargoPrimerPlazo" value="@aut.FechaCargoPrimerPlazo" /></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="hacienda-inputs-form">
+                    <button type="submit" class="mini-button">Guardar</button>
+                </div>
+            </div>
+
+            <div class="transaction-broker-card aut-frac" style="@(aut.Fraccionado ? "" : "display:none")">
+                <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Declaración a ingresar · Datos del ingreso del segundo plazo</span></div></div>
+                <div class="table-wrap">
+                    <table class="market-table market-table-grid transaction-table">
+                        <tbody>
+                            <tr><td>Importe del segundo plazo (40% del resultado de la declaración)</td><td class="text-align-right price-cell">@Model.AutoliquidacionSegundoPlazo.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>Forma de pago</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="formaPagoSegundoPlazo" maxlength="80" value="@aut.FormaPagoSegundoPlazo" /></td></tr>
+                            <tr><td>El importe de la domiciliación se cargará el día</td><td class="text-align-right"><input type="date" class="hacienda-casilla-input" name="fechaCargoSegundoPlazo" value="@aut.FechaCargoSegundoPlazo" /></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </form>
         </div>
     </div>
 
