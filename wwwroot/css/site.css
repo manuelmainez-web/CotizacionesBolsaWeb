@@ -1061,12 +1061,12 @@ tr.tx-page-hidden {
 
 .summary-panel-ing {
   background: #ffffff;
-  border-color: #ff6200;
+  border-color: #d98a58;
 }
 
 /* Plegado, el panel de INGDIRECT es una banda naranja completa, sin marco blanco alrededor. */
 .summary-panel-ing:not(.summary-panel--expanded) {
-  background: linear-gradient(180deg, #ff7a24 0%, #ff6200 100%);
+  background: linear-gradient(180deg, #e29d73 0%, #d98a58 100%);
 }
 
 .summary-panel-ing:not(.summary-panel--expanded) .summary-strip-label {
@@ -1093,7 +1093,7 @@ tr.tx-page-hidden {
 }
 
 .summary-panel-ing .summary-strip-label {
-  background: linear-gradient(180deg, #ff7a24 0%, #ff6200 100%);
+  background: linear-gradient(180deg, #e29d73 0%, #d98a58 100%);
   border-radius: 8px;
   box-sizing: border-box;
   padding: 0 8px;
@@ -1103,7 +1103,7 @@ tr.tx-page-hidden {
 .summary-panel-ing .btn-toggle-summary {
   background: #ffffff;
   border-color: #ffffff;
-  color: #cc4e00;
+  color: #b8642f;
 }
 
 .summary-panel-ing .btn-toggle-summary:hover {
@@ -1147,7 +1147,7 @@ tr.tx-page-hidden {
 }
 
 .summary-panel-ing .rendimiento-ref-total {
-  color: #cc4e00;
+  color: #b8642f;
 }
 
 .summary-panel-ing .rendimiento-ref-result.rendimiento-ref-positivo {
@@ -1186,7 +1186,7 @@ tr.tx-page-hidden {
 .ing-panel .panel-head .btn-toggle-summary {
   background: #ffffff;
   border-color: #ffffff;
-  color: #cc4e00;
+  color: #b8642f;
 }
 
 .ing-panel .panel-head .btn-toggle-summary:hover {
@@ -1799,16 +1799,16 @@ tr.tx-page-hidden {
 }
 
 /* Panel "Operaciones de compra y venta INGDIRECT": colores corporativos de ING
-   (naranja #FF6200, blanco y gris oscuro). */
+   (naranja #d98a58, blanco y gris oscuro). */
 .market-panel.ing-panel {
   background: #ffffff;
-  border-color: #ff6200;
+  border-color: #d98a58;
   color: #333333;
 }
 
 .ing-panel .panel-head {
-  background: linear-gradient(180deg, #ff7a24 0%, #ff6200 100%);
-  border-bottom: 3px solid #cc4e00;
+  background: linear-gradient(180deg, #e29d73 0%, #d98a58 100%);
+  border-bottom: 3px solid #b8642f;
   color: #ffffff;
 }
 
@@ -1840,11 +1840,11 @@ tr.tx-page-hidden {
 
 .ing-panel .transaction-broker-header {
   background: #fff3eb;
-  border-bottom: 2px solid #ff6200;
+  border-bottom: 2px solid #d98a58;
 }
 
 .ing-panel .transaction-broker-name {
-  color: #cc4e00;
+  color: #b8642f;
 }
 
 .ing-panel .transaction-broker-header .transaction-total-summary,
@@ -1862,13 +1862,13 @@ tr.tx-page-hidden {
 }
 
 .ing-panel .market-tabs .nav-link:hover {
-  color: #cc4e00;
+  color: #b8642f;
   border-color: #ffc499;
 }
 
 .ing-panel .market-tabs .nav-link.active {
-  background: #ff6200;
-  border-color: #ff6200;
+  background: #d98a58;
+  border-color: #d98a58;
   color: #ffffff;
 }
 
@@ -1877,9 +1877,9 @@ tr.tx-page-hidden {
 }
 
 .ing-panel .market-table thead th {
-  background: #ff6200;
+  background: #d98a58;
   color: #ffffff;
-  border-bottom: 2px solid #cc4e00;
+  border-bottom: 2px solid #b8642f;
 }
 
 .ing-panel .market-table-grid th,
@@ -1917,23 +1917,23 @@ tr.tx-page-hidden {
 }
 
 .ing-panel .transaction-table tr.transaction-row-current-year td {
-  border-color: #ff9a5c;
+  border-color: #e6b08c;
 }
 
 .ing-panel .mini-button {
-  background: #ff6200;
-  border-color: #cc4e00;
+  background: #d98a58;
+  border-color: #b8642f;
   color: #ffffff;
 }
 
 .ing-panel .mini-button:hover {
-  background: #e65800;
+  background: #cf7a45;
 }
 
 .ing-panel .mini-button.mini-button-secondary {
   background: #ffffff;
-  border-color: #ff6200;
-  color: #cc4e00;
+  border-color: #d98a58;
+  color: #b8642f;
 }
 
 /* Los botones de la cabecera naranja ("Cargar Excel", "Vaciar") van en blanco para que se vean. */
@@ -1941,7 +1941,7 @@ tr.tx-page-hidden {
 .ing-panel .panel-head .mini-button.mini-button-secondary {
   background: #ffffff;
   border-color: #ffffff;
-  color: #cc4e00;
+  color: #b8642f;
 }
 
 .ing-panel .panel-head .mini-button:hover {
@@ -1966,7 +1966,7 @@ tr.tx-page-hidden {
 .ing-panel .market-table tfoot td {
   background: #ffe3cf;
   color: #333333;
-  border-top: 2px solid #ff6200;
+  border-top: 2px solid #d98a58;
 }
 
 .ing-panel .hacienda-notices-note {
@@ -2114,7 +2114,7 @@ tr.tx-page-hidden {
 
 .ing-panel .icon-button-edit:hover {
   background: #ffe3cf;
-  color: #cc4e00;
+  color: #b8642f;
 }
 
 .tr-panel .icon-button-edit:hover {
@@ -3102,7 +3102,7 @@ tr.tx-page-hidden {
 }
 
 .broker-badge.broker-ing {
-  background: #ff6200;
+  background: #d98a58;
   color: #ffffff;
 }
 
@@ -3942,8 +3942,8 @@ tr.tx-page-hidden {
 }
 
 .summary-panel.summary-panel-ing .summary-strip-label {
-  background: linear-gradient(180deg, #ff7a24 0%, #ff6200 100%);
-  border-bottom: 3px solid #cc4e00;
+  background: linear-gradient(180deg, #e29d73 0%, #d98a58 100%);
+  border-bottom: 3px solid #b8642f;
 }
 
 .summary-panel.summary-panel-tr .summary-strip-label {
