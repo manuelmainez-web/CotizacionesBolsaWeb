@@ -677,7 +677,7 @@ public class IndexModel : PageModel
             compact = compact[..24];
         }
 
-        if (compact.Length > 4 && !compact.EndsWith("****", StringComparison.Ordinal))
+        if (compact.Length >= 15 && !compact.Contains('*'))
         {
             compact = compact[..^4] + "****";
         }

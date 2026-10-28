@@ -1659,10 +1659,10 @@ function imprimirConNumeracion(bodyClass, opciones) {
 document.addEventListener('change', function (event) {
     var input = event.target;
     if (input && input.classList && input.classList.contains('hacienda-casilla-input') && input.form) {
-        // IBAN: se enmascaran los 4 últimos dígitos antes de enviarlo (el número completo no se guarda).
+        // IBAN: si se escribe completo (sin asteriscos) se enmascaran sus 4 últimos dígitos; si se edita el valor ya enmascarado, se respeta lo escrito.
         if (input.hasAttribute('data-mask-iban')) {
             var iban = input.value.replace(/\s+/g, '').toUpperCase();
-            if (iban.length > 4 && !/\*{4}$/.test(iban)) {
+            if (iban.length >= 15 && iban.indexOf('*') === -1) {
                 iban = iban.slice(0, -4) + '****';
             }
             input.value = iban.replace(/(.{4})(?=.)/g, '$1 ');
