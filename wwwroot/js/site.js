@@ -1669,7 +1669,23 @@ document.addEventListener('change', function (event) {
         }
         // Datos del declarante y de la autoliquidación: se guardan sin recargar, así el panel conserva su estado (plegado/desplegado).
         if (input.form.hasAttribute('data-ajax-save')) {
-            fetch(input.form.action, { method: 'POST', body: new FormData(input.form), credentials: 'same-origin', redirect: 'manual' });
+            var formulario = input.form;
+            var marcarGuardado = function () {
+                input.style.outline = '2px solid #2e9e5b';
+                setTimeout(function () { input.style.outline = ''; }, 1200);
+            };
+            // Si el guardado sin recarga falla por cualquier motivo (red, autenticaci\u00f3n, servidor), se env\u00eda el formulario de forma normal.
+            fetch(formulario.action, { method: 'POST', body: new FormData(formulario), credentials: 'same-origin', redirect: 'manual' })
+                .then(function (respuesta) {
+                    if (respuesta.type === 'opaqueredirect' || respuesta.ok) {
+                        marcarGuardado();
+                    } else {
+                        formulario.submit();
+                    }
+                })
+                .catch(function () {
+                    formulario.submit();
+                });
             return;
         }
         input.form.submit();
