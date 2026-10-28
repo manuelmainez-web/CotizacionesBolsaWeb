@@ -763,17 +763,9 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostSaveDeclaracionAsync(string? otrasReducciones, string? aportacionesTrabajadorPP,
         string? nifEmpleador, string? minimoAutonomico, string? donativosBase, bool donativosRecurrentes,
-        string? deduccionesEstatales, string? deduccionesAutonomicas, string? retencionesTrabajo, string? retencionesAhorro)
+        string? deduccionesEstatales, string? deduccionesAutonomicas)
     {
         var previous = await _dataStore.LoadJsonAsync<DeclaracionInputs>(DeclaracionKey) ?? new DeclaracionInputs();
-        // Retenciones y pagos a cuenta: se guardan donde ya viven (rendimientos del trabajo y base del ahorro).
-        var trabajo = await _dataStore.LoadJsonAsync<TrabajoInputs>(TrabajoKey) ?? new TrabajoInputs();
-        trabajo.Retenciones = Math.Max(0m, ParseHaciendaDecimal(retencionesTrabajo));
-        await _dataStore.SaveJsonAsync(TrabajoKey, trabajo);
-
-        var hacienda = await _dataStore.LoadJsonAsync<HaciendaInputs>(HaciendaKey) ?? new HaciendaInputs();
-        hacienda.Retenciones = Math.Max(0m, ParseHaciendaDecimal(retencionesAhorro));
-        await _dataStore.SaveJsonAsync(HaciendaKey, hacienda);
 
         var nif = (nifEmpleador ?? string.Empty).Trim().ToUpperInvariant();
         await _dataStore.SaveJsonAsync(DeclaracionKey, new DeclaracionInputs

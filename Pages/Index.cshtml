@@ -2464,7 +2464,7 @@
                 <span class="transaction-total-summary">Suma a integrar en la base del ahorro: <strong>@Model.CapitalNeto.ToString(eurPlain, esCulture)</strong></span>
             </div>
         </div>
-        <p class="panel-help-text">Rellena los ingresos íntegros de capital mobiliario (intereses, dividendos, etc.) y los gastos de administración y depósito; el resto de filas se calcula solo. El resultado se integra en la base imponible del ahorro de los paneles Agencia Tributaria y Resumen de la declaración. Las retenciones se introducen en el Resumen de la declaración (casilla 0597).</p>
+        <p class="panel-help-text">Rellena los ingresos íntegros de capital mobiliario (intereses, dividendos, etc.) y los gastos de administración y depósito; el resto de filas se calcula solo. El resultado se integra en la base imponible del ahorro de los paneles Agencia Tributaria y Resumen de la declaración. Las retenciones se introducen en el panel Agencia Tributaria (retenciones / pagos a cuenta) y se reflejan en el Resumen de la declaración (casilla 0597).</p>
         <div id="capital-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
             <div class="transaction-broker-card">
                 <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Rendimientos del capital mobiliario a integrar en la base imponible del ahorro · DECLARANTE</span></div></div>
@@ -2658,7 +2658,7 @@
                 <span class="transaction-total-summary">@(resumen.ToPay >= 0 ? "A pagar" : "A devolver"): <strong class="@resumenClass">@Math.Abs(resumen.ToPay).ToString(eurPlain, esCulture)</strong></span>
             </div>
         </div>
-        <p class="panel-help-text">Liquidación del IRPF con los apartados y casillas de la declaración (modelo 100): rendimientos del capital mobiliario, integración de rentas, bases, reducciones, circunstancias personales, cálculo del impuesto, deducciones, cuotas líquidas y resultado. Los importes se calculan con los datos de los paneles Agencia Tributaria y Rendimiento del trabajo. Cálculo orientativo (escala estatal y de la Comunidad de Madrid).</p>
+        <p class="panel-help-text">Liquidación del IRPF con los apartados y casillas de la declaración (modelo 100): rendimientos del capital mobiliario, integración de rentas, bases, reducciones, circunstancias personales, cálculo del impuesto, deducciones, cuotas líquidas y resultado. Los importes se calculan con los datos de los paneles Agencia Tributaria y Rendimiento del trabajo. Cálculo orientativo (escala estatal y de la Comunidad de Madrid). Las retenciones y pagos a cuenta se toman de los paneles Rendimiento del trabajo (0596) y Agencia Tributaria (0597).</p>
         <div id="resumen-irpf-panel-body" class="hacienda-panel-body transaction-broker-grid is-collapsed">
             <div class="transaction-broker-card">
                 <div class="transaction-broker-header"><div class="transaction-broker-name"><span>Liquidación de la declaración</span></div></div>
@@ -2753,8 +2753,8 @@
                             <tr class="hacienda-section-row"><td colspan="3">Cuota resultante de la autoliquidación</td></tr>
                             <tr><td>0595</td><td><strong>Cuota resultante de la autoliquidación</strong> [(587)-(588)-(414)-(589)-(590)-(591)]</td><td class="text-align-right price-cell"><strong>@resumen.TotalNetTax.ToString(eurPlain, esCulture)</strong></td></tr>
                             <tr class="hacienda-section-row"><td colspan="3">Retenciones y demás pagos a cuenta</td></tr>
-                            <tr><td>0596</td><td>Por rendimientos del trabajo (€)</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="retencionesTrabajo" inputmode="decimal" value="@Num(resumen.WorkWithholdings)" /></td></tr>
-                            <tr><td>0597</td><td>Por rendimientos del capital mobiliario (€)</td><td class="text-align-right"><input type="text" class="hacienda-casilla-input" name="retencionesAhorro" inputmode="decimal" value="@Num(resumen.SavingsWithholdings)" /></td></tr>
+                            <tr><td>0596</td><td>Por rendimientos del trabajo (casilla 0596 del panel Rendimiento del trabajo)</td><td class="text-align-right price-cell">@resumen.WorkWithholdings.ToString(eurPlain, esCulture)</td></tr>
+                            <tr><td>0597</td><td>Por rendimientos del capital mobiliario (retenciones del panel Agencia Tributaria)</td><td class="text-align-right price-cell">@resumen.SavingsWithholdings.ToString(eurPlain, esCulture)</td></tr>
                             <tr><td>0609</td><td><strong>Total pagos a cuenta</strong> [suma de (592) + (593)+ (594) + (596) a (606)]</td><td class="text-align-right price-cell"><strong>@resumen.TotalWithholdings.ToString(eurPlain, esCulture)</strong></td></tr>
                             <tr class="hacienda-section-row"><td colspan="3">Resultado de la declaración</td></tr>
                             <tr><td>0610</td><td>Cuota diferencial [(595)-(609)]</td><td class="text-align-right price-cell">@resumen.ToPay.ToString(eurSigned, esCulture)</td></tr>
