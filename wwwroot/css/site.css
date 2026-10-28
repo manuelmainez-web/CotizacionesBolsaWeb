@@ -4106,3 +4106,341 @@ tr.tx-page-hidden {
     opacity: 1 !important;
   }
 }
+
+/* Pestañas Ingdirect y TradeRepublic: tablas con formato tipo Investing.com (solo pantalla).
+   Fondo blanco, cabecera gris clara con texto oscuro en negrita, filas con separadores finos,
+   cifras alineadas a la derecha, verde/rojo en ganancias y pérdidas y filas que se resaltan al pasar el ratón.
+   Las cabeceras de cada panel conservan el color de su bróker. */
+@media screen {
+  .broker-tab-content .market-panel {
+    background: #ffffff;
+    color: #1f2933;
+  }
+
+  .broker-tab-content .market-panel .transaction-broker-grid,
+  .broker-tab-content .market-panel .table-wrap {
+    background: #ffffff;
+    color: #1f2933;
+  }
+
+  .broker-tab-content .market-panel .transaction-broker-card {
+    background: #ffffff;
+    border: 1px solid #d9dee4;
+    border-radius: 4px;
+  }
+
+  .broker-tab-content .market-panel .transaction-broker-header {
+    background: #f1f3f5;
+    border-bottom: 1px solid #cfd5db;
+  }
+
+  .broker-tab-content .market-panel .transaction-broker-name,
+  .broker-tab-content .market-panel .transaction-broker-header .transaction-total-summary,
+  .broker-tab-content .market-panel .transaction-tab-summary,
+  .broker-tab-content .market-panel .transaction-tab-count {
+    color: #1f2933;
+  }
+
+  .broker-tab-content .market-panel .panel-help-text {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e1e5ea;
+    color: #4a5560;
+  }
+
+  .broker-tab-content .market-panel .market-table {
+    color: #1f2933;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  }
+
+  .broker-tab-content .market-panel .market-table thead th,
+  .broker-tab-content .market-panel .market-table th {
+    background: #f1f3f5;
+    color: #3a4651;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    border-bottom: 2px solid #cfd5db;
+  }
+
+  .broker-tab-content .market-panel .market-table td {
+    color: #1f2933;
+    border-bottom: 1px solid #e6e9ed;
+  }
+
+  .broker-tab-content .market-panel .market-table-grid th,
+  .broker-tab-content .market-panel .market-table-grid td {
+    border: 1px solid #e1e5ea;
+  }
+
+  .broker-tab-content .market-panel .market-table tbody tr {
+    background: #ffffff;
+  }
+
+  .broker-tab-content .market-panel .market-table tbody tr:nth-child(even) {
+    background: #fafbfc;
+  }
+
+  .broker-tab-content .market-panel .market-table tbody tr:hover {
+    background: #eaf3fc;
+  }
+
+  .broker-tab-content .market-panel .market-table.transaction-table tbody tr.transaction-row-current-year {
+    background: #e3effb;
+  }
+
+  .broker-tab-content .market-panel .market-table.transaction-table tbody tr.transaction-row-current-year:hover {
+    background: #d5e7f8;
+  }
+
+  .broker-tab-content .market-panel .transaction-table tr.transaction-row-current-year td {
+    border-color: #b9d3ee;
+  }
+
+  .broker-tab-content .market-panel .price-cell,
+  .broker-tab-content .market-panel .name-cell,
+  .broker-tab-content .market-panel .time-cell {
+    color: #1f2933;
+  }
+
+  .broker-tab-content .market-panel .transaction-table .transaction-title-name,
+  .broker-tab-content .market-panel .empty-state-cell,
+  .broker-tab-content .market-panel .hacienda-notices-note {
+    color: #6b7782;
+  }
+
+  .broker-tab-content .market-panel .market-table tfoot td {
+    background: #f1f3f5;
+    color: #1f2933;
+    border-top: 2px solid #cfd5db;
+  }
+
+  /* Variaciones: verde si sube / ganancia, rojo si baja / pérdida (como en Investing.com). */
+  .broker-tab-content .market-panel .hacienda-gain,
+  .broker-tab-content .market-panel #title-summary-panel-body .hacienda-gain,
+  .broker-tab-content .market-panel td.hacienda-gain {
+    color: #0a9d4a;
+    font-weight: 700;
+  }
+
+  .broker-tab-content .market-panel .hacienda-loss,
+  .broker-tab-content .market-panel #title-summary-panel-body .hacienda-loss,
+  .broker-tab-content .market-panel td.hacienda-loss {
+    color: #e0262d;
+    font-weight: 700;
+  }
+
+  .broker-tab-content .market-panel td.hacienda-gain {
+    background: rgba(10, 157, 74, 0.08);
+  }
+
+  .broker-tab-content .market-panel td.hacienda-loss {
+    background: rgba(224, 38, 45, 0.08);
+  }
+
+  .broker-tab-content .market-panel .panel-head .hacienda-gain,
+  .broker-tab-content .market-panel .panel-head .hacienda-loss {
+    color: #ffffff;
+    background: transparent;
+  }
+
+  .broker-tab-content .market-panel .market-table a,
+  .broker-tab-content .market-panel .name-link {
+    color: #0b5cad;
+  }
+}
+
+/* Pestañas Ingdirect y TradeRepublic: cabeceras de panel y resúmenes también en formato Investing.com
+   (fondo gris claro con texto oscuro; el color del bróker queda solo como filete inferior). */
+@media screen {
+  .broker-tab-content .market-panel .panel-head {
+    background: #f1f3f5;
+    color: #1f2933;
+    border-bottom: 3px solid #cfd5db;
+  }
+
+  .broker-tab-content .ing-panel .panel-head {
+    border-bottom-color: #d98a58;
+  }
+
+  .broker-tab-content .tr-panel .panel-head {
+    border-bottom-color: #1c1c1c;
+  }
+
+  .broker-tab-content .market-panel .panel-head span,
+  .broker-tab-content .market-panel .panel-head .panel-head-subtitle,
+  .broker-tab-content .market-panel .panel-head .transaction-total-summary,
+  .broker-tab-content .market-panel .panel-head .figure-label {
+    color: #1f2933;
+  }
+
+  .broker-tab-content .market-panel .panel-head .hacienda-gain {
+    color: #0a9d4a;
+    background: transparent;
+  }
+
+  .broker-tab-content .market-panel .panel-head .hacienda-loss {
+    color: #e0262d;
+    background: transparent;
+  }
+
+  .broker-tab-content .market-panel .panel-head .mini-button,
+  .broker-tab-content .market-panel .panel-head .mini-button.mini-button-secondary {
+    background: #ffffff;
+    border-color: #b8c0c8;
+    color: #1f2933;
+  }
+
+  .broker-tab-content .market-panel .panel-head .mini-button:hover {
+    background: #eaf3fc;
+  }
+
+  .broker-tab-content .market-panel .panel-head .btn-toggle-summary {
+    border-color: #b8c0c8;
+  }
+
+  .broker-tab-content .summary-panel-ing,
+  .broker-tab-content .summary-panel-tr {
+    background: #ffffff;
+    border-color: #cfd5db;
+  }
+
+  .broker-tab-content .summary-panel-ing:not(.summary-panel--expanded),
+  .broker-tab-content .summary-panel-tr:not(.summary-panel--expanded) {
+    background: #f1f3f5;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-strip-label,
+  .broker-tab-content .summary-panel-tr .summary-strip-label,
+  .broker-tab-content .summary-panel-ing:not(.summary-panel--expanded) .summary-strip-label,
+  .broker-tab-content .summary-panel-tr:not(.summary-panel--expanded) .summary-strip-label {
+    background: #f1f3f5;
+    color: #1f2933;
+    border-radius: 4px;
+    border-bottom: 3px solid #cfd5db;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-strip-label {
+    border-bottom-color: #d98a58;
+  }
+
+  .broker-tab-content .summary-panel-tr .summary-strip-label {
+    border-bottom-color: #1c1c1c;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-strip-label *,
+  .broker-tab-content .summary-panel-tr .summary-strip-label * {
+    color: #1f2933;
+  }
+
+  .broker-tab-content .summary-panel-ing .btn-toggle-summary,
+  .broker-tab-content .summary-panel-tr .btn-toggle-summary {
+    background: #ffffff;
+    border-color: #b8c0c8;
+    color: #1f2933;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-box,
+  .broker-tab-content .summary-panel-tr .summary-box {
+    background: #ffffff;
+    border-color: #d9dee4;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-box strong,
+  .broker-tab-content .summary-panel-tr .summary-box strong,
+  .broker-tab-content .summary-panel-ing .summary-box.invested strong {
+    color: #1f2933;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-box.gain strong,
+  .broker-tab-content .summary-panel-tr .summary-box.gain strong {
+    color: #0a9d4a;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-box.loss strong,
+  .broker-tab-content .summary-panel-tr .summary-box.loss strong {
+    color: #e0262d;
+  }
+
+  .broker-tab-content .summary-panel-ing .rendimiento-ref-panel {
+    background: #f8f9fa;
+    border-color: #d9dee4;
+  }
+
+  .broker-tab-content .summary-panel-ing .rendimiento-ref-input {
+    border-color: #b8c0c8;
+  }
+}
+
+/* Total de las cabeceras (por ejemplo "Total: 0,00 €" de la cuenta corriente) con texto oscuro sobre la cabecera clara. */
+@media screen {
+  .broker-tab-content .market-panel .panel-head strong,
+  .broker-tab-content .market-panel .panel-head .broker-head-figure strong {
+    color: #1f2933;
+  }
+
+  .broker-tab-content .market-panel .panel-head .hacienda-gain,
+  .broker-tab-content .market-panel .panel-head strong.hacienda-gain {
+    color: #0a9d4a;
+  }
+
+  .broker-tab-content .market-panel .panel-head .hacienda-loss,
+  .broker-tab-content .market-panel .panel-head strong.hacienda-loss {
+    color: #e0262d;
+  }
+}
+
+/* "Resumen total de las posiciones" con el mismo formato que "Operaciones de compra y venta":
+   marco con el color del bróker y esquinas redondeadas, cabecera gris con filete inferior, texto de ayuda
+   igual que el de los demás paneles y cuerpo blanco con el mismo margen interior. */
+@media screen {
+  .broker-tab-content .summary-panel-ing,
+  .broker-tab-content .summary-panel-tr,
+  .broker-tab-content .summary-panel-ing:not(.summary-panel--expanded),
+  .broker-tab-content .summary-panel-tr:not(.summary-panel--expanded) {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .broker-tab-content .summary-panel-ing {
+    border: 1px solid #d98a58;
+  }
+
+  .broker-tab-content .summary-panel-tr {
+    border: 1px solid #000000;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-strip-label,
+  .broker-tab-content .summary-panel-tr .summary-strip-label,
+  .broker-tab-content .summary-panel-ing:not(.summary-panel--expanded) .summary-strip-label,
+  .broker-tab-content .summary-panel-tr:not(.summary-panel--expanded) .summary-strip-label {
+    background: #f1f3f5;
+    border-radius: 0;
+    padding: 10px 16px;
+    height: auto;
+    min-height: 0;
+    border-bottom: 3px solid #1c1c1c;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-strip-label,
+  .broker-tab-content .summary-panel-ing:not(.summary-panel--expanded) .summary-strip-label {
+    border-bottom-color: #d98a58;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-help-text,
+  .broker-tab-content .summary-panel-tr .summary-help-text {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e1e5ea;
+    color: #4a5560;
+    padding: 10px 16px;
+    margin: 0;
+  }
+
+  .broker-tab-content .summary-panel-ing .summary-strip,
+  .broker-tab-content .summary-panel-tr .summary-strip {
+    background: #ffffff;
+    padding: 16px;
+    gap: 16px;
+  }
+}

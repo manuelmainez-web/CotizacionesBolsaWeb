@@ -1562,14 +1562,14 @@
     <div class="market-tab-shell mt-4 broker-tabs-shell">
         <ul class="nav nav-tabs market-tabs broker-tabs" id="broker-tabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="broker-ing-tab" data-bs-toggle="tab" data-bs-target="#broker-ing-tab-pane" type="button" role="tab" aria-controls="broker-ing-tab-pane" aria-selected="true"><img class="broker-tab-logo broker-tab-logo-ing" src="/images/brokers/ing.png" alt="" /><span translate="no" class="notranslate">Ingdirect</span></button>
+                <button class="nav-link active" id="broker-tr-tab" data-bs-toggle="tab" data-bs-target="#broker-tr-tab-pane" type="button" role="tab" aria-controls="broker-tr-tab-pane" aria-selected="true"><img class="broker-tab-logo" src="/images/brokers/traderepublic.png" alt="" /><span translate="no" class="notranslate">TradeRepublic</span></button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="broker-tr-tab" data-bs-toggle="tab" data-bs-target="#broker-tr-tab-pane" type="button" role="tab" aria-controls="broker-tr-tab-pane" aria-selected="false"><img class="broker-tab-logo" src="/images/brokers/traderepublic.png" alt="" /><span translate="no" class="notranslate">TradeRepublic</span></button>
+                <button class="nav-link" id="broker-ing-tab" data-bs-toggle="tab" data-bs-target="#broker-ing-tab-pane" type="button" role="tab" aria-controls="broker-ing-tab-pane" aria-selected="false"><img class="broker-tab-logo broker-tab-logo-ing" src="/images/brokers/ing.png" alt="" /><span translate="no" class="notranslate">Ingdirect</span></button>
             </li>
         </ul>
         <div class="tab-content broker-tab-content">
-            <div class="tab-pane fade show active" id="broker-ing-tab-pane" role="tabpanel" aria-labelledby="broker-ing-tab">
+            <div class="tab-pane fade" id="broker-ing-tab-pane" role="tabpanel" aria-labelledby="broker-ing-tab">
 
     @{
         var esCulture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
@@ -1922,7 +1922,7 @@
 
     @{ await RenderCheckingPanel("ING"); }
             </div>
-            <div class="tab-pane fade" id="broker-tr-tab-pane" role="tabpanel" aria-labelledby="broker-tr-tab">
+            <div class="tab-pane fade show active" id="broker-tr-tab-pane" role="tabpanel" aria-labelledby="broker-tr-tab">
 
     <div class="summary-panel summary-panel-tr">
         <div class="summary-strip-label" id="summary-strip-label-tr">
