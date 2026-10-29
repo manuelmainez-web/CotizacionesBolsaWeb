@@ -2422,7 +2422,7 @@
                                 </tr>
                                 <tr>
                                     <td>0023</td>
-                                    <td>↳ Reducción por obtención de rendimientos del trabajo (art. 20 LIRPF, automática)</td>
+                                    <td>• Reducción por obtención de rendimientos del trabajo (art. 20 LIRPF, automática)</td>
                                     @OvCell("ovReduccionTrabajo", trab.Reduction, trabState.OvReduccionTrabajo)
                                 </tr>
                                 <tr class="transaction-row-current-year">
@@ -2582,7 +2582,7 @@
                                 foreach (var lot in s.Lots)
                                 {
                                     <tr class="hacienda-lot-row">
-                                        <td>↳ Compra que se descuenta (FIFO)</td>
+                                        <td>• Compra que se descuenta (FIFO)</td>
                                         <td class="text-align-right">@lot.Date.ToString("dd/MM/yyyy")</td>
                                         <td class="text-align-right">@lot.SharesUsed.ToString("#,##0.######", esCulture)@(lot.SharesUsed < lot.SharesBought ? " de " + lot.SharesBought.ToString("#,##0.######", esCulture) : "")</td>
                                         <td></td>
@@ -2594,7 +2594,7 @@
                                 foreach (var wp in s.WindowPurchases)
                                 {
                                     <tr class="hacienda-lot-row hacienda-lot-row-warn">
-                                        <td>↳ Recompra en ±@(s.WashMonths == 12 ? "1 año" : s.WashMonths + " meses") de la venta con pérdida (puede diferirla)</td>
+                                        <td>• Recompra en ±@(s.WashMonths == 12 ? "1 año" : s.WashMonths + " meses") de la venta con pérdida (puede diferirla)</td>
                                         <td class="text-align-right">@wp.Date.ToString("dd/MM/yyyy")</td>
                                         <td class="text-align-right">@wp.Shares.ToString("#,##0.######", esCulture)</td>
                                         <td></td>
