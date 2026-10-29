@@ -468,6 +468,179 @@ tr.tx-page-hidden {
   font-weight: 400;
 }
 
+.world-markets-panel {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 16px;
+  background: rgba(14, 22, 30, 0.9);
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.32);
+}
+
+.world-markets-label {
+  margin-bottom: 0;
+}
+
+.world-markets-panel:has(.world-markets-body:not(.is-collapsed)) .world-markets-label {
+  margin-bottom: 10px;
+}
+
+.world-markets-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.world-markets-local-time {
+  margin-left: auto;
+  color: #d8e5f6;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.world-markets-body.is-collapsed {
+  display: none;
+}
+
+.world-markets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.world-market-card {
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #d8e5f6;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.world-market-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.world-market-city {
+  font-weight: 700;
+  color: #eff9ff;
+}
+
+.world-market-status {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(148, 163, 184, 0.2);
+  color: #a9bacd;
+}
+
+.world-market-card.is-open {
+  border-color: rgba(34, 197, 94, 0.55);
+}
+
+.world-market-card.is-open .world-market-status {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+}
+
+.world-market-exchange {
+  color: #a9bacd;
+  font-size: 0.66rem;
+}
+
+.world-market-time-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.world-market-analog {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.world-market-analog .wm-face {
+  fill: #0b1320;
+  stroke: rgba(148, 163, 184, 0.45);
+  stroke-width: 2;
+}
+
+.world-market-card.is-open .world-market-analog .wm-face {
+  stroke: rgba(34, 197, 94, 0.7);
+}
+
+.world-market-analog .wm-tick {
+  stroke: #8ea3b8;
+  stroke-width: 1.5;
+}
+
+.world-market-analog .wm-tick-main {
+  stroke: #d8e5f6;
+  stroke-width: 2.5;
+}
+
+.world-market-analog .wm-hand {
+  stroke-linecap: round;
+}
+
+.world-market-analog .wm-hour {
+  stroke: #eff9ff;
+  stroke-width: 4;
+}
+
+.world-market-analog .wm-minute {
+  stroke: #eff9ff;
+  stroke-width: 2.5;
+}
+
+.world-market-analog .wm-second {
+  stroke: #f87171;
+  stroke-width: 1;
+}
+
+.world-market-analog .wm-center {
+  fill: #f87171;
+}
+
+.world-market-time-text {
+  min-width: 0;
+}
+
+.world-market-clock {
+  margin-top: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #eff9ff;
+  font-variant-numeric: tabular-nums;
+}
+
+.world-market-hours {
+  color: #a9bacd;
+}
+
+.world-markets-note {
+  margin: 8px 0 0;
+  color: #8ea3b8;
+  font-size: 0.66rem;
+}
+
+@media print {
+  .world-markets-panel {
+    display: none !important;
+  }
+}
+
 .summary-panel {
   display: flex;
   flex-direction: column;

@@ -152,6 +152,97 @@ document.addEventListener('click', function (event) {
     syncSummaryPanelState(panelResumen);
 });
 
+// Panel de horarios de los mercados del mundo: hora local de cada plaza y estado abierto/cerrado
+(function () {
+    var grid = document.getElementById('world-markets-grid');
+    if (!grid) {
+        return;
+    }
+
+    // Horario de negociación continua en hora local (minutos desde las 00:00). Lunes a viernes.
+    var mercados = [
+        { ciudad: 'Madrid', bolsa: 'BME', zona: 'Europe/Madrid', abre: '09:00', cierra: '17:30' },
+        { ciudad: 'Londres', bolsa: 'LSE', zona: 'Europe/London', abre: '08:00', cierra: '16:30' },
+        { ciudad: 'Fráncfort', bolsa: 'Xetra', zona: 'Europe/Berlin', abre: '09:00', cierra: '17:30' },
+        { ciudad: 'París', bolsa: 'Euronext', zona: 'Europe/Paris', abre: '09:00', cierra: '17:30' },
+        { ciudad: 'Nueva York', bolsa: 'NYSE / Nasdaq', zona: 'America/New_York', abre: '09:30', cierra: '16:00' },
+        { ciudad: 'São Paulo', bolsa: 'B3', zona: 'America/Sao_Paulo', abre: '10:00', cierra: '17:00' },
+        { ciudad: 'Tokio', bolsa: 'TSE', zona: 'Asia/Tokyo', abre: '09:00', cierra: '15:30' },
+        { ciudad: 'Hong Kong', bolsa: 'HKEX', zona: 'Asia/Hong_Kong', abre: '09:30', cierra: '16:00' },
+        { ciudad: 'Shanghái', bolsa: 'SSE', zona: 'Asia/Shanghai', abre: '09:30', cierra: '15:00' },
+        { ciudad: 'Sídney', bolsa: 'ASX', zona: 'Australia/Sydney', abre: '10:00', cierra: '16:00' }
+    ];
+
+    function aMinutos(hhmm) {
+        var partes = hhmm.split(':');
+        return parseInt(partes[0], 10) * 60 + parseInt(partes[1], 10);
+    }
+
+    var marcasReloj = '';
+    for (var i = 0; i < 12; i++) {
+        marcasReloj += '<line class="wm-tick' + (i % 3 === 0 ? ' wm-tick-main' : '') + '" x1="50" y1="8" x2="50" y2="' + (i % 3 === 0 ? 17 : 13) + '" transform="rotate(' + (i * 30) + ' 50 50)" />';
+    }
+    var relojSvg =
+        '<svg class="world-market-analog" viewBox="0 0 100 100" aria-hidden="true">' +
+        '<circle class="wm-face" cx="50" cy="50" r="47" />' + marcasReloj +
+        '<line class="wm-hand wm-hour" x1="50" y1="50" x2="50" y2="28" />' +
+        '<line class="wm-hand wm-minute" x1="50" y1="50" x2="50" y2="16" />' +
+        '<line class="wm-hand wm-second" x1="50" y1="56" x2="50" y2="12" />' +
+        '<circle class="wm-center" cx="50" cy="50" r="2.5" />' +
+        '</svg>';
+
+    mercados.forEach(function (m) {
+        m.formato = new Intl.DateTimeFormat('en-GB', {
+            timeZone: m.zona, weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+        });
+
+        var tarjeta = document.createElement('div');
+        tarjeta.className = 'world-market-card';
+        tarjeta.innerHTML =
+            '<div class="world-market-head"><span class="world-market-city"></span><span class="world-market-status"></span></div>' +
+            '<div class="world-market-exchange"></div>' +
+            '<div class="world-market-time-row">' + relojSvg +
+            '<div class="world-market-time-text"><div class="world-market-clock"></div>' +
+            '<div class="world-market-hours"></div></div></div>';
+        tarjeta.querySelector('.world-market-city').textContent = m.ciudad;
+        tarjeta.querySelector('.world-market-exchange').textContent = m.bolsa;
+        tarjeta.querySelector('.world-market-hours').textContent = m.abre + ' - ' + m.cierra;
+        grid.appendChild(tarjeta);
+        m.tarjeta = tarjeta;
+    });
+
+    var zonaLocal = document.getElementById('world-markets-local-time');
+
+    function actualizar() {
+        var ahora = new Date();
+        mercados.forEach(function (m) {
+            var partes = {};
+            m.formato.formatToParts(ahora).forEach(function (p) { partes[p.type] = p.value; });
+            var minutos = parseInt(partes.hour, 10) * 60 + parseInt(partes.minute, 10);
+            var laborable = partes.weekday !== 'Sat' && partes.weekday !== 'Sun';
+            var abierto = laborable && minutos >= aMinutos(m.abre) && minutos < aMinutos(m.cierra);
+
+            m.tarjeta.classList.toggle('is-open', abierto);
+            m.tarjeta.querySelector('.world-market-status').textContent = abierto ? 'ABIERTO' : 'CERRADO';
+            m.tarjeta.querySelector('.world-market-clock').textContent = partes.hour + ':' + partes.minute + ':' + partes.second;
+
+            var h = parseInt(partes.hour, 10);
+            var min = parseInt(partes.minute, 10);
+            var seg = parseInt(partes.second, 10);
+            m.tarjeta.querySelector('.wm-hour').setAttribute('transform', 'rotate(' + (((h % 12) + min / 60) * 30) + ' 50 50)');
+            m.tarjeta.querySelector('.wm-minute').setAttribute('transform', 'rotate(' + ((min + seg / 60) * 6) + ' 50 50)');
+            m.tarjeta.querySelector('.wm-second').setAttribute('transform', 'rotate(' + (seg * 6) + ' 50 50)');
+        });
+
+        if (zonaLocal) {
+            zonaLocal.textContent = 'Su hora: ' + ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+    }
+
+    actualizar();
+    setInterval(actualizar, 1000);
+})();
+
 // Reloj con fecha y hora actual en la cabecera
 (function () {
     var el = document.getElementById('current-datetime');
