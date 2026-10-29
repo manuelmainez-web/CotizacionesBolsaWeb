@@ -221,13 +221,15 @@ body.wco-active .topbar-datetime {
 .header-side-column {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   align-items: flex-start;
   gap: 10px;
   flex-shrink: 0;
 }
 
 .weather-box {
-  width: 220px;
+  width: 200px;
   box-sizing: border-box;
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.18);

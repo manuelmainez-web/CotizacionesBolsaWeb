@@ -1476,19 +1476,23 @@ function imprimirConNumeracion(bodyClass, opciones) {
     recalcular();
 })();
 
-// Control del tiempo (bajo el código QR): tiempo actual, temperatura y
-// previsión de los próximos días con Open-Meteo (sin clave). Usa la ubicación
-// del navegador si el usuario la permite; si no, la ciudad por defecto.
+// Control del tiempo (junto al código QR): tiempo actual, temperatura y
+// previsión de los próximos días con Open-Meteo (sin clave) para cada caja
+// .weather-box (Madrid y Cercedilla), según sus atributos data-lat/data-lon/data-city.
 (function () {
-    var caja = document.getElementById('weather-box');
-    if (!caja) {
+    var cajas = document.querySelectorAll('.weather-box');
+    if (!cajas.length) {
         return;
     }
 
-    var latDefecto = parseFloat(caja.getAttribute('data-lat'));
-    var lonDefecto = parseFloat(caja.getAttribute('data-lon'));
-    var ciudadDefecto = caja.getAttribute('data-city') || '';
-    var posicion = { lat: latDefecto, lon: lonDefecto, nombre: ciudadDefecto };
+    Array.prototype.forEach.call(cajas, iniciarCaja);
+
+    function iniciarCaja(caja) {
+    var posicion = {
+        lat: parseFloat(caja.getAttribute('data-lat')),
+        lon: parseFloat(caja.getAttribute('data-lon')),
+        nombre: caja.getAttribute('data-city') || ''
+    };
 
     var codigos = {
         0: ['☀️', 'Despejado'], 1: ['🌤️', 'Mayormente despejado'], 2: ['⛅', 'Parcialmente nuboso'], 3: ['☁️', 'Nublado'],
@@ -1516,12 +1520,12 @@ function imprimirConNumeracion(bodyClass, opciones) {
         var diario = datos.daily;
         var info = describir(actual.weather_code);
 
-        document.getElementById('weather-place').textContent = posicion.nombre || 'Tiempo';
-        document.getElementById('weather-icon').textContent = info[0];
-        document.getElementById('weather-temp').textContent = redondear(actual.temperature_2m) + 'C';
-        document.getElementById('weather-desc').textContent = info[1];
+        caja.querySelector('.weather-place').textContent = posicion.nombre || 'Tiempo';
+        caja.querySelector('.weather-icon').textContent = info[0];
+        caja.querySelector('.weather-temp').textContent = redondear(actual.temperature_2m) + 'C';
+        caja.querySelector('.weather-desc').textContent = info[1];
 
-        var lista = document.getElementById('weather-forecast');
+        var lista = caja.querySelector('.weather-forecast');
         lista.innerHTML = '';
         for (var i = 1; i < diario.time.length; i++) {
             var fecha = new Date(diario.time[i] + 'T12:00:00');
@@ -1554,22 +1558,12 @@ function imprimirConNumeracion(bodyClass, opciones) {
             .then(function (respuesta) { return respuesta.json(); })
             .then(pintar)
             .catch(function () {
-                document.getElementById('weather-desc').textContent = 'Tiempo no disponible';
+                caja.querySelector('.weather-desc').textContent = 'Tiempo no disponible';
             });
     }
 
-    function iniciar() {
-        cargar();
-        setInterval(cargar, 15 * 60 * 1000);
-    }
-
-    if (navigator.geolocation && window.isSecureContext) {
-        navigator.geolocation.getCurrentPosition(function (pos) {
-            posicion = { lat: pos.coords.latitude.toFixed(3), lon: pos.coords.longitude.toFixed(3), nombre: 'Mi ubicación' };
-            iniciar();
-        }, iniciar, { timeout: 5000, maximumAge: 3600000 });
-    } else {
-        iniciar();
+    cargar();
+    setInterval(cargar, 15 * 60 * 1000);
     }
 })();
 
