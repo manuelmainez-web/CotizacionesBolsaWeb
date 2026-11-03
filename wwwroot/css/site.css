@@ -1480,6 +1480,19 @@ tr.tx-page-hidden {
   min-width: 138px;
 }
 
+.panel-head-row .es-clock:not(:empty)::before {
+  content: "-";
+  margin-right: 8px;
+}
+
+.panel-head-row .es-clock {
+  margin-left: 6px;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: #edf6ff;
+}
+
 .cash-panel-body.is-collapsed {
   display: none;
 }

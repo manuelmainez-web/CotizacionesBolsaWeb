@@ -176,7 +176,7 @@
             <div class="tab-pane fade show active" id="indices-tab-pane" role="tabpanel" aria-labelledby="indices-tab">
                 <div class="market-panel market-panel-watchlist">
                     <div class="panel-head panel-head-row">
-                        <span>Índices <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+                        <span>Índices <span class="panel-head-subtitle">(Control de cotizaciones)</span> <span class="es-clock" data-es-clock title="Fecha y hora de España"></span></span>
                         <button type="button" class="mini-button" data-dialog-target="add-index-dialog">+ Añadir índice</button>
                     </div>
                     <div class="table-wrap">
@@ -273,7 +273,7 @@
             <div class="tab-pane fade" id="futures-tab-pane" role="tabpanel" aria-labelledby="futures-tab">
                 <div class="market-panel mt-4 market-panel-watchlist">
                     <div class="panel-head panel-head-row">
-                        <span>Futuros <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+                        <span>Futuros <span class="panel-head-subtitle">(Control de cotizaciones)</span> <span class="es-clock" data-es-clock title="Fecha y hora de España"></span></span>
                     </div>
                     <div class="table-wrap">
                         <table class="market-table market-table-compact market-table-grid" style="table-layout: fixed;">
@@ -473,7 +473,7 @@
 
     <div class="market-panel mt-4 market-panel-watchlist">
         <div class="panel-head panel-head-row">
-            <span>Acciones <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+            <span>Acciones <span class="panel-head-subtitle">(Control de cotizaciones)</span> <span class="es-clock" data-es-clock title="Fecha y hora de España"></span></span>
             <button type="button" class="mini-button" data-dialog-target="add-stock-dialog">+ Añadir acción</button>
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.StockError))
@@ -588,7 +588,7 @@
 
     <div class="market-panel mt-4 market-panel-watchlist">
         <div class="panel-head panel-head-row">
-            <span>ETF <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+            <span>ETF <span class="panel-head-subtitle">(Control de cotizaciones)</span> <span class="es-clock" data-es-clock title="Fecha y hora de España"></span></span>
             <button type="button" class="mini-button" data-dialog-target="add-etf-control-dialog">+ Añadir ETF</button>
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.EtfControlError))
@@ -716,7 +716,7 @@
 
     <div class="market-panel mt-4 notranslate market-panel-watchlist" translate="no">
         <div class="panel-head panel-head-row">
-            <span>Materias primas <span class="panel-head-subtitle">(Control de cotizaciones)</span></span>
+            <span>Materias primas <span class="panel-head-subtitle">(Control de cotizaciones)</span> <span class="es-clock" data-es-clock title="Fecha y hora de España"></span></span>
             <button type="button" class="mini-button" data-dialog-target="add-commodity-dialog">+ Añadir Materia Prima</button>
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.CommodityError))
@@ -3024,6 +3024,35 @@
 </div>
 
 @section Scripts {
+    <script>
+        (function () {
+            var clocks = document.querySelectorAll('[data-es-clock]');
+            if (!clocks.length) {
+                return;
+            }
+
+            var formatter = new Intl.DateTimeFormat('es-ES', {
+                timeZone: 'Europe/Madrid',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+
+            function tick() {
+                var text = formatter.format(new Date());
+                clocks.forEach(function (el) {
+                    el.textContent = text;
+                });
+            }
+
+            tick();
+            setInterval(tick, 1000);
+        })();
+    </script>
     <script>
         (function () {
             document.addEventListener('click', function (event) {
