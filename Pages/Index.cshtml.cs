@@ -1995,6 +1995,18 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostMoveFutureUpAsync(string symbol)
+    {
+        await MoveCustomEntryAsync(FuturesKey, symbol, -1);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMoveFutureDownAsync(string symbol)
+    {
+        await MoveCustomEntryAsync(FuturesKey, symbol, 1);
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnPostEditFutureAsync(string symbol, string name, string newSymbol)
     {
         if (string.IsNullOrWhiteSpace(symbol) || string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(newSymbol))

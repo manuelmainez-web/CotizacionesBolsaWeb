@@ -333,7 +333,14 @@
                                             <td class="text-align-right" data-interval-from="@(item.UpdatedEpochMs?.ToString() ?? "")">@item.IntervalText</td>
                                             <td class="text-align-right">@item.DisplaySymbol</td>
                                             <td class="delete-cell">
-                                                <button type="button" class="icon-button-edit" data-dialog-target="edit-future-@futureRow" title="Editar">✎</button>
+                                                <form method="post" asp-page-handler="MoveFutureUp" class="inline-form">
+                                                    <input type="hidden" name="symbol" value="@item.Symbol" />
+                                                    <button type="submit" class="icon-button-move" title="Subir" @(futureRow == 0 ? "disabled" : "")>▲</button>
+                                                </form>
+                                                <form method="post" asp-page-handler="MoveFutureDown" class="inline-form">
+                                                    <input type="hidden" name="symbol" value="@item.Symbol" />
+                                                    <button type="submit" class="icon-button-move" title="Bajar" @(futureRow == Model.Futures.Count - 1 ? "disabled" : "")>▼</button>
+                                                </form>
                                                 <form method="post" asp-page-handler="DeleteFuture" onsubmit="return confirm('¿Eliminar este futuro?');">
                                                     <input type="hidden" name="symbol" value="@item.Symbol" />
                                                     <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
