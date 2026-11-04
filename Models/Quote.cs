@@ -52,12 +52,39 @@ public sealed class Quote
     public string DisplayIsin => string.IsNullOrWhiteSpace(Isin) ? "—" : Isin;
     public string DisplayMarket => string.IsNullOrWhiteSpace(Market) ? "—" : Market;
     public string UpdatedText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("dd/MM/yyyy HH:mm") : "N/A";
+    public long? UpdatedEpochMs => LastUpdated?.ToUnixTimeMilliseconds();
+    public string IntervalText => LastUpdated.HasValue ? FormatInterval(DateTimeOffset.UtcNow - LastUpdated.Value) : "N/A";
     public string UpdatedDateText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("dd/MM/yyyy") : "N/A";
     public string UpdatedTimeText => LastUpdated.HasValue ? TimeZoneInfo.ConvertTime(LastUpdated.Value, SpainTimeZone).ToString("HH:mm") : string.Empty;
     public string TrendCssClass => PercentChange.HasValue && PercentChange.Value >= 0 ? "text-success" : "text-danger";
     public bool IsMarketOpen => ComputeMarketOpen(CountryCode, Symbol);
     public string MarketStatusLabel => string.Empty;
     public string FlagUrl => GetFlagUrl(CountryCode);
+
+    public static string FormatInterval(TimeSpan elapsed)
+    {
+        if (elapsed < TimeSpan.Zero)
+        {
+            elapsed = TimeSpan.Zero;
+        }
+
+        if (elapsed.TotalMinutes < 1)
+        {
+            return $"{(int)elapsed.TotalSeconds} s";
+        }
+
+        if (elapsed.TotalHours < 1)
+        {
+            return $"{elapsed.Minutes} min {elapsed.Seconds:00} s";
+        }
+
+        if (elapsed.TotalDays < 1)
+        {
+            return $"{elapsed.Hours} h {elapsed.Minutes:00} min";
+        }
+
+        return $"{(int)elapsed.TotalDays} d {elapsed.Hours} h";
+    }
 
     public static string GetFlagUrl(string? countryCode) => string.IsNullOrWhiteSpace(countryCode) ? "https://flagcdn.com/w40/gb.png" : countryCode switch
     {

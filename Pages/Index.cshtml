@@ -190,6 +190,7 @@
                                     <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
                                     <th class="text-align-right" style="width: 100px;">Volumen</th>
                                     <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                                    <th class="text-align-right" style="width: 100px;">INTERVALO<br />ACTUALIZACIÓN</th>
                                     <th class="text-align-right" style="width: 90px;">Símbolo</th>
                                     <th style="width: 96px;"></th>
                                 </tr>
@@ -222,6 +223,7 @@
                                                 </svg>
                                             </span>
                                         </td>
+                                        <td class="text-align-right" data-interval-from="@(item.UpdatedEpochMs?.ToString() ?? "")">@item.IntervalText</td>
                                         <td class="text-align-right">@item.DisplaySymbol</td>
                                         <td class="delete-cell">
                                             <form method="post" asp-page-handler="MoveIndexUp" class="inline-form">
@@ -275,6 +277,10 @@
                     <div class="panel-head panel-head-row">
                         <span>Futuros <span class="panel-head-subtitle">(Control de cotizaciones)</span> <span class="es-clock" data-es-clock title="Fecha y hora de España"></span></span>
                     </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.FutureError))
+                    {
+                        <div class="form-error-banner">@Model.FutureError</div>
+                    }
                     <div class="table-wrap">
                         <table class="market-table market-table-compact market-table-grid" style="table-layout: fixed;">
                             <thead>
@@ -286,6 +292,7 @@
                                     <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
                                     <th class="text-align-right" style="width: 100px;">Volumen</th>
                                     <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                                    <th class="text-align-right" style="width: 100px;">INTERVALO<br />ACTUALIZACIÓN</th>
                                     <th class="text-align-right" style="width: 90px;">Símbolo</th>
                                     <th style="width: 96px;"></th>
                                 </tr>
@@ -294,13 +301,14 @@
                                 @if (Model.Futures.Count == 0)
                                 {
                                     <tr>
-                                        <td colspan="9" class="empty-state-cell">No hay futuros disponibles para mostrar.</td>
+                                        <td colspan="10" class="empty-state-cell">No hay futuros disponibles para mostrar.</td>
                                     </tr>
                                 }
                                 else
                                 {
-                                    @foreach (var item in Model.Futures)
+                                    @for (var futureRow = 0; futureRow < Model.Futures.Count; futureRow++)
                                     {
+                                        var item = Model.Futures[futureRow];
                                         <tr>
                                             <td class="name-cell">
                                                 <span class="name-with-flag">
@@ -322,8 +330,15 @@
                                                     </svg>
                                                 </span>
                                             </td>
+                                            <td class="text-align-right" data-interval-from="@(item.UpdatedEpochMs?.ToString() ?? "")">@item.IntervalText</td>
                                             <td class="text-align-right">@item.DisplaySymbol</td>
-                                            <td class="delete-cell"></td>
+                                            <td class="delete-cell">
+                                                <button type="button" class="icon-button-edit" data-dialog-target="edit-future-@futureRow" title="Editar">✎</button>
+                                                <form method="post" asp-page-handler="DeleteFuture" onsubmit="return confirm('¿Eliminar este futuro?');">
+                                                    <input type="hidden" name="symbol" value="@item.Symbol" />
+                                                    <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     }
                                 }
@@ -331,6 +346,29 @@
                         </table>
                     </div>
                 </div>
+
+                @for (var futureRow = 0; futureRow < Model.Futures.Count; futureRow++)
+                {
+                    var item = Model.Futures[futureRow];
+                    <dialog id="edit-future-@futureRow" class="add-entry-dialog">
+                        <form method="post" asp-page-handler="EditFuture">
+                            <h3>Editar @item.Name</h3>
+                            <input type="hidden" name="symbol" value="@item.Symbol" />
+                            <label>
+                                Nombre
+                                <input type="text" name="name" required maxlength="150" value="@item.Name" />
+                            </label>
+                            <label>
+                                Símbolo (Yahoo Finance)
+                                <input type="text" name="newSymbol" required maxlength="30" value="@item.Symbol" />
+                            </label>
+                            <div class="dialog-actions">
+                                <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                                <button type="submit" class="mini-button">Guardar</button>
+                            </div>
+                        </form>
+                    </dialog>
+                }
             </div>
 
             <div class="tab-pane fade" id="accesos-tab-pane" role="tabpanel" aria-labelledby="accesos-tab">
@@ -491,6 +529,7 @@
                         <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
                         <th class="text-align-right" style="width: 100px;">Volumen</th>
                         <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                        <th class="text-align-right" style="width: 100px;">INTERVALO<br />ACTUALIZACIÓN</th>
                         <th class="text-align-right" style="width: 90px;">Símbolo</th>
                         <th style="width: 96px;"></th>
                     </tr>
@@ -499,7 +538,7 @@
                     @if (Model.Stocks.Count == 0)
                     {
                         <tr>
-                            <td colspan="9" class="empty-state-cell">No hay acciones añadidas. Usa "+ Añadir acción" para empezar.</td>
+                            <td colspan="10" class="empty-state-cell">No hay acciones añadidas. Usa "+ Añadir acción" para empezar.</td>
                         </tr>
                     }
                     else
@@ -528,6 +567,7 @@
                                         </svg>
                                     </span>
                                 </td>
+                                <td class="text-align-right" data-interval-from="@(item.UpdatedEpochMs?.ToString() ?? "")">@item.IntervalText</td>
                                 <td class="text-align-right">@item.Symbol</td>
                                 <td class="delete-cell">
                                     <form method="post" asp-page-handler="MoveStockUp">
@@ -606,6 +646,7 @@
                         <th class="text-align-right" style="width: 90px;">CIERRE<br />(Anterior)</th>
                         <th class="text-align-right" style="width: 100px;">Volumen</th>
                         <th class="text-align-right" style="width: 110px;">Actualizado</th>
+                        <th class="text-align-right" style="width: 100px;">INTERVALO<br />ACTUALIZACIÓN</th>
                         <th class="isin-print-hide text-align-right" style="width: 90px;">ISIN</th>
                         <th style="width: 96px;"></th>
                     </tr>
@@ -614,7 +655,7 @@
                     @if (Model.EtfsControl.Count == 0)
                     {
                         <tr>
-                            <td colspan="9" class="empty-state-cell">No hay ETF añadidos. Usa "+ Añadir ETF" para empezar.</td>
+                            <td colspan="10" class="empty-state-cell">No hay ETF añadidos. Usa "+ Añadir ETF" para empezar.</td>
                         </tr>
                     }
                     else
@@ -643,6 +684,7 @@
                                         </svg>
                                     </span>
                                 </td>
+                                <td class="text-align-right" data-interval-from="@(item.UpdatedEpochMs?.ToString() ?? "")">@item.IntervalText</td>
                                 <td class="isin-cell isin-print-hide">@item.DisplayIsin</td>
                                 <td class="delete-cell">
                                     <form method="post" asp-page-handler="MoveEtfControlUp">
@@ -734,6 +776,7 @@
                         <th class="text-align-right" style="width: 90px;">Máximo</th>
                         <th class="text-align-right" style="width: 100px;">Mínimo</th>
                         <th class="text-align-right" style="width: 110px;">Actualización</th>
+                        <th class="text-align-right" style="width: 100px;">INTERVALO<br />ACTUALIZACIÓN</th>
                         <th class="text-align-right" style="width: 90px;">Clasificación</th>
                         <th style="width: 96px;"></th>
                     </tr>
@@ -767,6 +810,7 @@
                                     </span>
                                 </div>
                             </td>
+                            <td class="text-align-right" data-interval-from="@(item.UpdatedEpochMs?.ToString() ?? "")">@item.IntervalText</td>
                             <td class="text-align-right">@classification</td>
                             <td class="delete-cell">
                                 <form method="post" asp-page-handler="MoveCommodityUp">
@@ -3051,6 +3095,34 @@
 
             tick();
             setInterval(tick, 1000);
+        })();
+    </script>
+    <script>
+        (function () {
+            function formatInterval(ms) {
+                var total = Math.max(0, Math.floor(ms / 1000));
+                var d = Math.floor(total / 86400);
+                var h = Math.floor((total % 86400) / 3600);
+                var m = Math.floor((total % 3600) / 60);
+                var s = total % 60;
+                if (d > 0) { return d + ' d ' + h + ' h'; }
+                if (h > 0) { return h + ' h ' + (m < 10 ? '0' : '') + m + ' min'; }
+                if (m > 0) { return m + ' min ' + (s < 10 ? '0' : '') + s + ' s'; }
+                return s + ' s';
+            }
+
+            function tickIntervals() {
+                var now = Date.now();
+                document.querySelectorAll('[data-interval-from]').forEach(function (el) {
+                    var from = parseInt(el.getAttribute('data-interval-from'), 10);
+                    if (!isNaN(from)) {
+                        el.textContent = formatInterval(now - from);
+                    }
+                });
+            }
+
+            tickIntervals();
+            setInterval(tickIntervals, 1000);
         })();
     </script>
     <script>

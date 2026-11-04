@@ -1108,6 +1108,9 @@ public class IndexModel : PageModel
     [TempData]
     public string? CommodityError { get; set; }
 
+    [TempData]
+    public string? FutureError { get; set; }
+
     public List<Quote> Indices { get; private set; } = new();
     public List<Quote> Stocks { get; private set; } = new();
     public List<Quote> Etfs { get; private set; } = new();
@@ -1391,24 +1394,35 @@ public class IndexModel : PageModel
         PortfolioStocks = stockHoldingConfigs.Count > 0 ? await _service.GetQuotesAsync(stockHoldingConfigs) : new List<Quote>();
         EtfsControl = etfControlConfigs.Count > 0 ? await _service.GetQuotesAsync(etfControlConfigs) : new List<Quote>();
 
-        var futuresConfigs = new List<QuoteConfig>();
-        foreach (var config in indexConfigs)
+        List<QuoteConfig> futuresConfigs;
+        if (await _dataStore.ExistsAsync(FuturesKey))
         {
-            var futureSymbol = await _service.ResolveFutureSymbolByNameAsync(config.Name, config.Symbol);
-            if (string.IsNullOrWhiteSpace(futureSymbol))
+            futuresConfigs = await _dataStore.LoadEntriesAsync<QuoteConfig>(FuturesKey);
+        }
+        else
+        {
+            // Primera carga: se siembra la lista de futuros a partir de los índices; a partir de aquí
+            // la lista es independiente y editable desde la pestaña Futuros.
+            futuresConfigs = new List<QuoteConfig>();
+            foreach (var config in indexConfigs)
             {
-                futureSymbol = config.Symbol;
+                var futureSymbol = await _service.ResolveFutureSymbolByNameAsync(config.Name, config.Symbol);
+                if (string.IsNullOrWhiteSpace(futureSymbol))
+                {
+                    futureSymbol = config.Symbol;
+                }
+
+                futuresConfigs.Add(new QuoteConfig(
+                    config.Name,
+                    futureSymbol,
+                    config.Isin,
+                    config.CountryCode,
+                    config.Market));
             }
 
-            futuresConfigs.Add(new QuoteConfig(
-                config.Name,
-                futureSymbol,
-                config.Isin,
-                config.CountryCode,
-                config.Market));
+            await _dataStore.SaveEntriesAsync(FuturesKey, futuresConfigs);
         }
 
-        await _dataStore.SaveEntriesAsync(FuturesKey, futuresConfigs);
         var futuresQuotes = futuresConfigs.Count > 0 ? await _service.GetQuotesAsync(futuresConfigs) : new List<Quote>();
         Futures = futuresQuotes
             .Where(quote => quote != null &&
@@ -1971,6 +1985,40 @@ public class IndexModel : PageModel
             };
             await _dataStore.SaveEntriesAsync(FundsKey, holdings);
         }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostDeleteFutureAsync(string symbol)
+    {
+        await RemoveCustomEntryAsync(FuturesKey, symbol);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEditFutureAsync(string symbol, string name, string newSymbol)
+    {
+        if (string.IsNullOrWhiteSpace(symbol) || string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(newSymbol))
+        {
+            FutureError = "Revisa los datos: el nombre y el s\u00edmbolo son obligatorios.";
+            return RedirectToPage();
+        }
+
+        var entries = await _dataStore.LoadEntriesAsync<QuoteConfig>(FuturesKey);
+        var index = entries.FindIndex(e => string.Equals(e.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
+        if (index < 0)
+        {
+            return RedirectToPage();
+        }
+
+        var trimmedSymbol = newSymbol.Trim();
+        if (entries.Where((_, i) => i != index).Any(e => string.Equals(e.Symbol, trimmedSymbol, StringComparison.OrdinalIgnoreCase)))
+        {
+            FutureError = $"Ya existe un futuro con el s\u00edmbolo \"{trimmedSymbol}\".";
+            return RedirectToPage();
+        }
+
+        entries[index] = entries[index] with { Name = name.Trim(), Symbol = trimmedSymbol };
+        await _dataStore.SaveEntriesAsync(FuturesKey, entries);
 
         return RedirectToPage();
     }
