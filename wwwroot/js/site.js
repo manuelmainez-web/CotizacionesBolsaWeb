@@ -1576,14 +1576,76 @@ function imprimirConNumeracion(bodyClass, opciones) {
         return;
     }
 
+    // [nombre, latitud, longitud] (capital de cada provincia; Cercedilla como lugar extra)
+    var lugares = [
+        ['A Coruña', 43.3623, -8.4115], ['Álava', 42.8467, -2.6716], ['Albacete', 38.9943, -1.8585],
+        ['Alicante', 38.3452, -0.4810], ['Almería', 36.8340, -2.4637], ['Asturias', 43.3614, -5.8593],
+        ['Ávila', 40.6564, -4.6818], ['Badajoz', 38.8794, -6.9707], ['Baleares', 39.5696, 2.6502],
+        ['Barcelona', 41.3851, 2.1734], ['Bizkaia', 43.2630, -2.9350], ['Burgos', 42.3439, -3.6969],
+        ['Cáceres', 39.4753, -6.3724], ['Cádiz', 36.5271, -6.2886], ['Cantabria', 43.4623, -3.8100],
+        ['Castellón', 39.9864, -0.0513], ['Ceuta', 35.8894, -5.3213], ['Cercedilla', 40.7399, -4.0575],
+        ['Ciudad Real', 38.9848, -3.9274], ['Córdoba', 37.8882, -4.7794], ['Cuenca', 40.0704, -2.1374],
+        ['Gipuzkoa', 43.3183, -1.9812], ['Girona', 41.9794, 2.8214], ['Granada', 37.1773, -3.5986],
+        ['Guadalajara', 40.6333, -3.1667], ['Huelva', 37.2614, -6.9447], ['Huesca', 42.1401, -0.4089],
+        ['Jaén', 37.7796, -3.7849], ['La Rioja', 42.4627, -2.4450], ['Las Palmas', 28.1235, -15.4363],
+        ['León', 42.5987, -5.5671], ['Lleida', 41.6176, 0.6200], ['Lugo', 43.0097, -7.5568],
+        ['Madrid', 40.4168, -3.7038], ['Málaga', 36.7213, -4.4214], ['Melilla', 35.2923, -2.9381],
+        ['Murcia', 37.9922, -1.1307], ['Navarra', 42.8125, -1.6458], ['Ourense', 42.3358, -7.8639],
+        ['Palencia', 42.0096, -4.5288], ['Pontevedra', 42.4310, -8.6444], ['Salamanca', 40.9701, -5.6635],
+        ['Santa Cruz de Tenerife', 28.4636, -16.2518], ['Segovia', 40.9429, -4.1088], ['Sevilla', 37.3891, -5.9845],
+        ['Soria', 41.7664, -2.4790], ['Tarragona', 41.1189, 1.2445], ['Teruel', 40.3456, -1.1065],
+        ['Toledo', 39.8628, -4.0273], ['Valencia', 39.4699, -0.3763], ['Valladolid', 41.6523, -4.7245],
+        ['Zamora', 41.5033, -5.7446], ['Zaragoza', 41.6488, -0.8891]
+    ];
+
     Array.prototype.forEach.call(cajas, iniciarCaja);
 
-    function iniciarCaja(caja) {
-    var posicion = {
-        lat: parseFloat(caja.getAttribute('data-lat')),
-        lon: parseFloat(caja.getAttribute('data-lon')),
-        nombre: caja.getAttribute('data-city') || ''
-    };
+    function iniciarCaja(caja, indice) {
+    var claveGuardado = 'weather-city-' + indice;
+    var selector = caja.querySelector('.weather-select');
+    if (!selector) {
+        selector = document.createElement('select');
+        selector.className = 'weather-select';
+        selector.setAttribute('aria-label', 'Provincia');
+        var lugarAntiguo = caja.querySelector('.weather-place');
+        if (lugarAntiguo) {
+            lugarAntiguo.parentNode.replaceChild(selector, lugarAntiguo);
+        } else {
+            caja.insertBefore(selector, caja.firstChild);
+        }
+    }
+    var inicial = caja.getAttribute('data-city') || 'Madrid';
+    try {
+        inicial = localStorage.getItem(claveGuardado) || inicial;
+    } catch (e) { }
+
+    var posicion = { lat: 0, lon: 0, nombre: '' };
+
+    lugares.forEach(function (lugar) {
+        var opcion = document.createElement('option');
+        opcion.value = lugar[0];
+        opcion.textContent = lugar[0];
+        selector.appendChild(opcion);
+    });
+
+    function seleccionar(nombre) {
+        var lugar = lugares.filter(function (l) { return l[0] === nombre; })[0] || lugares.filter(function (l) { return l[0] === 'Madrid'; })[0];
+        posicion.nombre = lugar[0];
+        posicion.lat = lugar[1];
+        posicion.lon = lugar[2];
+        selector.value = lugar[0];
+    }
+
+    seleccionar(inicial);
+
+    selector.addEventListener('change', function () {
+        seleccionar(selector.value);
+        try {
+            localStorage.setItem(claveGuardado, posicion.nombre);
+        } catch (e) { }
+        caja.querySelector('.weather-desc').textContent = 'Cargando…';
+        cargar();
+    });
 
     var codigos = {
         0: ['☀️', 'Despejado'], 1: ['🌤️', 'Mayormente despejado'], 2: ['⛅', 'Parcialmente nuboso'], 3: ['☁️', 'Nublado'],
@@ -1611,7 +1673,6 @@ function imprimirConNumeracion(bodyClass, opciones) {
         var diario = datos.daily;
         var info = describir(actual.weather_code);
 
-        caja.querySelector('.weather-place').textContent = posicion.nombre || 'Tiempo';
         caja.querySelector('.weather-icon').textContent = info[0];
         caja.querySelector('.weather-temp').textContent = redondear(actual.temperature_2m) + 'C';
         caja.querySelector('.weather-desc').textContent = info[1];

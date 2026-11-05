@@ -229,21 +229,27 @@ body.wco-active .topbar-datetime {
 }
 
 .weather-box {
-  width: 200px;
+  width: 160px;
   box-sizing: border-box;
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 12px;
-  padding: 10px 14px;
+  border-radius: 10px;
+  padding: 6px 10px;
   color: #d8e5f6;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
 }
 
-.weather-place {
-  color: #a9bacd;
-  font-size: 0.7rem;
-  text-align: center;
+.weather-select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
   margin-bottom: 4px;
+  padding: 2px 4px;
+  background: #0f172a;
+  color: #a9bacd;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 6px;
+  font-size: 0.68rem;
 }
 
 .weather-current {
@@ -254,19 +260,19 @@ body.wco-active .topbar-datetime {
 }
 
 .weather-icon {
-  font-size: 1.9rem;
+  font-size: 1.5rem;
   line-height: 1;
 }
 
 .weather-temp {
-  font-size: 1.7rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #eff9ff;
 }
 
 .weather-desc {
   text-align: center;
-  margin: 2px 0 8px;
+  margin: 2px 0 5px;
 }
 
 .weather-forecast {
