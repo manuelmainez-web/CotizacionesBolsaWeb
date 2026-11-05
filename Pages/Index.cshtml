@@ -89,8 +89,29 @@
             <span class="world-markets-local-time" id="world-markets-local-time"></span>
         </div>
         <div class="world-markets-body is-collapsed" id="world-markets-body">
-            <div class="world-markets-grid" id="world-markets-grid"></div>
-            <p class="world-markets-note">Horario de negociación continua en la hora local de cada plaza (sin contar festivos). La hora mostrada es la actual en cada ciudad.</p>
+            <ul class="nav nav-tabs market-tabs world-markets-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="world-clocks-tab" data-bs-toggle="tab" data-bs-target="#world-clocks-pane" type="button" role="tab" aria-controls="world-clocks-pane" aria-selected="true">Relojes</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="world-map-tab" data-bs-toggle="tab" data-bs-target="#world-map-pane" type="button" role="tab" aria-controls="world-map-pane" aria-selected="false">Mapa</button>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="world-clocks-pane" role="tabpanel" aria-labelledby="world-clocks-tab">
+                    <div class="world-markets-grid" id="world-markets-grid"></div>
+                    <p class="world-markets-note">Horario de negociación continua en la hora local de cada plaza (sin contar festivos). La hora mostrada es la actual en cada ciudad.</p>
+                </div>
+                <div class="tab-pane fade" id="world-map-pane" role="tabpanel" aria-labelledby="world-map-tab">
+                    <div class="world-map-scroll">
+                        <div class="world-map-stage" id="world-map-stage">
+                            <img class="world-map-img" src="~/images/world-map.svg" alt="Mapamundi" />
+                            <svg class="world-map-lines" id="world-map-lines" viewBox="0 0 1000 383" aria-hidden="true"></svg>
+                        </div>
+                    </div>
+                    <p class="world-markets-note">Hora actual en cada país donde está la bolsa. Borde verde = mercado abierto (horario de negociación continua, sin contar festivos).</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2273,7 +2294,7 @@
     <div class="blank-line-1"></div>
 
     <div class="control-cotizaciones-title agencia-tributaria-title">
-        <h2 class="control-cotizaciones-title-text">Agencia Tributaria</h2>
+        <h2 class="control-cotizaciones-title-text"><img class="title-broker-logo" src="/images/brokers/aeat.png" alt="Agencia Tributaria" />Agencia Tributaria</h2>
         <div class="control-cotizaciones-title-line"></div>
     </div>
 
@@ -2291,7 +2312,6 @@
         <div class="panel-head panel-head-row">
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="declarante-panel-body" data-toggle-name="hacienda-declarante" title="Mostrar/ocultar" aria-label="Mostrar datos del declarante" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
                 Datos del declarante <span class="panel-head-subtitle">(IRPF · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
@@ -2405,7 +2425,6 @@
         <div class="panel-head panel-head-row">
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="trabajo-panel-body" data-toggle-name="hacienda-trabajo" title="Mostrar/ocultar" aria-label="Mostrar rendimiento del trabajo" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
                 Rendimiento del trabajo <span class="panel-head-subtitle">(IRPF · base general · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
@@ -2530,7 +2549,6 @@
         <div class="panel-head panel-head-row">
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="capital-panel-body" data-toggle-name="hacienda-capital" title="Mostrar/ocultar" aria-label="Mostrar capital mobiliario" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
                 Rendimientos del capital mobiliario <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
@@ -2575,7 +2593,6 @@
         <div class="panel-head panel-head-row">
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="hacienda-panel-body" data-toggle-name="hacienda" title="Mostrar/ocultar" aria-label="Mostrar hacienda" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
                 Ganancias y pérdidas patrimoniales <span class="panel-head-subtitle">(IRPF · base del ahorro · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
@@ -2697,7 +2714,6 @@
         <div class="panel-head panel-head-row">
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="resumen-irpf-panel-body" data-toggle-name="hacienda-resumen" title="Mostrar/ocultar" aria-label="Mostrar resumen de la declaración" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
                 Resumen de la declaración <span class="panel-head-subtitle">(IRPF · ahorro + trabajo · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
@@ -2823,7 +2839,6 @@
         <div class="panel-head panel-head-row">
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="tramos-panel-body" data-toggle-name="hacienda-tramos" title="Mostrar/ocultar" aria-label="Mostrar tramos de la declaración" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
                 Tramos de la declaración <span class="panel-head-subtitle">(IRPF · escalas de la base general y del ahorro · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">
@@ -2889,7 +2904,6 @@
         <div class="panel-head panel-head-row">
             <span>
                 <button type="button" class="btn-toggle-summary table-toggle-button toggle-left" data-toggle-target="autoliquidacion-panel-body" data-toggle-name="hacienda-autoliquidacion" title="Mostrar/ocultar" aria-label="Mostrar datos de la autoliquidación" aria-expanded="false"></button>
-                <img class="transaction-broker-logo panel-header-logo" src="/images/brokers/aeat.png" style="border-radius: 6px; background: #fff;" alt="Agencia Tributaria" title="Agencia Tributaria" />
                 Datos de la autoliquidación <span class="panel-head-subtitle">(IRPF · ejercicio @hac.Year)</span>
             </span>
             <div class="panel-head-actions">

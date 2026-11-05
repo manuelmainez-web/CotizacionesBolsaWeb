@@ -161,17 +161,55 @@ document.addEventListener('click', function (event) {
 
     // Horario de negociación continua en hora local (minutos desde las 00:00). Lunes a viernes.
     var mercados = [
-        { ciudad: 'Madrid', bolsa: 'BME', zona: 'Europe/Madrid', abre: '09:00', cierra: '17:30' },
-        { ciudad: 'Londres', bolsa: 'LSE', zona: 'Europe/London', abre: '08:00', cierra: '16:30' },
-        { ciudad: 'Fráncfort', bolsa: 'Xetra', zona: 'Europe/Berlin', abre: '09:00', cierra: '17:30' },
-        { ciudad: 'París', bolsa: 'Euronext', zona: 'Europe/Paris', abre: '09:00', cierra: '17:30' },
-        { ciudad: 'Nueva York', bolsa: 'NYSE / Nasdaq', zona: 'America/New_York', abre: '09:30', cierra: '16:00' },
-        { ciudad: 'São Paulo', bolsa: 'B3', zona: 'America/Sao_Paulo', abre: '10:00', cierra: '17:00' },
-        { ciudad: 'Tokio', bolsa: 'TSE', zona: 'Asia/Tokyo', abre: '09:00', cierra: '15:30' },
-        { ciudad: 'Hong Kong', bolsa: 'HKEX', zona: 'Asia/Hong_Kong', abre: '09:30', cierra: '16:00' },
-        { ciudad: 'Shanghái', bolsa: 'SSE', zona: 'Asia/Shanghai', abre: '09:30', cierra: '15:00' },
-        { ciudad: 'Sídney', bolsa: 'ASX', zona: 'Australia/Sydney', abre: '10:00', cierra: '16:00' }
+        { ciudad: 'Madrid', pais: 'España', bolsa: 'BME', zona: 'Europe/Madrid', abre: '09:00', cierra: '17:30', lat: 40.4, lon: -3.7, etiqueta: [415, 110] },
+        { ciudad: 'Londres', pais: 'Reino Unido', bolsa: 'LSE', zona: 'Europe/London', abre: '08:00', cierra: '16:30', lat: 51.5, lon: -0.1, etiqueta: [430, 22] },
+        { ciudad: 'Fráncfort', pais: 'Alemania', bolsa: 'Xetra', zona: 'Europe/Berlin', abre: '09:00', cierra: '17:30', lat: 50.1, lon: 8.7, etiqueta: [600, 30] },
+        { ciudad: 'París', pais: 'Francia', bolsa: 'Euronext', zona: 'Europe/Paris', abre: '09:00', cierra: '17:30', lat: 48.9, lon: 2.35, etiqueta: [415, 66] },
+        { ciudad: 'Nueva York', pais: 'Estados Unidos', bolsa: 'NYSE / Nasdaq', zona: 'America/New_York', abre: '09:30', cierra: '16:00', lat: 40.7, lon: -74, etiqueta: [250, 175] },
+        { ciudad: 'São Paulo', pais: 'Brasil', bolsa: 'B3', zona: 'America/Sao_Paulo', abre: '10:00', cierra: '17:00', lat: -23.5, lon: -46.6, etiqueta: [470, 300] },
+        { ciudad: 'Tokio', pais: 'Japón', bolsa: 'TSE', zona: 'Asia/Tokyo', abre: '09:00', cierra: '15:30', lat: 35.7, lon: 139.7, etiqueta: [940, 80] },
+        { ciudad: 'Hong Kong', pais: 'Hong Kong', bolsa: 'HKEX', zona: 'Asia/Hong_Kong', abre: '09:30', cierra: '16:00', lat: 22.3, lon: 114.2, etiqueta: [880, 195] },
+        { ciudad: 'Shanghái', pais: 'China', bolsa: 'SSE', zona: 'Asia/Shanghai', abre: '09:30', cierra: '15:00', lat: 31.2, lon: 121.5, etiqueta: [940, 140] },
+        { ciudad: 'Sídney', pais: 'Australia', bolsa: 'ASX', zona: 'Australia/Sydney', abre: '10:00', cierra: '16:00', lat: -33.9, lon: 151.2, etiqueta: [850, 350] }
     ];
+
+    // Mapa mundi: marcador en la plaza y etiqueta con país y hora actual (posiciones en unidades 1000 x 383).
+    var escenaMapa = document.getElementById('world-map-stage');
+    var lineasMapa = document.getElementById('world-map-lines');
+    var NS = 'http://www.w3.org/2000/svg';
+    if (escenaMapa && lineasMapa) {
+        var K = 1000 / 360;
+        mercados.forEach(function (m) {
+            var px = (m.lon + 180) * K;
+            var py = (80 - m.lat) * K;
+
+            var linea = document.createElementNS(NS, 'line');
+            linea.setAttribute('class', 'wmap-line');
+            linea.setAttribute('x1', m.etiqueta[0]);
+            linea.setAttribute('y1', m.etiqueta[1]);
+            linea.setAttribute('x2', px.toFixed(1));
+            linea.setAttribute('y2', py.toFixed(1));
+            lineasMapa.appendChild(linea);
+
+            var punto = document.createElementNS(NS, 'circle');
+            punto.setAttribute('class', 'wmap-dot');
+            punto.setAttribute('cx', px.toFixed(1));
+            punto.setAttribute('cy', py.toFixed(1));
+            punto.setAttribute('r', '3.5');
+            lineasMapa.appendChild(punto);
+            m.punto = punto;
+
+            var etiqueta = document.createElement('div');
+            etiqueta.className = 'wmap-label';
+            etiqueta.style.left = (m.etiqueta[0] / 10) + '%';
+            etiqueta.style.top = (m.etiqueta[1] / 3.83) + '%';
+            etiqueta.title = m.ciudad + ' · ' + m.bolsa + ' · ' + m.abre + ' - ' + m.cierra;
+            etiqueta.innerHTML = '<span class="wmap-country"></span><span class="wmap-time"></span>';
+            etiqueta.querySelector('.wmap-country').textContent = m.pais;
+            escenaMapa.appendChild(etiqueta);
+            m.etiquetaMapa = etiqueta;
+        });
+    }
 
     function aMinutos(hhmm) {
         var partes = hhmm.split(':');
@@ -225,6 +263,12 @@ document.addEventListener('click', function (event) {
             m.tarjeta.classList.toggle('is-open', abierto);
             m.tarjeta.querySelector('.world-market-status').textContent = abierto ? 'ABIERTO' : 'CERRADO';
             m.tarjeta.querySelector('.world-market-clock').textContent = partes.hour + ':' + partes.minute + ':' + partes.second;
+
+            if (m.etiquetaMapa) {
+                m.etiquetaMapa.classList.toggle('is-open', abierto);
+                m.punto.classList.toggle('is-open', abierto);
+                m.etiquetaMapa.querySelector('.wmap-time').textContent = partes.hour + ':' + partes.minute + ':' + partes.second;
+            }
 
             var h = parseInt(partes.hour, 10);
             var min = parseInt(partes.minute, 10);

@@ -12,9 +12,9 @@ body {
 .site-footer {
   margin-top: 2rem;
   padding: 1.25rem 0 2rem;
-  border-top: 1px solid rgba(15, 23, 42, 0.12);
-  background: #ffffff;
-  color: #111111;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  background: #000000;
+  color: #ffffff;
 }
 
 .site-footer p {
@@ -22,22 +22,26 @@ body {
   font-size: 0.78rem;
   line-height: 1.6;
   text-align: justify;
-  color: #111111;
+  color: #ffffff;
 }
 
 .site-footer strong {
-  color: #000000;
+  color: #ffffff;
 }
 
 .site-footer-divider {
   height: 1px;
-  background: rgba(17, 17, 17, 0.7);
+  background: rgba(255, 255, 255, 0.8);
   margin: 0.9rem 0 0.75rem;
+}
+
+.site-footer-divider-top {
+  margin: 0 0 1rem;
 }
 
 .site-footer-copyright {
   text-align: left;
-  color: #111111;
+  color: #ffffff;
   font-size: 0.76rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -639,6 +643,90 @@ tr.tx-page-hidden {
   margin: 8px 0 0;
   color: #8ea3b8;
   font-size: 0.66rem;
+}
+
+.world-map-scroll {
+  overflow-x: auto;
+}
+
+.world-markets-tabs {
+  margin-bottom: 10px;
+}
+
+.world-markets-tabs .nav-link {
+  padding: 6px 16px;
+  font-size: 0.8rem;
+}
+.world-map-stage {
+  position: relative;
+  min-width: 760px;
+  aspect-ratio: 1000 / 383;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.world-map-img,
+.world-map-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.world-map-lines .wmap-line {
+  stroke: rgba(148, 163, 184, 0.55);
+  stroke-width: 0.8;
+  stroke-dasharray: 3 2;
+}
+
+.world-map-lines .wmap-dot {
+  fill: #94a3b8;
+  stroke: #0b1320;
+  stroke-width: 1;
+}
+
+.world-map-lines .wmap-dot.is-open {
+  fill: #4ade80;
+}
+
+.wmap-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 92px;
+  padding: 2px 8px;
+  box-sizing: border-box;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.94);
+  color: #d8e5f6;
+  font-size: 0.66rem;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.wmap-label.is-open {
+  border-color: rgba(34, 197, 94, 0.75);
+}
+
+.wmap-country {
+  font-weight: 700;
+  color: #eff9ff;
+}
+
+.wmap-time {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #a9bacd;
+  font-variant-numeric: tabular-nums;
+}
+
+.wmap-label.is-open .wmap-time {
+  color: #4ade80;
 }
 
 @media print {
