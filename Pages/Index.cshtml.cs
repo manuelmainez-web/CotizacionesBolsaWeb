@@ -75,6 +75,89 @@ public class IndexModel : PageModel
         var guardado = await _dataStore.SaveJsonAsync(RendimientoRefKey, new RendimientoRefState { Valor = texto });
         return new JsonResult(new { ok = guardado });
     }
+
+    // Índice de referencia de cada plaza del mapa de horarios.
+    private static readonly QuoteConfig[] MapIndexConfigs =
+    {
+        new("IBEX 35", "^IBEX", null, "ES"),
+        new("FTSE 100", "^FTSE", null, "GB"),
+        new("DAX", "^GDAXI", null, "DE"),
+        new("CAC 40", "^FCHI", null, "FR"),
+        new("FTSE MIB", "FTSEMIB.MI", null, "IT"),
+        new("S&P 500", "^GSPC", null, "US"),
+        new("NASDAQ", "^IXIC", null, "US"),
+        new("DOW JONES", "^DJI", null, "US"),
+        new("S&P/TSX", "^GSPTSE", null, "CA"),
+        new("Bovespa", "^BVSP", null, "BR"),
+        new("Nifty 50", "^NSEI", null, "IN"),
+        new("TA-35", "TA35.TA", null, "IL"),
+        new("MERVAL", "^MERV", null, "AR"),
+        new("NIKKEI 225", "^N225", null, "JP"),
+        new("Hang Seng", "^HSI", null, "HK"),
+        new("Shanghai", "000001.SS", null, "CN"),
+        new("China A50", "XIN9.FGI", null, "CN"),
+        new("ASX 200", "^AXJO", null, "AU")
+    };
+
+    public async Task<IActionResult> OnGetMapIndicesAsync(CancellationToken cancellationToken)
+    {
+        var moexTask = Task.WhenAll(
+            GetMoexIndexAsync("IMOEX", "IMOEX.ME", "MOEX", cancellationToken),
+            GetMoexIndexAsync("RTSI", "RTSI.ME", "RTS", cancellationToken));
+        var quotes = await Task.WhenAll(MapIndexConfigs.Select(async config =>
+            (await _service.GetQuotesAsync(new[] { config }, cancellationToken)).FirstOrDefault()));
+
+        var resultado = quotes
+            .Where(q => q is { Price: not null })
+            .Select(q => new MapIndexDto(
+                q!.Symbol,
+                q.Name,
+                q.DisplayPrice,
+                q.DisplayPercent,
+                q.PercentChange.HasValue && q.PercentChange.Value >= 0))
+            .ToList();
+
+        resultado.AddRange((await moexTask).Where(i => i != null)!);
+
+        return new JsonResult(resultado);
+    }
+
+    private sealed record MapIndexDto(string Symbol, string Name, string Price, string Percent, bool Up);
+
+    private static readonly HttpClient MoexHttpClient = new() { Timeout = TimeSpan.FromSeconds(10) };
+
+    // Yahoo Finance no ofrece los índices de Moscú; se consulta la API pública de la bolsa de Moscú (ISS).
+    private static async Task<MapIndexDto?> GetMoexIndexAsync(string secId, string symbol, string name, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var json = await MoexHttpClient.GetStringAsync(
+                $"https://iss.moex.com/iss/engines/stock/markets/index/securities/{secId}.json?iss.meta=off&iss.only=marketdata&marketdata.columns=SECID,CURRENTVALUE,LASTCHANGEPRC",
+                cancellationToken);
+            using var doc = JsonDocument.Parse(json);
+            var fila = doc.RootElement.GetProperty("marketdata").GetProperty("data")[0];
+            if (fila[1].ValueKind != JsonValueKind.Number || fila[2].ValueKind != JsonValueKind.Number)
+            {
+                return null;
+            }
+
+            var cultura = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+            var precio = fila[1].GetDecimal();
+            var variacion = fila[2].GetDecimal();
+            return new MapIndexDto(
+                symbol,
+                name,
+                precio.ToString("N2", cultura),
+                $"{variacion.ToString("0.00", cultura)}% {(variacion >= 0 ? "\u25B2" : "\u25BC")}",
+                variacion >= 0);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+
     private Dictionary<string, List<BrokerTransactionRow>> _transactionState = new(StringComparer.OrdinalIgnoreCase);
 
     private static string TransactionKey(bool sale, string broker) =>

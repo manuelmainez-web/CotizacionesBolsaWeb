@@ -161,16 +161,22 @@ document.addEventListener('click', function (event) {
 
     // Horario de negociación continua en hora local (minutos desde las 00:00). Lunes a viernes.
     var mercados = [
-        { ciudad: 'Madrid', pais: 'España', bolsa: 'BME', zona: 'Europe/Madrid', abre: '09:00', cierra: '17:30', lat: 40.4, lon: -3.7, etiqueta: [415, 110] },
-        { ciudad: 'Londres', pais: 'Reino Unido', bolsa: 'LSE', zona: 'Europe/London', abre: '08:00', cierra: '16:30', lat: 51.5, lon: -0.1, etiqueta: [430, 22] },
-        { ciudad: 'Fráncfort', pais: 'Alemania', bolsa: 'Xetra', zona: 'Europe/Berlin', abre: '09:00', cierra: '17:30', lat: 50.1, lon: 8.7, etiqueta: [600, 30] },
-        { ciudad: 'París', pais: 'Francia', bolsa: 'Euronext', zona: 'Europe/Paris', abre: '09:00', cierra: '17:30', lat: 48.9, lon: 2.35, etiqueta: [415, 66] },
-        { ciudad: 'Nueva York', pais: 'Estados Unidos', bolsa: 'NYSE / Nasdaq', zona: 'America/New_York', abre: '09:30', cierra: '16:00', lat: 40.7, lon: -74, etiqueta: [250, 175] },
-        { ciudad: 'São Paulo', pais: 'Brasil', bolsa: 'B3', zona: 'America/Sao_Paulo', abre: '10:00', cierra: '17:00', lat: -23.5, lon: -46.6, etiqueta: [470, 300] },
-        { ciudad: 'Tokio', pais: 'Japón', bolsa: 'TSE', zona: 'Asia/Tokyo', abre: '09:00', cierra: '15:30', lat: 35.7, lon: 139.7, etiqueta: [940, 80] },
-        { ciudad: 'Hong Kong', pais: 'Hong Kong', bolsa: 'HKEX', zona: 'Asia/Hong_Kong', abre: '09:30', cierra: '16:00', lat: 22.3, lon: 114.2, etiqueta: [880, 195] },
-        { ciudad: 'Shanghái', pais: 'China', bolsa: 'SSE', zona: 'Asia/Shanghai', abre: '09:30', cierra: '15:00', lat: 31.2, lon: 121.5, etiqueta: [940, 140] },
-        { ciudad: 'Sídney', pais: 'Australia', bolsa: 'ASX', zona: 'Australia/Sydney', abre: '10:00', cierra: '16:00', lat: -33.9, lon: 151.2, etiqueta: [850, 350] }
+        { ciudad: 'Madrid', pais: 'España', cc: 'es', bolsa: 'BME', zona: 'Europe/Madrid', indice: '^IBEX', abre: '09:00', cierra: '17:30', lat: 40.4, lon: -3.7, etiqueta: [400, 170] },
+        { ciudad: 'Londres', pais: 'Reino Unido', cc: 'gb', bolsa: 'LSE', zona: 'Europe/London', indice: '^FTSE', abre: '08:00', cierra: '16:30', lat: 51.5, lon: -0.1, etiqueta: [400, 32] },
+        { ciudad: 'Fráncfort', pais: 'Alemania', cc: 'de', bolsa: 'Xetra', zona: 'Europe/Berlin', indice: '^GDAXI', abre: '09:00', cierra: '17:30', lat: 50.1, lon: 8.7, etiqueta: [575, 32] },
+        { ciudad: 'París', pais: 'Francia', cc: 'fr', bolsa: 'Euronext', zona: 'Europe/Paris', indice: '^FCHI', abre: '09:00', cierra: '17:30', lat: 48.9, lon: 2.35, etiqueta: [400, 101] },
+        { ciudad: 'Milán', pais: 'Italia', cc: 'it', bolsa: 'Borsa Italiana', zona: 'Europe/Rome', indice: 'FTSEMIB.MI', abre: '09:00', cierra: '17:30', lat: 45.5, lon: 9.2, etiqueta: [655, 112] },
+        { ciudad: 'Moscú', pais: 'Rusia', cc: 'ru', bolsa: 'MOEX', zona: 'Europe/Moscow', indice: ['IMOEX.ME', 'RTSI.ME'], abre: '09:50', cierra: '18:50', lat: 55.8, lon: 37.6, etiqueta: [798, 52] },
+        { ciudad: 'Nueva York', pais: 'Estados Unidos', cc: 'us', bolsa: 'NYSE / Nasdaq', zona: 'America/New_York', indice: ['^GSPC', '^IXIC', '^DJI'], abre: '09:30', cierra: '16:00', lat: 40.7, lon: -74, etiqueta: [250, 195] },
+        { ciudad: 'Toronto', pais: 'Canadá', cc: 'ca', bolsa: 'TSX', zona: 'America/Toronto', indice: '^GSPTSE', abre: '09:30', cierra: '16:00', lat: 43.7, lon: -79.4, etiqueta: [230, 62] },
+        { ciudad: 'São Paulo', pais: 'Brasil', cc: 'br', bolsa: 'B3', zona: 'America/Sao_Paulo', indice: '^BVSP', abre: '10:00', cierra: '17:00', lat: -23.5, lon: -46.6, etiqueta: [470, 300] },
+        { ciudad: 'Bombay', pais: 'India', cc: 'in', bolsa: 'NSE / BSE', zona: 'Asia/Kolkata', indice: '^NSEI', abre: '09:15', cierra: '15:30', lat: 19.1, lon: 72.9, etiqueta: [710, 245] },
+        { ciudad: 'Tel Aviv', pais: 'Israel', cc: 'il', bolsa: 'TASE', zona: 'Asia/Jerusalem', indice: 'TA35.TA', abre: '09:59', cierra: '17:25', lat: 32.1, lon: 34.8, etiqueta: [570, 200] },
+        { ciudad: 'Buenos Aires', pais: 'Argentina', cc: 'ar', bolsa: 'BYMA', zona: 'America/Argentina/Buenos_Aires', indice: '^MERV', abre: '11:00', cierra: '17:00', lat: -34.6, lon: -58.4, etiqueta: [290, 322] },
+        { ciudad: 'Tokio', pais: 'Japón', cc: 'jp', bolsa: 'TSE', zona: 'Asia/Tokyo', indice: '^N225', abre: '09:00', cierra: '15:30', lat: 35.7, lon: 139.7, etiqueta: [925, 55] },
+        { ciudad: 'Hong Kong', pais: 'Hong Kong', cc: 'hk', bolsa: 'HKEX', zona: 'Asia/Hong_Kong', indice: '^HSI', abre: '09:30', cierra: '16:00', lat: 22.3, lon: 114.2, etiqueta: [845, 222] },
+        { ciudad: 'Shanghái', pais: 'China', cc: 'cn', bolsa: 'SSE', zona: 'Asia/Shanghai', indice: ['000001.SS', 'XIN9.FGI'], abre: '09:30', cierra: '15:00', lat: 31.2, lon: 121.5, etiqueta: [925, 138] },
+        { ciudad: 'Sídney', pais: 'Australia', cc: 'au', bolsa: 'ASX', zona: 'Australia/Sydney', indice: '^AXJO', abre: '10:00', cierra: '16:00', lat: -33.9, lon: 151.2, etiqueta: [850, 350] }
     ];
 
     // Mapa mundi: marcador en la plaza y etiqueta con país y hora actual (posiciones en unidades 1000 x 383).
@@ -204,11 +210,36 @@ document.addEventListener('click', function (event) {
             etiqueta.style.left = (m.etiqueta[0] / 10) + '%';
             etiqueta.style.top = (m.etiqueta[1] / 3.83) + '%';
             etiqueta.title = m.ciudad + ' · ' + m.bolsa + ' · ' + m.abre + ' - ' + m.cierra;
-            etiqueta.innerHTML = '<span class="wmap-country"></span><span class="wmap-time"></span>';
+            etiqueta.innerHTML = '<span class="wmap-country"></span><span class="wmap-time"></span><span class="wmap-hours"></span><span class="wmap-index"></span>';
             etiqueta.querySelector('.wmap-country').textContent = m.pais;
+            etiqueta.querySelector('.wmap-hours').textContent = m.abre + ' - ' + m.cierra;
+            if (m.cc) {
+                var bandera = document.createElement('img');
+                bandera.className = 'wmap-flag';
+                bandera.src = 'https://flagcdn.com/w40/' + m.cc + '.png';
+                bandera.alt = '';
+                bandera.setAttribute('aria-hidden', 'true');
+                etiqueta.querySelector('.wmap-country').prepend(bandera);
+            }
             escenaMapa.appendChild(etiqueta);
             m.etiquetaMapa = etiqueta;
         });
+    }
+
+    // Las etiquetas se escalan con el ancho del mapa para que se vea entero sin barra de desplazamiento.
+    if (escenaMapa) {
+        var ajustarEscalaMapa = function () {
+            var ancho = escenaMapa.clientWidth;
+            if (ancho > 0) {
+                escenaMapa.style.setProperty('--wmap-scale', Math.min(ancho / 1300, 1.2).toFixed(3));
+            }
+        };
+        ajustarEscalaMapa();
+        if (window.ResizeObserver) {
+            new ResizeObserver(ajustarEscalaMapa).observe(escenaMapa);
+        } else {
+            window.addEventListener('resize', ajustarEscalaMapa);
+        }
     }
 
     function aMinutos(hhmm) {
@@ -229,7 +260,15 @@ document.addEventListener('click', function (event) {
         '<circle class="wm-center" cx="50" cy="50" r="2.5" />' +
         '</svg>';
 
-    mercados.forEach(function (m) {
+    // Orden de las tarjetas de relojes: Europa, América, Asia (incluye Oceanía) y África (aún sin bolsas).
+    var regionPorPais = { es: 0, gb: 0, de: 0, fr: 0, it: 0, ru: 0, us: 1, ca: 1, br: 1, ar: 1, il: 2, in: 2, cn: 2, hk: 2, jp: 2, au: 2 };
+    function regionDe(m) {
+        return regionPorPais.hasOwnProperty(m.cc) ? regionPorPais[m.cc] : 99;
+    }
+
+    mercados.slice().sort(function (a, b) {
+        return regionDe(a) - regionDe(b) || mercados.indexOf(a) - mercados.indexOf(b);
+    }).forEach(function (m) {
         m.formato = new Intl.DateTimeFormat('en-GB', {
             timeZone: m.zona, weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
         });
@@ -241,8 +280,17 @@ document.addEventListener('click', function (event) {
             '<div class="world-market-exchange"></div>' +
             '<div class="world-market-time-row">' + relojSvg +
             '<div class="world-market-time-text"><div class="world-market-clock"></div>' +
-            '<div class="world-market-hours"></div></div></div>';
+            '<div class="world-market-hours"></div></div></div>' +
+            '<div class="world-market-indices"></div>';
         tarjeta.querySelector('.world-market-city').textContent = m.ciudad;
+        if (m.cc) {
+            var banderaTarjeta = document.createElement('img');
+            banderaTarjeta.className = 'wmap-flag world-market-flag';
+            banderaTarjeta.src = 'https://flagcdn.com/w40/' + m.cc + '.png';
+            banderaTarjeta.alt = '';
+            banderaTarjeta.setAttribute('aria-hidden', 'true');
+            tarjeta.querySelector('.world-market-city').prepend(banderaTarjeta);
+        }
         tarjeta.querySelector('.world-market-exchange').textContent = m.bolsa;
         tarjeta.querySelector('.world-market-hours').textContent = m.abre + ' - ' + m.cierra;
         grid.appendChild(tarjeta);
@@ -250,6 +298,75 @@ document.addEventListener('click', function (event) {
     });
 
     var zonaLocal = document.getElementById('world-markets-local-time');
+
+    // Cotización del índice de cada plaza: solo se consulta mientras el panel de horarios está desplegado.
+    var consultandoIndices = false;
+
+    function cargarIndicesMapa() {
+        var cuerpo = document.getElementById('world-markets-body');
+        if (consultandoIndices || (cuerpo && cuerpo.classList.contains('is-collapsed'))) {
+            return;
+        }
+        consultandoIndices = true;
+        fetch(window.location.pathname + '?handler=MapIndices', { cache: 'no-store', credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (datos) {
+                var porSimbolo = {};
+                datos.forEach(function (d) { porSimbolo[d.symbol] = d; });
+                mercados.forEach(function (m) {
+                    var cotizaciones = [].concat(m.indice).map(function (s) { return porSimbolo[s]; }).filter(Boolean);
+
+                    // Pestaña Relojes: una línea por índice bajo el horario.
+                    var contenedor = m.tarjeta && m.tarjeta.querySelector('.world-market-indices');
+                    if (contenedor && cotizaciones.length > 0) {
+                        contenedor.textContent = '';
+                        cotizaciones.forEach(function (d) {
+                            var fila = document.createElement('div');
+                            fila.className = 'world-market-index ' + (d.up ? 'is-up' : 'is-down');
+                            var nombre = document.createElement('span');
+                            nombre.className = 'world-market-index-name';
+                            nombre.textContent = d.name;
+                            var valor = document.createElement('span');
+                            valor.textContent = d.price + ' ' + d.percent;
+                            fila.appendChild(nombre);
+                            fila.appendChild(valor);
+                            contenedor.appendChild(fila);
+                        });
+                    }
+
+                    // Pestaña Mapa: índices bajo la hora de la etiqueta.
+                    if (!m.etiquetaMapa) {
+                        return;
+                    }
+                    [].concat(m.indice).forEach(function (simbolo, i) {
+                        var d = porSimbolo[simbolo];
+                        if (!d) {
+                            return;
+                        }
+                        var celda = m.etiquetaMapa.querySelectorAll('.wmap-index')[i];
+                        if (!celda) {
+                            celda = document.createElement('span');
+                            m.etiquetaMapa.appendChild(celda);
+                        }
+                        celda.className = 'wmap-index ' + (d.up ? 'is-up' : 'is-down');
+                        celda.textContent = d.name + '\n' + d.price + ' ' + d.percent;
+                    });
+                });
+            })
+            .catch(function () { })
+            .then(function () { consultandoIndices = false; });
+    }
+
+    var botonMapa = document.getElementById('world-map-tab');
+    if (botonMapa) {
+        botonMapa.addEventListener('shown.bs.tab', cargarIndicesMapa);
+    }
+    setInterval(cargarIndicesMapa, 30000);
+
+    var botonDespliegue = document.querySelector('[data-toggle-target="world-markets-body"]');
+    if (botonDespliegue) {
+        botonDespliegue.addEventListener('click', function () { setTimeout(cargarIndicesMapa, 200); });
+    }
 
     function actualizar() {
         var ahora = new Date();

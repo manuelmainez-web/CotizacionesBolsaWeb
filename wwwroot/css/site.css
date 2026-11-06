@@ -537,6 +537,9 @@ tr.tx-page-hidden {
 .world-market-city {
   font-weight: 700;
   color: #eff9ff;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .world-market-status {
@@ -547,6 +550,38 @@ tr.tx-page-hidden {
   letter-spacing: 0.04em;
   background: rgba(148, 163, 184, 0.2);
   color: #a9bacd;
+}
+
+.world-market-indices:empty {
+  display: none;
+}
+
+.world-market-indices {
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.world-market-index {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  column-gap: 8px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.world-market-index-name {
+  color: #a9bacd;
+}
+
+.world-market-index.is-up {
+  color: #4ade80;
+}
+
+.world-market-index.is-down {
+  color: #f87171;
 }
 
 .world-market-card.is-open {
@@ -642,7 +677,7 @@ tr.tx-page-hidden {
 }
 
 .world-map-scroll {
-  overflow-x: auto;
+  overflow-x: visible;
 }
 
 .world-markets-tabs {
@@ -655,7 +690,7 @@ tr.tx-page-hidden {
 }
 .world-map-stage {
   position: relative;
-  min-width: 760px;
+  min-width: 0;
   aspect-ratio: 1000 / 383;
   border-radius: 12px;
   overflow: hidden;
@@ -689,11 +724,11 @@ tr.tx-page-hidden {
 
 .wmap-label {
   position: absolute;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(var(--wmap-scale, 1));
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 92px;
+  min-width: 120px;
   padding: 2px 8px;
   box-sizing: border-box;
   border: 1px solid rgba(148, 163, 184, 0.4);
@@ -712,6 +747,17 @@ tr.tx-page-hidden {
 .wmap-country {
   font-weight: 700;
   color: #eff9ff;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.wmap-flag {
+  width: 16px;
+  height: 12px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.35);
 }
 
 .wmap-time {
@@ -723,6 +769,37 @@ tr.tx-page-hidden {
 
 .wmap-label.is-open .wmap-time {
   color: #4ade80;
+}
+
+.wmap-hours {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #8ea3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.wmap-index {
+  margin-top: 2px;
+  padding-top: 2px;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: pre;
+  font-variant-numeric: tabular-nums;
+  color: #a9bacd;
+}
+
+.wmap-index:empty {
+  display: none;
+}
+
+.wmap-index.is-up {
+  color: #4ade80;
+}
+
+.wmap-index.is-down {
+  color: #f87171;
 }
 
 @media print {

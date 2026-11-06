@@ -91,18 +91,14 @@
         <div class="world-markets-body is-collapsed" id="world-markets-body">
             <ul class="nav nav-tabs market-tabs world-markets-tabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="world-clocks-tab" data-bs-toggle="tab" data-bs-target="#world-clocks-pane" type="button" role="tab" aria-controls="world-clocks-pane" aria-selected="true">Relojes</button>
+                    <button class="nav-link active" id="world-map-tab" data-bs-toggle="tab" data-bs-target="#world-map-pane" type="button" role="tab" aria-controls="world-map-pane" aria-selected="true">Mapa</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="world-map-tab" data-bs-toggle="tab" data-bs-target="#world-map-pane" type="button" role="tab" aria-controls="world-map-pane" aria-selected="false">Mapa</button>
+                    <button class="nav-link" id="world-clocks-tab" data-bs-toggle="tab" data-bs-target="#world-clocks-pane" type="button" role="tab" aria-controls="world-clocks-pane" aria-selected="false">Relojes</button>
                 </li>
             </ul>
             <div class="tab-content">
-                <div class="tab-pane fade show active" id="world-clocks-pane" role="tabpanel" aria-labelledby="world-clocks-tab">
-                    <div class="world-markets-grid" id="world-markets-grid"></div>
-                    <p class="world-markets-note">Horario de negociación continua en la hora local de cada plaza (sin contar festivos). La hora mostrada es la actual en cada ciudad.</p>
-                </div>
-                <div class="tab-pane fade" id="world-map-pane" role="tabpanel" aria-labelledby="world-map-tab">
+                <div class="tab-pane fade show active" id="world-map-pane" role="tabpanel" aria-labelledby="world-map-tab">
                     <div class="world-map-scroll">
                         <div class="world-map-stage" id="world-map-stage">
                             <img class="world-map-img" src="~/images/world-map.svg" alt="Mapamundi" />
@@ -110,6 +106,10 @@
                         </div>
                     </div>
                     <p class="world-markets-note">Hora actual en cada país donde está la bolsa. Borde verde = mercado abierto (horario de negociación continua, sin contar festivos).</p>
+                </div>
+                <div class="tab-pane fade" id="world-clocks-pane" role="tabpanel" aria-labelledby="world-clocks-tab">
+                    <div class="world-markets-grid" id="world-markets-grid"></div>
+                    <p class="world-markets-note">Horario de negociación continua en la hora local de cada plaza (sin contar festivos). La hora mostrada es la actual en cada ciudad.</p>
                 </div>
             </div>
         </div>
