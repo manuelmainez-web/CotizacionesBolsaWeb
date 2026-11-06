@@ -4788,3 +4788,642 @@ tr.tx-page-hidden {
     gap: 16px;
   }
 }
+
+/* Pestaña Ingdirect: todos los paneles (resumen total de las posiciones, operaciones de compra y venta,
+   resumen por título y cuenta corriente) con el mismo formato oscuro que las tablas de Índices/Acciones
+   (solo pantalla). Se identifican por el id de la pestaña para imponerse a los colores corporativos de ING. */
+@media screen {
+  /* Resumen total de las posiciones */
+  #broker-ing-tab-pane .summary-panel-ing,
+  #broker-ing-tab-pane .summary-panel-ing:not(.summary-panel--expanded) {
+    background: rgba(14, 22, 30, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(2, 6, 23, 0.32);
+    overflow: hidden;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .summary-strip-label,
+  #broker-ing-tab-pane .summary-panel-ing:not(.summary-panel--expanded) .summary-strip-label {
+    background: linear-gradient(180deg, rgba(22, 35, 48, 0.96) 0%, rgba(14, 22, 30, 0.95) 100%);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 0;
+    color: #edf6ff;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .summary-strip-label * {
+    color: #edf6ff;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .btn-toggle-summary,
+  #broker-ing-tab-pane .market-panel .panel-head .btn-toggle-summary {
+    background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: #eff9ff;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .btn-toggle-summary:hover,
+  #broker-ing-tab-pane .market-panel .panel-head .btn-toggle-summary:hover {
+    background: linear-gradient(180deg, #29415d 0%, #1b2d3e 100%);
+    border-color: rgba(96, 165, 250, 0.7);
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .summary-help-text,
+  #broker-ing-tab-pane .market-panel .panel-help-text {
+    background: rgba(15, 23, 42, 0.55);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    color: #cbd5e1;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .summary-strip {
+    background: transparent;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .summary-box {
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.96) 0%, rgba(15, 23, 42, 0.9) 100%);
+    border-color: rgba(148, 163, 184, 0.14);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .summary-box span {
+    color: #a9bacd;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .summary-box strong,
+  #broker-ing-tab-pane .summary-panel-ing .summary-box.invested strong {
+    color: #f8fafc;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .summary-box.gain strong {
+    color: #7ef0a7;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .summary-box.loss strong {
+    color: #ff5d73;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .rendimiento-ref-panel {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: #d8e5f6;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .rendimiento-ref-input {
+    background: #0f1d2b;
+    border-color: rgba(148, 163, 184, 0.3);
+    color: #eff9ff;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .rendimiento-ref-total {
+    color: #d8e5f6;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .rendimiento-ref-result.rendimiento-ref-positivo {
+    color: #22c55e;
+  }
+
+  #broker-ing-tab-pane .summary-panel-ing .rendimiento-ref-result.rendimiento-ref-negativo {
+    color: #ef4444;
+  }
+
+  /* Paneles de operaciones, resumen por título y cuenta corriente */
+  #broker-ing-tab-pane .market-panel {
+    background: rgba(14, 22, 30, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    color: #edf2f7;
+  }
+
+  #broker-ing-tab-pane .market-panel .panel-head {
+    background: linear-gradient(180deg, rgba(22, 35, 48, 0.96) 0%, rgba(14, 22, 30, 0.95) 100%);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    color: #edf6ff;
+  }
+
+  #broker-ing-tab-pane .market-panel .panel-head span,
+  #broker-ing-tab-pane .market-panel .panel-head .panel-head-subtitle,
+  #broker-ing-tab-pane .market-panel .panel-head .transaction-total-summary,
+  #broker-ing-tab-pane .market-panel .panel-head .figure-label {
+    color: #edf6ff;
+  }
+
+  #broker-ing-tab-pane .market-panel .panel-head strong,
+  #broker-ing-tab-pane .market-panel .panel-head .broker-head-figure strong {
+    color: #ffffff;
+  }
+
+  #broker-ing-tab-pane .market-panel .panel-head .hacienda-gain,
+  #broker-ing-tab-pane .market-panel .panel-head strong.hacienda-gain {
+    color: #4ade80;
+  }
+
+  #broker-ing-tab-pane .market-panel .panel-head .hacienda-loss,
+  #broker-ing-tab-pane .market-panel .panel-head strong.hacienda-loss {
+    color: #f87171;
+  }
+
+  #broker-ing-tab-pane .market-panel .mini-button,
+  #broker-ing-tab-pane .market-panel .panel-head .mini-button {
+    background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: #eff9ff;
+  }
+
+  #broker-ing-tab-pane .market-panel .mini-button:hover,
+  #broker-ing-tab-pane .market-panel .panel-head .mini-button:hover {
+    background: linear-gradient(180deg, #2b4059 0%, #1d2f42 100%);
+  }
+
+  #broker-ing-tab-pane .market-panel .mini-button.mini-button-secondary,
+  #broker-ing-tab-pane .market-panel .panel-head .mini-button.mini-button-secondary {
+    background: transparent;
+    border-color: rgba(148, 163, 184, 0.32);
+    color: #c9d5df;
+  }
+
+  #broker-ing-tab-pane .market-panel .transaction-broker-grid,
+  #broker-ing-tab-pane .market-panel #transaction-broker-grid-excel,
+  #broker-ing-tab-pane .market-panel #title-summary-panel-body {
+    background: rgba(15, 23, 42, 0.72);
+    color: #edf2f7;
+  }
+
+  #broker-ing-tab-pane .market-panel .table-wrap {
+    background: transparent;
+    color: #edf2f7;
+  }
+
+  #broker-ing-tab-pane .market-panel .transaction-broker-card {
+    background: rgba(14, 22, 30, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 12px;
+  }
+
+  #broker-ing-tab-pane .market-panel .transaction-broker-header {
+    background: rgba(17, 24, 39, 0.96);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  }
+
+  #broker-ing-tab-pane .market-panel .transaction-broker-name {
+    color: #edf6ff;
+  }
+
+  #broker-ing-tab-pane .market-panel .transaction-broker-header .transaction-total-summary {
+    color: #d6e8ff;
+  }
+
+  #broker-ing-tab-pane .market-panel .transaction-tab-summary,
+  #broker-ing-tab-pane .market-panel .transaction-tab-count {
+    color: #a9bacd;
+  }
+
+  #broker-ing-tab-pane .market-panel .market-tabs {
+    border-bottom-color: rgba(148, 163, 184, 0.18);
+  }
+
+  #broker-ing-tab-pane .market-panel .market-tabs .nav-link {
+    color: #a9bacd;
+  }
+
+  #broker-ing-tab-pane .market-panel .market-tabs .nav-link:hover {
+    background: transparent;
+    color: #edf6ff;
+    border-color: rgba(148, 163, 184, 0.2);
+  }
+
+  #broker-ing-tab-pane .market-panel .market-tabs .nav-link.active {
+    background: rgba(37, 99, 235, 0.12);
+    border-color: rgba(96, 165, 250, 0.35);
+    color: #edf6ff;
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table {
+    color: #edf2f7;
+    font-family: inherit;
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table thead th,
+  #broker-ing-tab-pane .market-panel .market-table th {
+    background: rgba(11, 18, 26, 0.98);
+    color: #a9bacd;
+    font-size: 0.64rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table td {
+    color: #edf2f7;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table-grid th,
+  #broker-ing-tab-pane .market-panel .market-table-grid td {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table tbody tr {
+    background: rgba(14, 22, 30, 0.85);
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table tbody tr:nth-child(even) {
+    background: rgba(18, 27, 36, 0.92);
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table tbody tr:hover {
+    background: rgba(31, 46, 59, 0.94);
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table.transaction-table tbody tr.transaction-row-current-year {
+    background: rgba(250, 204, 21, 0.16);
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table.transaction-table tbody tr.transaction-row-current-year:hover {
+    background: rgba(250, 204, 21, 0.24);
+  }
+
+  #broker-ing-tab-pane .market-panel .transaction-table tr.transaction-row-current-year td {
+    border-color: rgba(250, 204, 21, 0.45);
+  }
+
+  #broker-ing-tab-pane .market-panel .price-cell,
+  #broker-ing-tab-pane .market-panel .name-cell {
+    color: #f8fafc;
+  }
+
+  #broker-ing-tab-pane .market-panel .time-cell {
+    color: #cdd9e4;
+  }
+
+  #broker-ing-tab-pane .market-panel .transaction-table .transaction-title-name,
+  #broker-ing-tab-pane .market-panel .hacienda-notices-note {
+    color: #94a3b8;
+  }
+
+  #broker-ing-tab-pane .market-panel .empty-state-cell {
+    color: #9fb0c2;
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table tfoot td {
+    background: rgba(11, 18, 26, 0.98);
+    color: #edf2f7;
+    border-top: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  #broker-ing-tab-pane .market-panel .hacienda-gain,
+  #broker-ing-tab-pane .market-panel #title-summary-panel-body .hacienda-gain,
+  #broker-ing-tab-pane .market-panel td.hacienda-gain {
+    color: #4ade80;
+    background: transparent;
+  }
+
+  #broker-ing-tab-pane .market-panel .hacienda-loss,
+  #broker-ing-tab-pane .market-panel #title-summary-panel-body .hacienda-loss,
+  #broker-ing-tab-pane .market-panel td.hacienda-loss {
+    color: #f87171;
+    background: transparent;
+  }
+
+  #broker-ing-tab-pane .market-panel .market-table a,
+  #broker-ing-tab-pane .market-panel .name-link {
+    color: inherit;
+  }
+
+  #broker-ing-tab-pane .market-panel .icon-button-edit {
+    border-color: rgba(96, 165, 250, 0.4);
+    background: rgba(96, 165, 250, 0.12);
+    color: #93c5fd;
+  }
+
+  #broker-ing-tab-pane .market-panel .icon-button-edit:hover {
+    background: rgba(96, 165, 250, 0.28);
+    color: #ffffff;
+  }
+
+  #broker-ing-tab-pane .market-panel .icon-button-delete {
+    border-color: rgba(255, 93, 115, 0.4);
+    background: rgba(255, 93, 115, 0.12);
+    color: #ff8a9a;
+  }
+
+  #broker-ing-tab-pane .market-panel .icon-button-delete:hover {
+    background: rgba(255, 93, 115, 0.28);
+    color: #ffffff;
+  }
+
+  #broker-ing-tab-pane .market-panel .form-error-banner {
+    color: #ff8a9a;
+  }
+}
+
+/* Pestaña TradeRepublic: mismo formato oscuro que las tablas de Índices/Acciones (solo pantalla). */
+@media screen {
+  #broker-tr-tab-pane .summary-panel-tr,
+  #broker-tr-tab-pane .summary-panel-tr:not(.summary-panel--expanded) {
+    background: rgba(14, 22, 30, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(2, 6, 23, 0.32);
+    overflow: hidden;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .summary-strip-label,
+  #broker-tr-tab-pane .summary-panel-tr:not(.summary-panel--expanded) .summary-strip-label {
+    background: linear-gradient(180deg, rgba(22, 35, 48, 0.96) 0%, rgba(14, 22, 30, 0.95) 100%);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 0;
+    color: #edf6ff;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .summary-strip-label * {
+    color: #edf6ff;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .btn-toggle-summary,
+  #broker-tr-tab-pane .market-panel .panel-head .btn-toggle-summary {
+    background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: #eff9ff;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .btn-toggle-summary:hover,
+  #broker-tr-tab-pane .market-panel .panel-head .btn-toggle-summary:hover {
+    background: linear-gradient(180deg, #29415d 0%, #1b2d3e 100%);
+    border-color: rgba(96, 165, 250, 0.7);
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .summary-help-text,
+  #broker-tr-tab-pane .market-panel .panel-help-text {
+    background: rgba(15, 23, 42, 0.55);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    color: #cbd5e1;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .summary-strip {
+    background: transparent;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .summary-box {
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.96) 0%, rgba(15, 23, 42, 0.9) 100%);
+    border-color: rgba(148, 163, 184, 0.14);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .summary-box span {
+    color: #a9bacd;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .summary-box strong,
+  #broker-tr-tab-pane .summary-panel-tr .summary-box.invested strong {
+    color: #f8fafc;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .summary-box.gain strong {
+    color: #7ef0a7;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .summary-box.loss strong {
+    color: #ff5d73;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .rendimiento-ref-panel {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: #d8e5f6;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .rendimiento-ref-input {
+    background: #0f1d2b;
+    border-color: rgba(148, 163, 184, 0.3);
+    color: #eff9ff;
+  }
+
+  #broker-tr-tab-pane .summary-panel-tr .rendimiento-ref-total {
+    color: #d8e5f6;
+  }
+
+  #broker-tr-tab-pane .market-panel {
+    background: rgba(14, 22, 30, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    color: #edf2f7;
+  }
+
+  #broker-tr-tab-pane .market-panel .panel-head {
+    background: linear-gradient(180deg, rgba(22, 35, 48, 0.96) 0%, rgba(14, 22, 30, 0.95) 100%);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    color: #edf6ff;
+  }
+
+  #broker-tr-tab-pane .market-panel .panel-head span,
+  #broker-tr-tab-pane .market-panel .panel-head .panel-head-subtitle,
+  #broker-tr-tab-pane .market-panel .panel-head .transaction-total-summary,
+  #broker-tr-tab-pane .market-panel .panel-head .figure-label {
+    color: #edf6ff;
+  }
+
+  #broker-tr-tab-pane .market-panel .panel-head strong,
+  #broker-tr-tab-pane .market-panel .panel-head .broker-head-figure strong {
+    color: #ffffff;
+  }
+
+  #broker-tr-tab-pane .market-panel .panel-head .hacienda-gain,
+  #broker-tr-tab-pane .market-panel .panel-head strong.hacienda-gain {
+    color: #4ade80;
+  }
+
+  #broker-tr-tab-pane .market-panel .panel-head .hacienda-loss,
+  #broker-tr-tab-pane .market-panel .panel-head strong.hacienda-loss {
+    color: #f87171;
+  }
+
+  #broker-tr-tab-pane .market-panel .mini-button,
+  #broker-tr-tab-pane .market-panel .panel-head .mini-button {
+    background: linear-gradient(180deg, #23384c 0%, #172b3e 100%);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: #eff9ff;
+  }
+
+  #broker-tr-tab-pane .market-panel .mini-button:hover,
+  #broker-tr-tab-pane .market-panel .panel-head .mini-button:hover {
+    background: linear-gradient(180deg, #2b4059 0%, #1d2f42 100%);
+  }
+
+  #broker-tr-tab-pane .market-panel .mini-button.mini-button-secondary,
+  #broker-tr-tab-pane .market-panel .panel-head .mini-button.mini-button-secondary {
+    background: transparent;
+    border-color: rgba(148, 163, 184, 0.32);
+    color: #c9d5df;
+  }
+
+  #broker-tr-tab-pane .market-panel .transaction-broker-grid,
+  #broker-tr-tab-pane .market-panel #transaction-broker-grid-tr {
+    background: rgba(15, 23, 42, 0.72);
+    color: #edf2f7;
+  }
+
+  #broker-tr-tab-pane .market-panel .table-wrap {
+    background: transparent;
+    color: #edf2f7;
+  }
+
+  #broker-tr-tab-pane .market-panel .transaction-broker-card {
+    background: rgba(14, 22, 30, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 12px;
+  }
+
+  #broker-tr-tab-pane .market-panel .transaction-broker-header {
+    background: rgba(17, 24, 39, 0.96);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  }
+
+  #broker-tr-tab-pane .market-panel .transaction-broker-name {
+    color: #edf6ff;
+  }
+
+  #broker-tr-tab-pane .market-panel .transaction-broker-header .transaction-total-summary {
+    color: #d6e8ff;
+  }
+
+  #broker-tr-tab-pane .market-panel .transaction-tab-summary,
+  #broker-tr-tab-pane .market-panel .transaction-tab-count {
+    color: #a9bacd;
+  }
+
+  #broker-tr-tab-pane .market-panel .market-tabs {
+    border-bottom-color: rgba(148, 163, 184, 0.18);
+  }
+
+  #broker-tr-tab-pane .market-panel .market-tabs .nav-link {
+    color: #a9bacd;
+  }
+
+  #broker-tr-tab-pane .market-panel .market-tabs .nav-link:hover {
+    background: transparent;
+    color: #edf6ff;
+    border-color: rgba(148, 163, 184, 0.2);
+  }
+
+  #broker-tr-tab-pane .market-panel .market-tabs .nav-link.active {
+    background: rgba(37, 99, 235, 0.12);
+    border-color: rgba(96, 165, 250, 0.35);
+    color: #edf6ff;
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table {
+    color: #edf2f7;
+    font-family: inherit;
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table thead th,
+  #broker-tr-tab-pane .market-panel .market-table th {
+    background: rgba(11, 18, 26, 0.98);
+    color: #a9bacd;
+    font-size: 0.64rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table td {
+    color: #edf2f7;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table-grid th,
+  #broker-tr-tab-pane .market-panel .market-table-grid td {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table tbody tr {
+    background: rgba(14, 22, 30, 0.85);
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table tbody tr:nth-child(even) {
+    background: rgba(18, 27, 36, 0.92);
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table tbody tr:hover {
+    background: rgba(31, 46, 59, 0.94);
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table.transaction-table tbody tr.transaction-row-current-year {
+    background: rgba(250, 204, 21, 0.16);
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table.transaction-table tbody tr.transaction-row-current-year:hover {
+    background: rgba(250, 204, 21, 0.24);
+  }
+
+  #broker-tr-tab-pane .market-panel .transaction-table tr.transaction-row-current-year td {
+    border-color: rgba(250, 204, 21, 0.45);
+  }
+
+  #broker-tr-tab-pane .market-panel .price-cell,
+  #broker-tr-tab-pane .market-panel .name-cell {
+    color: #f8fafc;
+  }
+
+  #broker-tr-tab-pane .market-panel .time-cell {
+    color: #cdd9e4;
+  }
+
+  #broker-tr-tab-pane .market-panel .transaction-table .transaction-title-name,
+  #broker-tr-tab-pane .market-panel .hacienda-notices-note {
+    color: #94a3b8;
+  }
+
+  #broker-tr-tab-pane .market-panel .empty-state-cell {
+    color: #9fb0c2;
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table tfoot td {
+    background: rgba(11, 18, 26, 0.98);
+    color: #edf2f7;
+    border-top: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  #broker-tr-tab-pane .market-panel .hacienda-gain,
+  #broker-tr-tab-pane .market-panel td.hacienda-gain {
+    color: #4ade80;
+    background: transparent;
+  }
+
+  #broker-tr-tab-pane .market-panel .hacienda-loss,
+  #broker-tr-tab-pane .market-panel td.hacienda-loss {
+    color: #f87171;
+    background: transparent;
+  }
+
+  #broker-tr-tab-pane .market-panel .market-table a,
+  #broker-tr-tab-pane .market-panel .name-link {
+    color: inherit;
+  }
+
+  #broker-tr-tab-pane .market-panel .icon-button-edit {
+    border-color: rgba(96, 165, 250, 0.4);
+    background: rgba(96, 165, 250, 0.12);
+    color: #93c5fd;
+  }
+
+  #broker-tr-tab-pane .market-panel .icon-button-edit:hover {
+    background: rgba(96, 165, 250, 0.28);
+    color: #ffffff;
+  }
+
+  #broker-tr-tab-pane .market-panel .icon-button-delete {
+    border-color: rgba(255, 93, 115, 0.4);
+    background: rgba(255, 93, 115, 0.12);
+    color: #ff8a9a;
+  }
+
+  #broker-tr-tab-pane .market-panel .icon-button-delete:hover {
+    background: rgba(255, 93, 115, 0.28);
+    color: #ffffff;
+  }
+
+  #broker-tr-tab-pane .market-panel .form-error-banner {
+    color: #ff8a9a;
+  }
+}
