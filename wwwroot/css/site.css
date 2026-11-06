@@ -44,6 +44,13 @@ body {
   line-height: 1.5;
 }
 
+/* El aviso legal solo se muestra en pantalla: no se imprime. */
+@media print {
+  .site-footer {
+    display: none !important;
+  }
+}
+
 @media (max-width: 576px) {
   .site-footer {
     padding-top: 1rem;

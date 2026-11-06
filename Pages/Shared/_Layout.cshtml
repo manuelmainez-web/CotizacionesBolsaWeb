@@ -42,6 +42,8 @@
         @RenderBody()
     </main>
 
+    @if (string.Equals(ViewContext.RouteData.Values["page"]?.ToString(), "/Index", StringComparison.OrdinalIgnoreCase))
+    {
     <footer class="site-footer">
         <div class="container">
             <p>
@@ -69,6 +71,7 @@
             </div>
         </div>
     </footer>
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
