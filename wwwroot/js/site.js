@@ -280,8 +280,7 @@ document.addEventListener('click', function (event) {
             '<div class="world-market-exchange"></div>' +
             '<div class="world-market-time-row">' + relojSvg +
             '<div class="world-market-time-text"><div class="world-market-clock"></div>' +
-            '<div class="world-market-hours"></div></div></div>' +
-            '<div class="world-market-indices"></div>';
+            '<div class="world-market-hours"></div></div></div>';
         tarjeta.querySelector('.world-market-city').textContent = m.ciudad;
         if (m.cc) {
             var banderaTarjeta = document.createElement('img');
@@ -299,12 +298,13 @@ document.addEventListener('click', function (event) {
 
     var zonaLocal = document.getElementById('world-markets-local-time');
 
-    // Cotización del índice de cada plaza: solo se consulta mientras el panel de horarios está desplegado.
+    // Cotización del índice de cada plaza: solo se consulta mientras la pestaña Mapa está visible.
+    var panelMapa = document.getElementById('world-map-pane');
     var consultandoIndices = false;
 
     function cargarIndicesMapa() {
         var cuerpo = document.getElementById('world-markets-body');
-        if (consultandoIndices || (cuerpo && cuerpo.classList.contains('is-collapsed'))) {
+        if (!panelMapa || !panelMapa.classList.contains('active') || consultandoIndices || (cuerpo && cuerpo.classList.contains('is-collapsed'))) {
             return;
         }
         consultandoIndices = true;
@@ -314,26 +314,6 @@ document.addEventListener('click', function (event) {
                 var porSimbolo = {};
                 datos.forEach(function (d) { porSimbolo[d.symbol] = d; });
                 mercados.forEach(function (m) {
-                    var cotizaciones = [].concat(m.indice).map(function (s) { return porSimbolo[s]; }).filter(Boolean);
-
-                    // Pestaña Relojes: una línea por índice bajo el horario.
-                    var contenedor = m.tarjeta && m.tarjeta.querySelector('.world-market-indices');
-                    if (contenedor && cotizaciones.length > 0) {
-                        contenedor.textContent = '';
-                        cotizaciones.forEach(function (d) {
-                            var fila = document.createElement('div');
-                            fila.className = 'world-market-index ' + (d.up ? 'is-up' : 'is-down');
-                            var nombre = document.createElement('span');
-                            nombre.className = 'world-market-index-name';
-                            nombre.textContent = d.name;
-                            var valor = document.createElement('span');
-                            valor.textContent = d.price + ' ' + d.percent;
-                            fila.appendChild(nombre);
-                            fila.appendChild(valor);
-                            contenedor.appendChild(fila);
-                        });
-                    }
-
                     // Pestaña Mapa: índices bajo la hora de la etiqueta.
                     if (!m.etiquetaMapa) {
                         return;
