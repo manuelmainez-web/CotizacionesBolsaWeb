@@ -1202,6 +1202,39 @@ public class IndexModel : PageModel
     public List<Quote> EtfsControl { get; private set; } = new();
     public List<Quote> Futures { get; private set; } = new();
     public List<Quote> Commodities { get; private set; } = new();
+
+    public List<Quote> Cryptos { get; private set; } = new();
+
+    private const string CryptosKey = "custom-cryptos";
+
+    [TempData]
+    public string? CryptoError { get; set; }
+
+    private static readonly QuoteConfig[] DefaultCryptoConfigs =
+    {
+        new("Bitcoin", "BTC-USD", null, "US"),
+        new("Ethereum", "ETH-USD", null, "US"),
+        new("Tether", "USDT-USD", null, "US"),
+        new("BNB", "BNB-USD", null, "US"),
+        new("XRP", "XRP-USD", null, "US"),
+        new("Solana", "SOL-USD", null, "US"),
+        new("USDC", "USDC-USD", null, "US"),
+        new("Dogecoin", "DOGE-USD", null, "US"),
+        new("Cardano", "ADA-USD", null, "US"),
+        new("TRON", "TRX-USD", null, "US")
+    };
+
+    // Criptomonedas que se pueden añadir desde el diálogo (símbolo de Yahoo Finance, nombre).
+    public static readonly List<(string Symbol, string Name)> AvailableCryptoOptions = new()
+    {
+        ("BTC-USD", "Bitcoin"), ("ETH-USD", "Ethereum"), ("USDT-USD", "Tether"), ("BNB-USD", "BNB"),
+        ("XRP-USD", "XRP"), ("SOL-USD", "Solana"), ("USDC-USD", "USDC"), ("DOGE-USD", "Dogecoin"),
+        ("ADA-USD", "Cardano"), ("TRX-USD", "TRON"), ("AVAX-USD", "Avalanche"), ("LINK-USD", "Chainlink"),
+        ("DOT-USD", "Polkadot"), ("SHIB-USD", "Shiba Inu"), ("LTC-USD", "Litecoin"), ("BCH-USD", "Bitcoin Cash"),
+        ("XLM-USD", "Stellar"), ("XMR-USD", "Monero"), ("ATOM-USD", "Cosmos"), ("ETC-USD", "Ethereum Classic"),
+        ("NEAR-USD", "NEAR Protocol"), ("HBAR-USD", "Hedera"), ("DAI-USD", "Dai"), ("UNI7083-USD", "Uniswap"),
+        ("TON11419-USD", "Toncoin"), ("SUI20947-USD", "Sui")
+    };
     public List<CommodityHolding> CommodityHoldings { get; private set; } = new();
     public List<EtfHolding> EtfHoldings { get; private set; } = new();
     public List<FundHolding> FundHoldings { get; private set; } = new();
@@ -1528,6 +1561,16 @@ public class IndexModel : PageModel
             .Select(h => new QuoteConfig(h.Name, h.Symbol, null, "US"))
             .ToList();
         Commodities = commoditiesConfigs.Count > 0 ? await _service.GetQuotesAsync(commoditiesConfigs) : new List<Quote>();
+
+        // Principales criptomonedas (lista editable): se consultan en paralelo para no alargar la carga de la página.
+        if (!await _dataStore.ExistsAsync(CryptosKey))
+        {
+            await _dataStore.SaveEntriesAsync(CryptosKey, DefaultCryptoConfigs.ToList());
+        }
+
+        var cryptoConfigs = await _dataStore.LoadEntriesAsync<QuoteConfig>(CryptosKey);
+        Cryptos = (await Task.WhenAll(cryptoConfigs.Select(async config =>
+            (await _service.GetQuotesAsync(new[] { config })).First()))).ToList();
 
         foreach (var quote in Indices)
         {
@@ -2313,6 +2356,45 @@ public class IndexModel : PageModel
             }
         }
 
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAddCryptoAsync(string symbol)
+    {
+        var option = AvailableCryptoOptions.FirstOrDefault(o => o.Symbol == symbol);
+        if (string.IsNullOrWhiteSpace(symbol) || option.Symbol is null)
+        {
+            CryptoError = "Selecciona una criptomoneda válida.";
+            return RedirectToPage();
+        }
+
+        var entries = await _dataStore.LoadEntriesAsync<QuoteConfig>(CryptosKey);
+        if (entries.Any(e => string.Equals(e.Symbol, symbol, StringComparison.OrdinalIgnoreCase)))
+        {
+            CryptoError = $"{option.Name} ya está añadida.";
+            return RedirectToPage();
+        }
+
+        entries.Add(new QuoteConfig(option.Name, option.Symbol, null, "US"));
+        await _dataStore.SaveEntriesAsync(CryptosKey, entries);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostDeleteCryptoAsync(string symbol)
+    {
+        await RemoveCustomEntryAsync(CryptosKey, symbol);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMoveCryptoUpAsync(string symbol)
+    {
+        await MoveCustomEntryAsync(CryptosKey, symbol, -1);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMoveCryptoDownAsync(string symbol)
+    {
+        await MoveCustomEntryAsync(CryptosKey, symbol, 1);
         return RedirectToPage();
     }
 

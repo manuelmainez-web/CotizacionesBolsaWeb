@@ -186,6 +186,9 @@
                 <button class="nav-link" id="control-materias-tab" data-bs-toggle="tab" data-bs-target="#control-materias-tab-pane" type="button" role="tab" aria-controls="control-materias-tab-pane" aria-selected="false">Materias primas</button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="control-cripto-tab" data-bs-toggle="tab" data-bs-target="#control-cripto-tab-pane" type="button" role="tab" aria-controls="control-cripto-tab-pane" aria-selected="false">Criptomonedas</button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="accesos-tab" data-bs-toggle="tab" data-bs-target="#accesos-tab-pane" type="button" role="tab" aria-controls="accesos-tab-pane" aria-selected="false">Accesos</button>
             </li>
             <li class="nav-item" role="presentation">
@@ -888,6 +891,100 @@
             </div>
         </form>
     </dialog>
+            </div>
+
+            <div class="tab-pane fade" id="control-cripto-tab-pane" role="tabpanel" aria-labelledby="control-cripto-tab">
+                @{
+                    string FormatCrypto(decimal? value) => !value.HasValue ? "N/A" : value.Value.ToString(Math.Abs(value.Value) < 10m ? "N4" : "N2", System.Globalization.CultureInfo.GetCultureInfo("es-ES"));
+                }
+                <div class="market-panel mt-4 notranslate market-panel-watchlist" translate="no">
+                    <div class="panel-head panel-head-row">
+                        <span>Criptomonedas <span class="panel-head-subtitle">(Principales, en dólares)</span> <span class="es-clock" data-es-clock title="Fecha y hora de España"></span></span>
+                        <button type="button" class="mini-button" data-dialog-target="add-crypto-dialog">+ Añadir Criptomoneda</button>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.CryptoError))
+                    {
+                        <div class="form-error-banner">@Model.CryptoError</div>
+                    }
+                    <div class="table-wrap">
+                        <table class="market-table market-table-compact market-table-grid market-table-cripto" style="table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">Nombre</th>
+                                    <th class="text-align-right" style="width: 70px;">% Var.</th>
+                                    <th class="text-align-right" style="width: 90px;">Var.</th>
+                                    <th class="text-align-right" style="width: 90px;">Último</th>
+                                    <th class="text-align-right" style="width: 90px;">Máximo</th>
+                                    <th class="text-align-right" style="width: 100px;">Mínimo</th>
+                                    <th class="text-align-right" style="width: 110px;">Actualización</th>
+                                    <th class="text-align-right" style="width: 100px;">INTERVALO<br />ACTUALIZACIÓN</th>
+                                    <th class="text-align-right" style="width: 90px;">Símbolo</th>
+                                    <th style="width: 96px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-cryptos">
+                                @for (var cryptoRow = 0; cryptoRow < Model.Cryptos.Count; cryptoRow++)
+                                {
+                                    var item = Model.Cryptos[cryptoRow];
+                                    <tr>
+                                        <td class="name-cell">
+                                            <a class="name-link" href="/Historico?symbol=@item.Symbol&name=@item.Name&countryCode=">@item.Name</a>
+                                        </td>
+                                        <td class="@item.TrendCssClass">@item.DisplayPercent</td>
+                                        <td class="@item.TrendCssClass">@(item.Change.HasValue ? item.Change.Value.ToString("+#,##0.00##;-#,##0.00##;0.00", System.Globalization.CultureInfo.GetCultureInfo("es-ES")) : "N/A") $</td>
+                                        <td class="price-cell price-cell-quote">@FormatCrypto(item.Price) $</td>
+                                        <td class="price-cell price-cell-quote">@FormatCrypto(item.High) $</td>
+                                        <td class="price-cell price-cell-quote">@FormatCrypto(item.Low) $</td>
+                                        <td class="time-cell">
+                                            @item.UpdatedText
+                                            <span class="market-clock market-open" title="Mercado abierto 24 h" aria-label="Mercado abierto 24 h">
+                                                <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" focusable="false">
+                                                    <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+                                                    <path d="M8 4.3v4l2.6 2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </span>
+                                        </td>
+                                        <td class="text-align-right" data-interval-from="@(item.UpdatedEpochMs?.ToString() ?? "")">@item.IntervalText</td>
+                                        <td class="text-align-right">@item.Symbol</td>
+                                        <td class="delete-cell">
+                                            <form method="post" asp-page-handler="MoveCryptoUp">
+                                                <input type="hidden" name="symbol" value="@item.Symbol" />
+                                                <button type="submit" class="icon-button-move" title="Subir" @(cryptoRow == 0 ? "disabled" : "")>▲</button>
+                                            </form>
+                                            <form method="post" asp-page-handler="MoveCryptoDown">
+                                                <input type="hidden" name="symbol" value="@item.Symbol" />
+                                                <button type="submit" class="icon-button-move" title="Bajar" @(cryptoRow == Model.Cryptos.Count - 1 ? "disabled" : "")>▼</button>
+                                            </form>
+                                            <form method="post" asp-page-handler="DeleteCrypto" onsubmit="return confirm('¿Eliminar esta criptomoneda?');">
+                                                <input type="hidden" name="symbol" value="@item.Symbol" />
+                                                <button type="submit" class="icon-button-delete" title="Eliminar">✕</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <dialog id="add-crypto-dialog" class="add-entry-dialog">
+                    <form method="post" asp-page-handler="AddCrypto">
+                        <h3>Añadir Criptomoneda</h3>
+                        <label>
+                            Criptomoneda
+                            <select name="symbol" required>
+                                @foreach (var crypto in IndexModel.AvailableCryptoOptions.Where(o => !Model.Cryptos.Any(c => c.Symbol == o.Symbol)))
+                                {
+                                    <option value="@crypto.Symbol">@crypto.Name (@crypto.Symbol)</option>
+                                }
+                            </select>
+                        </label>
+                        <div class="dialog-actions">
+                            <button type="submit" formmethod="dialog" formnovalidate class="mini-button mini-button-secondary">Cancelar</button>
+                            <button type="submit" class="mini-button">Añadir</button>
+                        </div>
+                    </form>
+                </dialog>
             </div>
         </div>
     </div>
@@ -3601,6 +3698,7 @@
                 'tbody-stocks',
                 'tbody-etfs-control',
                 'tbody-commodities',
+                'tbody-cryptos',
                 'tbody-etfs',
                 'tbody-funds',
                 'tbody-pensionplans',
